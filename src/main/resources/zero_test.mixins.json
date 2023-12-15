@@ -1,0 +1,17 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "zero.test.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+    "WorldMixins",
+    "BlockMixins",
+    "ComparatorMixins"
+  ],
+  "client": [
+    "ZeroTestMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

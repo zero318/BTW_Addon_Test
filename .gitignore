@@ -1,0 +1,19 @@
+# Ignore Gradle project-specific cache directory
+.gradle
+
+# Ignore Gradle build output directories
+**/build/
+!src/**/build/
+
+# I implemented src/btw as a symlink, which kills git for reasons 
+src/**
+!src/main/
+!src/main/**
+exclude/**
+
+# Ignore local Minecraft folder
+.minecraft
+run/**
+release/**
+reobfuscated/**
+trash*.txt

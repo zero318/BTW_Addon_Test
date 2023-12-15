@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "id": "zero_test",
+  "version": "${version}",
+
+  "name": "Zero BTW Addon Test",
+  "description": "This is an example description! Tell everyone what your mod is about!",
+  "authors": [
+    "zero318"
+  ],
+  "contact": {
+    "homepage": "https://fabricmc.net/",
+    "sources": "https://youtu.be/dQw4w9WgXcQ?si=X9yjuiUkfADJA7bt"
+  },
+
+  "license": "CC0-1.0",
+  "icon": "assets/zero_btw_addon_test/icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "init": [
+      "zero.test.ZeroTestMod"
+    ],
+    "preLaunch": [
+      "zero.test.ZeroTestPreLaunchInitializer"
+    ]
+  },
+  "mixins": [
+    "zero_test.mixins.json"
+  ],
+
+  "depends": {
+    "fabricloader": ">=0.7.4"
+  },
+  "suggests": {
+    "flamingo": "*"
+  }
+}
