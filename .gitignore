@@ -10,6 +10,7 @@ src/**
 !src/main/
 !src/main/**
 exclude/**
+exclude/
 
 # Ignore local Minecraft folder
 .minecraft
@@ -17,3 +18,4 @@ run/**
 release/**
 reobfuscated/**
 trash*.txt
+__temp.txt

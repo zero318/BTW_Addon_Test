@@ -24,7 +24,7 @@ public class WorldMixins {
                 if (((IBlockMixin)block_instance).getWeakChanges(world, nextX, Y, nextZ, neighbor_id)) {
                     block_instance.onNeighborBlockChange(world, nextX, Y, nextZ, neighbor_id);
                 }
-                if (Block.isNormalCube(block_id)) {
+                else if (Block.isNormalCube(block_id)) {
                     nextX += Direction.offsetX[i];
                     nextZ += Direction.offsetZ[i];
                     block_id = world.getBlockId(nextX, Y, nextZ);
