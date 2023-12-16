@@ -1,0 +1,6 @@
+#ifndef FEATURE_FLAGS_H
+#define FEATURE_FLAGS_H 1
+
+#define ENABLE_DIRECTIONAL_UPDATES 1
+
+#endif

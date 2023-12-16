@@ -4,10 +4,11 @@ import btw.AddonHandler;
 import btw.BTWAddon;
 import net.minecraft.src.*;
 
-import zero.test.block.CUDBlock;
+import zero.test.block.*;
 import zero.test.block.ZeroTestBlocks;
 
 #include "ids.h"
+#include "feature_flags.h"
 
 public class ZeroTestAddon extends BTWAddon {
     private static ZeroTestAddon instance;
@@ -22,6 +23,10 @@ public class ZeroTestAddon extends BTWAddon {
         
         ZeroTestBlocks.cud_block = new CUDBlock(CUD_BLOCK_ID);
         Item.itemsList[CUD_BLOCK_ID-256] = new ItemBlock(CUD_BLOCK_ID-256);
+#if ENABLE_DIRECTIONAL_UPDATES
+        ZeroTestBlocks.observer_block = new ObserverBlock(OBSERVER_BLOCK_ID);
+        Item.itemsList[OBSERVER_BLOCK_ID-256] = new ItemBlock(OBSERVER_BLOCK_ID-256);
+#endif
     }
 
     public static ZeroTestAddon getInstance() {

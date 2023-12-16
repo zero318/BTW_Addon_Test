@@ -5,6 +5,5 @@ import java.util.logging.Logger;
 public class ZeroTestMod implements ModInitializer {
  @Override
  public void onInitialize() {
-  AddonHandler.logMessage("Hello Fabric world!");
  }
 }
