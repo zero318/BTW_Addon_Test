@@ -6,36 +6,29 @@ import net.minecraft.src.BlockRedstoneLogic;
 import net.minecraft.src.BlockComparator;
 import net.minecraft.src.*;
 
+import btw.AddonHandler;
+import btw.BTWAddon;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.Overwrite;
 
-import zero.test.IBlockMixin;
+import zero.test.IBlockMixins;
+import zero.test.IWorldMixins;
 
 #include "..\func_aliases.h"
 #include "..\feature_flags.h"
 #include "..\util.h"
 
 @Mixin(World.class)
-public class WorldMixins {
-    /*
-    @Redirect(
-		method = "func_96440_m(IIII)V",
-		at = @At(
-			value = "INVOKE",
-			target = "Lnet/minecraft/src/BlockComparator;func_94487_f(I)Z"
-		),
-		require = 2
-	)
-    private boolean block_id_is_comparator(int id) {
-        return Block.redstoneComparatorIdle.blockIdIsActiveOrInactive(id);
-    }
-    */
+public class WorldMixins implements IWorldMixins {
     
-    /**
-     * Piss off about a missing doc comment being a warnning
-     */
+    /*
+        Changes:
+        - Added getWeakChanges instead of hardcoding the comparator ID
+        - Added horrible jank for directional updates
+    */
     @Overwrite
     public void func_96440_m(int X, int Y, int Z, int neighbor_id) {
         World world = (World)(Object)this;
@@ -49,23 +42,26 @@ public class WorldMixins {
                 int neighbor_id_ex = neighbor_id | UPDATE_DIRECTION_ENABLED_MASK | i + 2 << UPDATE_DIRECTION_OFFSET;
 #endif
                 Block block_instance = Block.blocksList[block_id];
-                if (((IBlockMixin)block_instance).getWeakChanges(world, nextX, Y, nextZ, neighbor_id)) {
+                if (((IBlockMixins)block_instance).getWeakChanges(world, nextX, Y, nextZ, neighbor_id)) {
 #if ENABLE_DIRECTIONAL_UPDATES
-                    block_instance.onNeighborBlockChange(world, nextX, Y, nextZ, ((IBlockMixin)block_instance).caresAboutUpdateDirection() ? neighbor_id_ex : neighbor_id);
+                    block_instance.onNeighborBlockChange(world, nextX, Y, nextZ, ((IBlockMixins)block_instance).caresAboutUpdateDirection() ? neighbor_id_ex : neighbor_id);
 #else
                     block_instance.onNeighborBlockChange(world, nextX, Y, nextZ, neighbor_id);
 #endif
                 }
                 // Crashes if this isn't an else? Why?
+                // TODO: See if the null check fixed this
                 else if (Block.isNormalCube(block_id)) {
                     nextX += Direction.offsetX[i];
                     nextZ += Direction.offsetZ[i];
                     block_id = world.getBlockId(nextX, Y, nextZ);
                     block_instance = Block.blocksList[block_id];
-
-                    if (((IBlockMixin)block_instance).getWeakChanges(world, nextX, Y, nextZ, neighbor_id)) {
+                    if (
+                        !BLOCK_IS_AIR(block_instance) &&
+                        ((IBlockMixins)block_instance).getWeakChanges(world, nextX, Y, nextZ, neighbor_id)
+                    ) {
 #if ENABLE_DIRECTIONAL_UPDATES
-                        block_instance.onNeighborBlockChange(world, nextX, Y, nextZ, ((IBlockMixin)block_instance).caresAboutUpdateDirection() ? neighbor_id_ex : neighbor_id);
+                        block_instance.onNeighborBlockChange(world, nextX, Y, nextZ, ((IBlockMixins)block_instance).caresAboutUpdateDirection() ? neighbor_id_ex : neighbor_id);
 #else
                         block_instance.onNeighborBlockChange(world, nextX, Y, nextZ, neighbor_id);
 #endif
@@ -85,10 +81,14 @@ public class WorldMixins {
 		)
 	)
     public void onNeighborBlockChange(Block block, World world, int X, int Y, int Z, int neighbor_id) {
-        if (!((IBlockMixin)block).caresAboutUpdateDirection()) {
+        if (!((IBlockMixins)block).caresAboutUpdateDirection()) {
             neighbor_id &= BLOCK_ID_MASK;
         }
         block.onNeighborBlockChange(world, X, Y, Z, neighbor_id);
+    }
+    
+    public void forceNotifyBlockOfNeighborChange(int X, int Y, int Z, int neighbor_id) {
+        ((World)(Object)this).notifyBlockOfNeighborChange(X, Y, Z, neighbor_id | UPDATE_DIRECTION_FORCE_MASK);
     }
     
     @Overwrite

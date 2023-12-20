@@ -4,14 +4,17 @@ import net.minecraft.src.World;
 import net.minecraft.src.BlockRedstoneLogic;
 import net.minecraft.src.BlockComparator;
 import net.minecraft.src.*;
+import btw.AddonHandler;
+import btw.BTWAddon;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.Overwrite;
-import zero.test.IBlockMixin;
+import zero.test.IBlockMixins;
+import zero.test.IWorldMixins;
 
 @Mixin(World.class)
-public class WorldMixins {
+public class WorldMixins implements IWorldMixins {
     @Overwrite
     public void func_96440_m(int X, int Y, int Z, int neighbor_id) {
         World world = (World)(Object)this;
@@ -22,16 +25,19 @@ public class WorldMixins {
             if (block_id != 0) {
                 int neighbor_id_ex = neighbor_id | 0x10000000 | i + 2 << 28;
                 Block block_instance = Block.blocksList[block_id];
-                if (((IBlockMixin)block_instance).getWeakChanges(world, nextX, Y, nextZ, neighbor_id)) {
-                    block_instance.onNeighborBlockChange(world, nextX, Y, nextZ, ((IBlockMixin)block_instance).caresAboutUpdateDirection() ? neighbor_id_ex : neighbor_id);
+                if (((IBlockMixins)block_instance).getWeakChanges(world, nextX, Y, nextZ, neighbor_id)) {
+                    block_instance.onNeighborBlockChange(world, nextX, Y, nextZ, ((IBlockMixins)block_instance).caresAboutUpdateDirection() ? neighbor_id_ex : neighbor_id);
                 }
                 else if (Block.isNormalCube(block_id)) {
                     nextX += Direction.offsetX[i];
                     nextZ += Direction.offsetZ[i];
                     block_id = world.getBlockId(nextX, Y, nextZ);
                     block_instance = Block.blocksList[block_id];
-                    if (((IBlockMixin)block_instance).getWeakChanges(world, nextX, Y, nextZ, neighbor_id)) {
-                        block_instance.onNeighborBlockChange(world, nextX, Y, nextZ, ((IBlockMixin)block_instance).caresAboutUpdateDirection() ? neighbor_id_ex : neighbor_id);
+                    if (
+                        !((block_instance)==null) &&
+                        ((IBlockMixins)block_instance).getWeakChanges(world, nextX, Y, nextZ, neighbor_id)
+                    ) {
+                        block_instance.onNeighborBlockChange(world, nextX, Y, nextZ, ((IBlockMixins)block_instance).caresAboutUpdateDirection() ? neighbor_id_ex : neighbor_id);
                     }
                 }
             }
@@ -45,10 +51,13 @@ public class WorldMixins {
   )
  )
     public void onNeighborBlockChange(Block block, World world, int X, int Y, int Z, int neighbor_id) {
-        if (!((IBlockMixin)block).caresAboutUpdateDirection()) {
+        if (!((IBlockMixins)block).caresAboutUpdateDirection()) {
             neighbor_id &= 0xFFF;
         }
         block.onNeighborBlockChange(world, X, Y, Z, neighbor_id);
+    }
+    public void forceNotifyBlockOfNeighborChange(int X, int Y, int Z, int neighbor_id) {
+        ((World)(Object)this).notifyBlockOfNeighborChange(X, Y, Z, neighbor_id | 0xD0000000);
     }
     @Overwrite
     public void notifyBlocksOfNeighborChange(int X, int Y, int Z, int neighbor_id) {

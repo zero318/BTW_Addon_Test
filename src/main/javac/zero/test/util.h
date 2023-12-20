@@ -14,7 +14,17 @@
 #define MACRO_CATWW(arg1, arg2, arg3, arg4) MACRO_CATWW_RAW(arg1, arg2, arg3, arg4)
 #define MACRO_STR_RAW(arg) #arg
 #define MACRO_STR(arg) MACRO_STR_RAW(arg)
+#define MACRO_DEFER(...) __VA_ARGS__ MACRO_VOID()
 #define MACRO_EVAL(...) __VA_ARGS__
+#define MACRO_EVAL2(...) MACRO_EVAL(MACRO_EVAL(__VA_ARGS__))
+#define MACRO_EVAL4(...) MACRO_EVAL2(MACRO_EVAL2(__VA_ARGS__))
+#define MACRO_EVAL8(...) MACRO_EVAL4(MACRO_EVAL4(__VA_ARGS__))
+
+#define MACRO_PARENS ()
+
+#define _MACRO_FOR_EACH_INNER() MACRO_FOR_EACH_INNER
+#define MACRO_FOR_EACH_INNER(apply, arg, ...) apply(arg) __VA_OPT__(_MACRO_FOR_EACH_INNER MACRO_PARENS (apply, __VA_ARGS__))
+#define MACRO_FOR_EACH(apply, ...) __VA_OPT__(MACRO_EVAL8(MACRO_FOR_EACH_INNER(apply, __VA_ARGS__)))
 
 #define MACRO_FIRST(arg1, ...) arg1
 #define MACRO_FIRST_EVAL(...) MACRO_EVAL(MACRO_FIRST(__VA_ARGS__))
@@ -72,6 +82,94 @@
 
 #define MACROfalsetrueV_false(val) ,val
 #define MACROfalsetrueV_true(val) ,val
+
+#define MACRO01V_0(val) ,val
+#define MACRO01V_1(val) ,val
+
+#define MACROfalse0true1V_0(val) ,val
+#define MACROfalse0true1V_1(val) ,val
+#define MACROfalse0true1V_false(val) ,val
+#define MACROfalse0true1V_true(val) ,val
+
+#define MACRObitV_40(val) ,val
+#define MACRObitV_41(val) ,val
+#define MACRObitV_42(val) ,val
+#define MACRObitV_43(val) ,val
+#define MACRObitV_44(val) ,val
+#define MACRObitV_45(val) ,val
+#define MACRObitV_46(val) ,val
+#define MACRObitV_47(val) ,val
+#define MACRObitV_48(val) ,val
+#define MACRObitV_49(val) ,val
+#define MACRObitV_410(val) ,val
+#define MACRObitV_411(val) ,val
+#define MACRObitV_412(val) ,val
+#define MACRObitV_413(val) ,val
+#define MACRObitV_414(val) ,val
+#define MACRObitV_415(val) ,val
+#define MACRObitV_30(val) ,val
+#define MACRObitV_31(val) ,val
+#define MACRObitV_32(val) ,val
+#define MACRObitV_33(val) ,val
+#define MACRObitV_34(val) ,val
+#define MACRObitV_35(val) ,val
+#define MACRObitV_36(val) ,val
+#define MACRObitV_37(val) ,val
+#define MACRObitV_20(val) ,val
+#define MACRObitV_21(val) ,val
+#define MACRObitV_22(val) ,val
+#define MACRObitV_23(val) ,val
+#define MACRObitV_10(val) ,val
+#define MACRObitV_11(val) ,val
+
+#define MACRO_IS_0(val) MACRO_CAT(MACRO0V_,val)
+#define MACRO_IS_1(val) MACRO_CAT(MACRO1V_,val)
+#define MACRO_IS_2(val) MACRO_CAT(MACRO2V_,val)
+#define MACRO_IS_3(val) MACRO_CAT(MACRO3V_,val)
+#define MACRO_IS_4(val) MACRO_CAT(MACRO4V_,val)
+#define MACRO_IS_5(val) MACRO_CAT(MACRO5V_,val)
+#define MACRO_IS_6(val) MACRO_CAT(MACRO6V_,val)
+#define MACRO_IS_7(val) MACRO_CAT(MACRO7V_,val)
+#define MACRO_IS_8(val) MACRO_CAT(MACRO8V_,val)
+#define MACRO_IS_9(val) MACRO_CAT(MACRO9V_,val)
+#define MACRO_IS_10(val) MACRO_CAT(MACRO10V_,val)
+#define MACRO_IS_11(val) MACRO_CAT(MACRO11V_,val)
+#define MACRO_IS_12(val) MACRO_CAT(MACRO12V_,val)
+#define MACRO_IS_13(val) MACRO_CAT(MACRO13V_,val)
+#define MACRO_IS_14(val) MACRO_CAT(MACRO14V_,val)
+#define MACRO_IS_15(val) MACRO_CAT(MACRO15V_,val)
+#define MACRO_IS_FALSE(val) MACRO_CAT(MACROfalseV_,val)
+#define MACRO_IS_TRUE(val) MACRO_CAT(MACROtrueV_,val)
+#define MACRO_IS_FALSY(val) MACRO_CAT(MACROfalse0V_,val)
+#define MACRO_IS_TRUTHY(val) MACRO_CAT(MACROtrue1V_,val)
+#define MACRO_IS_BOOL(val) MACRO_CAT(MACROfalsetrueV_,val)
+#define MACRO_IS_BOOL_INT(val) MACRO_CAT(MACRO01V_,val)
+#define MACRO_IS_BOOL_ANY(val) MACRO_CAT(MACROfalse0true1V_,val)
+#define MACRO_IS_N_BIT(bit,val) MACRO_CATW(MACRObitV_,bit,val)
+
+#define _MACRO_CAST_TO_BOOL_0 false
+#define _MACRO_CAST_TO_BOOL_false false
+#define _MACRO_CAST_TO_BOOL_1 true
+#define _MACRO_CAST_TO_BOOL_true true
+#define MACRO_CAST_TO_BOOL(val)\
+MACRO_CAT(_MACRO_CAST_TO_BOOL,val)
+
+#define _MACRO_CAST_FROM_BOOL_0 0
+#define _MACRO_CAST_FROM_BOOL_false 0
+#define _MACRO_CAST_FROM_BOOL_1 1
+#define _MACRO_CAST_FROM_BOOL_true 1
+#define MACRO_CAST_FROM_BOOL(val)\
+MACRO_CAT(_MACRO_CAST_FROM_BOOL,val)
+
+#define MACRO_IF(cond, ...)\
+MACRO_SECOND_EVAL(cond(__VA_ARGS__),)
+#define MACRO_IF_NOT(cond, ...)\
+MACRO_SECOND_EVAL(cond(),__VA_ARGS__)
+
+#define MACRO_TERN(cond, if_true, ...)\
+MACRO_SECOND_EVAL(cond(if_true),__VA_ARGS__)
+#define MACRO_TERN_BOOL(cond)\
+MACRO_SECOND_EVAL(cond(1),0)
 
 #define MACRO_ARG_COUNT5(...) MACRO_SIXTH_EVAL(__VA_ARGS__ __VA_OPT__(,)5,4,3,2,1,0)
 
@@ -454,6 +552,16 @@ MACRO_SECOND_EVAL(MACROV_##z(),.setZ((pos).getZ()+(z)))
 
 #define sizeof_type_array(type, count) MACRO_CAT(sizeof_array_,type)(count)
 
+#define bitsof_boolean	(8)
+#define bitsof_byte		(8)
+#define bitsof_short	(16)
+#define bitsof_int		(32)
+#define bitsof_long		(64)
+#define bitsof_float	(32)
+#define bitsof_double	(64)
+
+#define bitsof_type(type) MACRO_CAT(bitsof_,type)
+
 #define lsb_boolean		(3)
 #define lsb_byte		(3)
 #define lsb_short		(4)
@@ -625,6 +733,13 @@ MACRO_SECOND_EVAL(MACROV_##z(),.setZ((pos).getZ()+(z)))
 
 #define pack_long(A,B) (MOVSXLQ(A)<<32| MOVZXLQ(B))
 #define unpack_long(outA, outB, in) { (outA) = (int)((in) >> 32); (outB) = (int)(in); }
+
+// Efficiently tests if [value] is within the range [min, max)
+#define IN_RANGE_EXCLUSIVE32(value, min, max) (ULSS((value)-(min),(max)-(min)))
+
+// Efficiently tests if [value] is within the range [min, max]
+// Valid for both signed and unsigned integers
+#define IN_RANGE_INCLUSIVE32(value, min, max) (ULEQ((value)-(min),(max)-(min)))
 
 /// Random direction crap
 
@@ -834,95 +949,43 @@ case NEIGHBOR_UP_SOUTH:
 #define POWERED_META_BITS 1
 #define POWER_META_BITS 4
 
-#define DIRECTION_META_MASK 7
-#define FLAT_DIRECTION_META_MASK 3
-#define POWERED_META_MASK 1
-#define POWER_META_MASK 15
-
-#define DIRECTION_META_IS_BOOL 0
-#define FLAT_DIRECTION_META_IS_BOOL 0
 #define POWERED_META_IS_BOOL 1
-#define POWER_META_IS_BOOL 0
 
-#define DIRECTION_META_DOWN (0)
-#define DIRECTION_META_UP (1)
-#define DIRECTION_META_NORTH (2)
-#define DIRECTION_META_SOUTH (3)
-#define DIRECTION_META_WEST (4)
-#define DIRECTION_META_EAST (5)
+#define DIRECTION_META_DOWN 0
+#define DIRECTION_META_UP 1
+#define DIRECTION_META_NORTH 2
+#define DIRECTION_META_SOUTH 3
+#define DIRECTION_META_WEST 4
+#define DIRECTION_META_EAST 5
 
-#define FLAT_DIRECTION_META_NORTH (0)
-#define FLAT_DIRECTION_META_SOUTH (1)
-#define FLAT_DIRECTION_META_WEST (2)
-#define FLAT_DIRECTION_META_EAST (3)
+#define FLAT_DIRECTION_META_NORTH 0
+#define FLAT_DIRECTION_META_SOUTH 1
+#define FLAT_DIRECTION_META_WEST 2
+#define FLAT_DIRECTION_META_EAST 3
 
-#define POWERED_META_FALSE (0)
-#define POWERED_META_TRUE (1)
+#define POWERED_META_FALSE 0
+#define POWERED_META_TRUE 1
 
-#define POWER_META_0 (0)
-#define POWER_META_1 (1)
-#define POWER_META_2 (2)
-#define POWER_META_3 (3)
-#define POWER_META_4 (4)
-#define POWER_META_5 (5)
-#define POWER_META_6 (6)
-#define POWER_META_7 (7)
-#define POWER_META_8 (8)
-#define POWER_META_9 (9)
-#define POWER_META_10 (10)
-#define POWER_META_11 (11)
-#define POWER_META_12 (12)
-#define POWER_META_13 (13)
-#define POWER_META_14 (14)
-#define POWER_META_15 (15)
-
-#define READ_META_FIELD_MASK(m, field, offset)
+#define POWER_META_0 0
+#define POWER_META_1 1
+#define POWER_META_2 2
+#define POWER_META_3 3
+#define POWER_META_4 4
+#define POWER_META_5 5
+#define POWER_META_6 6
+#define POWER_META_7 7
+#define POWER_META_8 8
+#define POWER_META_9 9
+#define POWER_META_10 10
+#define POWER_META_11 11
+#define POWER_META_12 12
+#define POWER_META_13 13
+#define POWER_META_14 14
+#define POWER_META_15 15
 
 #define META_BITS(m) m##_META_BITS
 #define META_IS_BOOL(m) m##_META_IS_BOOL
 #define META_OFFSET(m) m##_META_OFFSET
-#define META_MASK(m) m##_META_MASK
-
-#define META1V_1(val) ,val
-#define META3V_3(val) ,val
-#define META4V_4(val) ,val
-#define META15V_15(val) ,val
-
-// Meta shift value OFFSET, BITS
-#define METASV_13(val) ,val
-#define METASV_22(val) ,val
-#define METASV_31(val) ,val
-
-// Meta bool high OFFSET, BITS
-#define METABH_13(val) ,val
-#define METABH_22(val) ,val
-#define METABH_31(val) ,val
-
-// Meta bool low OFFSET, BITS
-#define METABL_01(val) ,val
-#define METABL_02(val) ,val
-#define METABL_03(val) ,val
-#define METABL_04(val) ,val
-#define METABL_11(val) ,val
-#define METABL_12(val) ,val
-#define METABL_21(val) ,val
-
-// Meta bool compare OFFSET
-#define METABC_1 >1
-#define METABC_2 >3
-#define METABC_3 >7
-
-// Meta bool mask OFFSET, BITS
-#define METABM_01 &1
-#define METABM_11 &2
-#define METABM_21 &4
-#define METABM_31 &8
-#define METABM_02 &3
-#define METABM_12 &6
-#define METABM_22 &12
-#define METABM_03 &7
-#define METABM_13 &14
-#define METABM_04
 
 // Meta write mask OFFSET, BITS
 #define METAWM_01 14
@@ -935,46 +998,214 @@ case NEIGHBOR_UP_SOUTH:
 #define METAWM_03 8
 #define METAWM_13 1
 
-// Meta read mask OFFSET, BITS
-#define METARM_01 1
-#define METARM_11 2
-#define METARM_21 4
-#define METARM_31 8
-#define METARM_02 3
-#define METARM_12 6
-#define METARM_22 12
-#define METARM_03 7
-#define METARM_13 14
+#define META_WRITE_MASK(f)\
+MACRO_CATW(METAWM_,META_OFFSET(f),META_BITS(f))
 
-// Meta write full OFFSET, BITS, VALUE
-#define METAWF_011(val) ,val
-#define METAWF_023(val) ,val
-#define METAWF_037(val) ,val
-#define METAWF_111(val) ,val
-#define METAWF_123(val) ,val
-#define METAWF_137(val) ,val
-#define METAWF_211(val) ,val
-#define METAWF_223(val) ,val
-#define METAWF_311(val) ,val
+// Meta mask values OFFSET/BITS
+#define METAMV_0 0
+#define METAMV_1 1
+#define METAMV_2 3
+#define METAMV_3 7
+#define METAMV_4 15
 
-// Meta bool write BOOL, VALUE
-#define METABW_11(val) ,val
-#define METABW_1true(val) ,val
-#define METABW_true1(val) ,val
-#define METABW_truetrue(val) ,val
+#define META_MASK(f)\
+MACRO_CAT(METAMV,META_BITS(f))
+#define META_BOOL_CMP(f)\
+MACRO_CAT(METAMV,META_OFFSET(f))
 
-//#define READ_META_FIELD(m, f)\
-((m)MACRO_SECOND_EVAL(MACRO_CAT(MACRO4V_,META_BITS(f))(),MACRO_SECOND_EVAL(MACRO_CAT(MACRO0V_,META_OFFSET(f))(),>>META_OFFSET(f))MACRO_SECOND_EVAL(MACRO_CATW(METASV_,META_OFFSET(f),META_BITS(f))(),&META_MASK(f))))
+// Meta mask values before shifting OFFSET, BITS
+#define METAMVU_01 1
+#define METAMVU_02 3
+#define METAMVU_03 7
+#define METAMVU_04 15
+#define METAMVU_11 2
+#define METAMVU_12 6
+#define METAMVU_13 14
+#define METAMVU_21 4
+#define METAMVU_22 12
+#define METAMVU_31 8
 
-#define READ_META_FIELD(m, f)\
-(MACRO_SECOND_EVAL(MACRO_CAT(MACROfalse0V_,META_IS_BOOL(f))((m)MACRO_SECOND_EVAL(MACRO_CAT(MACRO4V_,META_BITS(f))(),MACRO_SECOND_EVAL(MACRO_CAT(MACRO0V_,META_OFFSET(f))(),>>META_OFFSET(f))MACRO_SECOND_EVAL(MACRO_CATW(METASV_,META_OFFSET(f),META_BITS(f))(),&META_MASK(f)))),((m)MACRO_SECOND_EVAL(MACRO_CATW(METABH_,META_OFFSET(f),META_BITS(f))(MACRO_CAT(METABC_,META_OFFSET(f))),MACRO_CATW(METABM_,META_OFFSET(f),META_BITS(f))))MACRO_SECOND_EVAL(MACRO_CATW(METABL_,META_OFFSET(f),META_BITS(f))(!=0),)))
+#define META_MASK_UNSHIFTED(f)\
+MACRO_CATW(METAMVU_,META_OFFSET(f),META_BITS(f))
+
+// Meta high value data OFFSET, BITS
+// 0 = Needs != 0 if bool
+// 1 = Is last field
+// true = Is last field but uses != 0 anyway because it's 4 bits
+#define METAHVD_01 0
+#define METAHVD_02 0
+#define METAHVD_03 0
+#define METAHVD_04 true
+#define METAHVD_11 0
+#define METAHVD_12 0
+#define METAHVD_13 1
+#define METAHVD_21 0
+#define METAHVD_22 1
+#define METAHVD_31 1
+
+#define META_IS_LAST(f)\
+MACRO_TERN(MACRO_IS_TRUTHY(MACRO_CATW(METAHVD_,META_OFFSET(f),META_BITS(f))),1,MACRO_TERN_BOOL(MACRO_IS_TRUTHY(f##_META_IS_LAST)))
+#define META_BOOL_SKIPS_NEQ(f)\
+MACRO_TERN_BOOL(MACRO_IS_1(MACRO_CATW(METAHVD_,META_OFFSET(f),META_BITS(f))))
+
+#define META_IS_ONLY_FIELD(f)\
+MACRO_TERN(MACRO_IS_4(META_BITS(f)),1,MACRO_TERN(MACRO_IS_0(META_OFFSET(f)),META_IS_LAST(f),0))
+
+// Meta const lookup OFFSET, VALUE
+#define METACL_00 0
+#define METACL_01 1
+#define METACL_02 2
+#define METACL_03 3
+#define METACL_04 4
+#define METACL_05 5
+#define METACL_06 6
+#define METACL_07 7
+#define METACL_08 8
+#define METACL_09 9
+#define METACL_010 10
+#define METACL_011 11
+#define METACL_012 12
+#define METACL_013 13
+#define METACL_014 14
+#define METACL_015 15
+#define METACL_10 0
+#define METACL_11 2
+#define METACL_12 4
+#define METACL_13 6
+#define METACL_14 8
+#define METACL_15 10
+#define METACL_16 12
+#define METACL_17 14
+#define METACL_20 0
+#define METACL_21 4
+#define METACL_22 8
+#define METACL_23 12
+#define METACL_30 0
+#define METACL_31 8
+
+#define META_CONST_LOOKUP(f,v)\
+MACRO_CATW(METACL_,META_OFFSET(f),v)
+
+#define META_VALID_CONST(f,v)\
+MACRO_IS_N_BIT(META_BITS(f),v)
+
+// Meta full write BITS, VALUE
+#define METAFW_11(val) ,val
+#define METAFW_23(val) ,val
+#define METAFW_37(val) ,val
+
+#define META_IS_FULL_WRITE(f,v)\
+MACRO_CATW(METAFW_,META_BITS(f),v)
 
 
-#define MERGE_META_FIELD(m, f, v)\
-(MACRO_SECOND_EVAL(MACRO_CAT(MACRO4V_,META_BITS(f))(v),(m)MACRO_SECOND_EVAL(MACRO_CATW(METABW_,META_IS_BOOL(f),v)(|MACRO_CATW(METARM_,META_OFFSET(f),META_BITS(f))),MACRO_SECOND_EVAL(MACRO_CATWW(METAWF_,META_OFFSET(f),META_BITS(f),v)(),&MACRO_EVAL(MACRO_CATW(METAWM_,META_OFFSET(f),META_BITS(f))))MACRO_SECOND_EVAL(MACRO_CAT(MACROfalse0V_,v)(),|(v)MACRO_SECOND_EVAL(MACRO_CAT(MACRO0V_,META_OFFSET(f))(),<<META_OFFSET(f))))))
+//#define READ_META_FIELD_RAW(m,f)(\
+    /*TEXT*/(m)\
+    MACRO_IF_NOT(MACRO_IS_4(META_BITS(f)),\
+        MACRO_IF_NOT(MACRO_IS_0(META_OFFSET(f)),\
+            /*TEXT*/>>>META_OFFSET(f)\
+        )\
+        MACRO_IF_NOT(MACRO_IS_TRUTHY(META_IS_LAST(f)),\
+            /*TEXT*/&META_MASK(f)\
+        )\
+    )\
+)
 
-#define WRITE_META_FIELD(m, f, v)\
-(m = MACRO_SECOND_EVAL(MACRO_CAT(MACRO4V_,META_BITS(f))(v),m&MACRO_EVAL(MACRO_CATW(METAWM_,META_OFFSET(f),META_BITS(f)))|(v)MACRO_SECOND_EVAL(MACRO_CAT(MACRO0V_,META_OFFSET(f))(),<<META_OFFSET(f))))
+#define READ_META_FIELD_RAW(m,f)\
+((m)MACRO_IF_NOT(MACRO_IS_4(META_BITS(f)),MACRO_IF_NOT(MACRO_IS_0(META_OFFSET(f)),>>>META_OFFSET(f))MACRO_IF_NOT(MACRO_IS_TRUTHY(META_IS_LAST(f)),&META_MASK(f))))
+
+//#define READ_META_FIELD_BOOL(m,f)(\
+    /*TEXT*/((m)\
+    MACRO_IF_NOT(MACRO_IS_TRUTHY(META_IS_ONLY_FIELD(f)),\
+        MACRO_TERN(MACRO_IS_TRUTHY(META_IS_LAST(f)),\
+            /*TEXT*/>META_BOOL_CMP(f)\
+        /*ELSE*/,\
+            /*TEXT*/&META_MASK_UNSHIFTED(f)\
+        )\
+    )\
+    /*TEXT*/)\
+    MACRO_IF_NOT(MACRO_IS_TRUTHY(META_BOOL_SKIPS_NEQ(f)),\
+        /*TEXT*/!=0\
+    )\
+)
+
+#define READ_META_FIELD_BOOL(m,f)\
+(((m)MACRO_IF_NOT(MACRO_IS_TRUTHY(META_IS_ONLY_FIELD(f)),MACRO_TERN(MACRO_IS_TRUTHY(META_IS_LAST(f)),>META_BOOL_CMP(f),&META_MASK_UNSHIFTED(f))))MACRO_IF_NOT(MACRO_IS_TRUTHY(META_BOOL_SKIPS_NEQ(f)),!=0))
+
+//#define READ_META_FIELD(m,f)(\
+    MACRO_TERN(MACRO_IS_TRUTHY(META_IS_BOOL(f)),\
+        READ_META_FIELD_BOOL(m,f)\
+    /*ELSE*/,\
+        READ_META_FIELD_RAW(m,f)\
+    )\
+)
+
+#define READ_META_FIELD(m,f)\
+(MACRO_TERN(MACRO_IS_TRUTHY(META_IS_BOOL(f)),READ_META_FIELD_BOOL(m,f),READ_META_FIELD_RAW(m,f)))
+
+//#define MERGE_META_FIELD_RAW(m,f,v)(\
+    MACRO_TERN(MACRO_IS_TRUTHY(META_IS_ONLY_FIELD(f)),\
+        /*TEXT*/(v)\
+        MACRO_IF_NOT(META_VALID_CONST(f,v),\
+            /*TEXT*/&META_WRITE_MASK(f)\
+        )\
+    /*ELSE*/,\
+        /*TEXT*/(m)\
+        MACRO_TERN(META_VALID_CONST(f,v),\
+            MACRO_IF_NOT(META_IS_FULL_WRITE(f,v),\
+                /*TEXT*/&META_WRITE_MASK(f)\
+            )\
+            MACRO_IF_NOT(MACRO_IS_FALSY(v),\
+                /*TEXT*/|META_CONST_LOOKUP(f,v)\
+            )\
+        /*ELSE*/,\
+            /*TEXT*/&META_WRITE_MASK(f)|(v)\
+            MACRO_IF_NOT(MACRO_IS_0(META_OFFSET(f)),\
+                /*TEXT*/<<META_OFFSET(f)\
+            )\
+        )\
+    )\
+)
+
+#define MERGE_META_FIELD_RAW(m,f,v)\
+(MACRO_TERN(MACRO_IS_TRUTHY(META_IS_ONLY_FIELD(f)),(v)MACRO_IF_NOT(META_VALID_CONST(f,v),&META_WRITE_MASK(f)),(m)MACRO_TERN(META_VALID_CONST(f,v),MACRO_IF_NOT(META_IS_FULL_WRITE(f,v),&META_WRITE_MASK(f))MACRO_IF_NOT(MACRO_IS_FALSY(v),|META_CONST_LOOKUP(f,v)),&META_WRITE_MASK(f)|(v)MACRO_IF_NOT(MACRO_IS_0(META_OFFSET(f)),<<META_OFFSET(f)))))
+
+//#define MERGE_META_FIELD_BOOL(m,f,v)(\
+    MACRO_TERN(MACRO_IS_BOOL_ANY(v),\
+        MACRO_TERN(MACRO_IS_TRUTHY(META_IS_ONLY_FIELD(f)),\
+            /*TEXT*/MACRO_CAST_FROM_BOOL(v)\
+        /*ELSE*/,\
+            /*TEXT*/(m)\
+            MACRO_TERN(MACRO_IS_TRUTHY(v),\
+                /*TEXT*/|META_CONST_LOOKUP(f,1)\
+            /*ELSE*/,\
+                /*TEXT*/&META_WRITE_MASK(f)\
+            )\
+        )\
+    /*ELSE*/,\
+        MACRO_TERN(MACRO_IS_TRUTHY(META_IS_ONLY_FIELD(f)),\
+            /*TEXT*/(v)&1\
+        /*ELSE*/,\
+            /*TEXT*/(m)&META_WRITE_MASK(f)|((v)&1)\
+            MACRO_IF_NOT(MACRO_IS_0(META_OFFSET(f)),\
+                /*TEXT*/<<META_OFFSET(f)\
+            )\
+        )\
+    )\
+)
+
+#define MERGE_META_FIELD_BOOL(m,f,v)\
+(MACRO_TERN(MACRO_IS_BOOL_ANY(v),MACRO_TERN(MACRO_IS_TRUTHY(META_IS_ONLY_FIELD(f)),MACRO_CAST_FROM_BOOL(v),(m)MACRO_TERN(MACRO_IS_TRUTHY(v),|META_CONST_LOOKUP(f,1),&META_WRITE_MASK(f))),MACRO_TERN(MACRO_IS_TRUTHY(META_IS_ONLY_FIELD(f)),(v)&1,(m)&META_WRITE_MASK(f)|((v)&1)MACRO_IF_NOT(MACRO_IS_0(META_OFFSET(f)),<<META_OFFSET(f)))))
+
+//#define MERGE_META_FIELD(m,f,v)(\
+    MACRO_TERN(MACRO_IS_TRUTHY(META_IS_BOOL(f)),\
+        MERGE_META_FIELD_BOOL(m,f,v)\
+    /*ELSE*/,\
+        MERGE_META_FIELD_RAW(m,f,v)\
+    )\
+)
+
+#define MERGE_META_FIELD(m,f,v)\
+(MACRO_TERN(MACRO_IS_TRUTHY(META_IS_BOOL(f)),MERGE_META_FIELD_BOOL(m,f,v),MERGE_META_FIELD_RAW(m,f,v)))
 
 /// Fake Direction Metadata
 
@@ -987,7 +1218,17 @@ case NEIGHBOR_UP_SOUTH:
 #define DIRECTION_WEST 4
 #define DIRECTION_EAST 5
 
+#define OPPOSITE_DIRECTION(dir) ((dir)^1)
+
+#define DIRECTION_AXIS(dir) ((dir)&~1)
+
+#define AXIS_X 0x2
+#define AXIS_Y 0x0
+#define AXIS_Z 0x4
+
 #define UPDATE_DIRECTION_OFFSET 28
+
+#define GET_UPDATE_DIRECTION(...) ((__VA_ARGS__)>>>UPDATE_DIRECTION_OFFSET)
 
 #define UPDATE_DIRECTION_ENABLED_MASK 0x10000000
 
@@ -997,6 +1238,7 @@ case NEIGHBOR_UP_SOUTH:
 #define UPDATE_DIRECTION_SOUTH_MASK 0x70000000
 #define UPDATE_DIRECTION_WEST_MASK  0x90000000
 #define UPDATE_DIRECTION_EAST_MASK  0xB0000000
+#define UPDATE_DIRECTION_FORCE_MASK 0xD0000000
 
 #define UPDATE_DIRECTION_DOWN  0x1
 #define UPDATE_DIRECTION_UP    0x3
@@ -1004,5 +1246,51 @@ case NEIGHBOR_UP_SOUTH:
 #define UPDATE_DIRECTION_SOUTH 0x7
 #define UPDATE_DIRECTION_WEST  0x9
 #define UPDATE_DIRECTION_EAST  0xB
+#define UPDATE_DIRECTION_FORCE 0xD
+
+/// Misc. Flags
+
+#define PISTON_CAN_PUSH 0
+#define PISTON_CAN_BREAK 1
+#define PISTON_CANNOT_PUSH 2
+#define PISTON_CAN_SHOVEL 3
+// Glazed terracotta
+#define PISTON_CAN_PUSH_ONLY 4
+
+#define PISTON_PUSH_LIMIT 12
+
+#define WORLD_HEIGHT_MIN 0
+#define WORLD_HEIGHT_MAX 255
+
+#define WORLD_WIDTH_MIN -30000000
+#define WORLD_WIDTH_MAX 29999999
+
+#define WORLD_WIDTH_BITS 26
+#define WORLD_HEIGHT_BITS 12
+
+#define IS_VALID_BLOCK_X_POS(X) (IN_RANGE_INCLUSIVE32((X),WORLD_WIDTH_MIN,WORLD_WIDTH_MAX))
+#define IS_VALID_BLOCK_Y_POS(Y) (IN_RANGE_INCLUSIVE32((Y),WORLD_HEIGHT_MIN,WORLD_HEIGHT_MAX))
+#define IS_VALID_BLOCK_Z_POS(Z) (IN_RANGE_INCLUSIVE32((Z),WORLD_WIDTH_MIN,WORLD_WIDTH_MAX))
+
+#define IS_VALID_BLOCK_XZ_POS(X, Z) (IS_VALID_BLOCK_X_POS(X) && IS_VALID_BLOCK_Z_POS(Z))
+#define IS_VALID_BLOCK_XYZ_POS(X, Y, Z) (IS_VALID_BLOCK_Y_POS(Y) && IS_VALID_BLOCK_XZ_POS((X),(Z)))
+
+#define BLOCK_IS_AIR(block) ((block)==null)
+
+#define BLOCK_COORD_TYPE int
+#define BLOCK_POS_PACK_TYPE long
+
+#define BLOCK_POS_HASH_PACK(X,Y,Z)\
+((BLOCK_POS_PACK_TYPE)(Z)<<WORLD_HEIGHT_BITS+WORLD_WIDTH_BITS^(BLOCK_POS_PACK_TYPE)(X)<<WORLD_HEIGHT_BITS^(Y))
+
+// Z doesn't need to be masked because it's in the top bits anyway
+#define BLOCK_POS_PACK(X,Y,Z)\
+((BLOCK_POS_PACK_TYPE)(Z)<<WORLD_HEIGHT_BITS+WORLD_WIDTH_BITS|(BLOCK_POS_PACK_TYPE)((X)&0x3FFFFFF)<<12|((Y)&0xFFF))
+
+#define BLOCK_POS_UNPACK(pos,X,Y,Z){\
+(X)=(BLOCK_COORD_TYPE)((pos)<<WORLD_WIDTH_BITS>>bitsof_type(BLOCK_POS_PACK_TYPE)-WORLD_WIDTH_BITS);\
+(Z)=(BLOCK_COORD_TYPE)((pos)>>bitsof_type(BLOCK_POS_PACK_TYPE)-WORLD_WIDTH_BITS);\
+(Y)=(BLOCK_COORD_TYPE)(pos)<<bitsof_type(BLOCK_COORD_TYPE)-WORLD_HEIGHT_BITS>>bitsof_type(BLOCK_COORD_TYPE)-WORLD_HEIGHT_BITS;\
+}
 
 #endif

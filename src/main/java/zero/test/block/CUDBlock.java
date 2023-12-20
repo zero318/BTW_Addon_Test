@@ -28,9 +28,13 @@ public class CUDBlock extends BuddyBlock {
     public void onNeighborBlockChange(World world, int X, int Y, int Z, int neighbor_id) {
         if (neighbor_id != 1318) {
             int meta = world.getBlockMetadata(X, Y, Z);
-            if (!(((meta)&1)!=0)){
+            if (!((((meta)&1)!=0))) {
                 Block neighborBlock = blocksList[neighbor_id];
-                if (neighborBlock != null && neighborBlock.hasComparatorInputOverride() && !world.isUpdatePendingThisTickForBlock(X, Y, Z, blockID)) {
+                if (
+                    neighborBlock != null &&
+                    neighborBlock.hasComparatorInputOverride() &&
+                    !world.isUpdatePendingThisTickForBlock(X, Y, Z, blockID)
+                ) {
                     world.scheduleBlockUpdate(X, Y, Z, blockID, 1);
                 }
             }

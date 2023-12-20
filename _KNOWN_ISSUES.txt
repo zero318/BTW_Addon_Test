@@ -1,0 +1,6 @@
+-Most blocks appear twice in the creative menu
+-Slime blocks don't appear in the creative menu
+-Textures are slightly broken
+-Observers don't detect block placement
+-Observers don't create a clock when facing each other
+-Shovels are completely non-functional

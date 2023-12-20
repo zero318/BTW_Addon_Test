@@ -48,10 +48,14 @@ public class CUDBlock extends BuddyBlock {
     	// IDK why this check works for preventing a crash, but it does
         if (neighbor_id != CUD_BLOCK_ID) {
             int meta = world.getBlockMetadata(X, Y, Z);
-            if (!READ_META_FIELD(meta, POWERED)){
+            if (!READ_META_FIELD(meta, POWERED)) {
                 Block neighborBlock = blocksList[neighbor_id];
                 
-                if (neighborBlock != null && neighborBlock.hasComparatorInputOverride() && !world.isUpdatePendingThisTickForBlock(X, Y, Z, blockID)) {
+                if (
+                    neighborBlock != null &&
+                    neighborBlock.hasComparatorInputOverride() &&
+                    !world.isUpdatePendingThisTickForBlock(X, Y, Z, blockID)
+                ) {
                     // minimal delay when triggered to avoid notfying neighbors of change in same tick
                     // that they are notifying of the original change. Not doing so causes problems 
                     // with some blocks (like ladders) that haven't finished initializing their state 

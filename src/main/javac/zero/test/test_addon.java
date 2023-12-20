@@ -27,8 +27,13 @@ public class ZeroTestAddon extends BTWAddon {
         ZeroTestBlocks.observer_block = new ObserverBlock(OBSERVER_BLOCK_ID);
         Item.itemsList[OBSERVER_BLOCK_ID-256] = new ItemBlock(OBSERVER_BLOCK_ID-256);
 #endif
+#if ENABLE_MOVING_BLOCK_CHAINING
+        ZeroTestBlocks.slime_block = new SlimeBlock(SLIME_BLOCK_ID);
+        Item.itemsList[SLIME_BLOCK_ID-256] = new ItemBlock(SLIME_BLOCK_ID-256);
+#endif
     }
 
+    // Is this important?
     public static ZeroTestAddon getInstance() {
         if (instance != null)
             instance = new ZeroTestAddon();
