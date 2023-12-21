@@ -18,6 +18,8 @@ public class ZeroTestAddon extends BTWAddon {
         Item.itemsList[1319 -256] = new ItemBlock(1319 -256);
         ZeroTestBlocks.slime_block = new SlimeBlock(1320);
         Item.itemsList[1320 -256] = new ItemBlock(1320 -256);
+        ZeroTestBlocks.glue_block = new GlueBlock(1321);
+        Item.itemsList[1321 -256] = new ItemBlock(1321 -256);
     }
     public static ZeroTestAddon getInstance() {
         if (instance != null)

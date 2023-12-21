@@ -138,15 +138,8 @@ public class ObserverBlock extends BuddyBlock {
     @Environment(EnvType.CLIENT)
     public Icon getIcon(int side, int meta) {
 		// item render
-		
-		if (side == 3) {
-			return this.texture_front;
-		}
-		
-		return blockIcon;
+        return side == 3 ? this.texture_front : this.blockIcon;
     }
-    
-    
 
     @Override
     @Environment(EnvType.CLIENT)

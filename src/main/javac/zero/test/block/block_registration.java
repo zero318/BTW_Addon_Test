@@ -12,5 +12,6 @@ public class ZeroTestBlocks {
 #endif
 #if ENABLE_MOVING_BLOCK_CHAINING
     public static Block slime_block;
+    public static Block glue_block;
 #endif
 }

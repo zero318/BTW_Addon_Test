@@ -18,4 +18,8 @@ public class BlockMixins implements IBlockMixins {
     public boolean isSticky(int X, int Y, int Z, int direction) {
         return false;
     }
+    @Override
+    public boolean canStickTo(int X, int Y, int Z, int direction, int neighbor_id) {
+        return true;
+    }
 }
