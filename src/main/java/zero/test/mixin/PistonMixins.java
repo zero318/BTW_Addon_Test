@@ -172,11 +172,11 @@ public abstract class PistonMixins extends BlockPistonBase {
     protected boolean add_branch(World world, int X, int Y, int Z, int direction) {
         int block_id = world.getBlockId(X, Y, Z);
         Block block = Block.blocksList[block_id];
-        AddonHandler.logMessage("Branching Block ("+X+" "+Y+" "+Z+")"+direction);
+        if (!world.isRemote) AddonHandler.logMessage("Branching Block ("+X+" "+Y+" "+Z+")"+direction);
         for (int facing = 0; facing < 6; ++facing) {
-            AddonHandler.logMessage("Facing/Direction ("+facing+"/"+direction+") ("+((facing)&~1)+"/"+((direction)&~1)+")");
+            if (!world.isRemote) AddonHandler.logMessage("Facing/Direction ("+facing+"/"+direction+") ("+((facing)&~1)+"/"+((direction)&~1)+")");
             if (((facing)&~1) != ((direction)&~1)) {
-                AddonHandler.logMessage("Adding branch "+facing);
+                if (!world.isRemote) AddonHandler.logMessage("Adding branch "+facing);
                 if (((IBlockMixins)block).isStickyForBlocks(world, X, Y, Z, facing)) {
                     int nextX = X + Facing.offsetsXForSide[facing];
                     int nextY = Y + Facing.offsetsYForSide[facing];
@@ -214,7 +214,7 @@ public abstract class PistonMixins extends BlockPistonBase {
         ) {
             return true;
         }
-        AddonHandler.logMessage("SearchForExistingPush ("+X+" "+Y+" "+Z+")");
+        if (!world.isRemote) AddonHandler.logMessage("SearchForExistingPush ("+X+" "+Y+" "+Z+")");
         int push_index = push_index_global;
         for (int i = PUSH_LIST_START_INDEX; i < push_index; ++i) {
             if (pushed_blocks[i] == packed_pos) {
@@ -228,16 +228,16 @@ public abstract class PistonMixins extends BlockPistonBase {
         int next_block_id = block_id;
         Block next_block = block;
         for(;;) {
-            AddonHandler.logMessage("StickySearch ("+nextX+" "+nextY+" "+nextZ+")");
+            if (!world.isRemote) AddonHandler.logMessage("StickySearch ("+nextX+" "+nextY+" "+nextZ+")");
             if (++push_write_index == (PUSH_LIST_START_INDEX + PUSH_LIST_LENGTH)) {
-                AddonHandler.logMessage("Push failed limit reached A");
+                if (!world.isRemote) AddonHandler.logMessage("Push failed limit reached A");
                 return false;
             }
             if (!((IBlockMixins)next_block).isStickyForBlocks(world, nextX, nextY, nextZ, direction)) {
-                AddonHandler.logMessage("IsSticky false");
+                if (!world.isRemote) AddonHandler.logMessage("IsSticky false");
                 break;
             }
-            AddonHandler.logMessage("IsSticky true");
+            if (!world.isRemote) AddonHandler.logMessage("IsSticky true");
             int tempX = nextX - Facing.offsetsXForSide[direction];
             int tempY = nextY - Facing.offsetsYForSide[direction];
             int tempZ = nextZ - Facing.offsetsZForSide[direction];
@@ -260,7 +260,7 @@ public abstract class PistonMixins extends BlockPistonBase {
         }
         int push_count = push_write_index - push_index;
         do {
-            AddonHandler.logMessage("AddPush ("+nextX+" "+nextY+" "+nextZ+")");
+            if (!world.isRemote) AddonHandler.logMessage("AddPush ("+nextX+" "+nextY+" "+nextZ+")");
             data_list[push_index] = next_block_id;
             pushed_blocks[push_index++] = ((long)(nextZ)<<12 +26|(long)((nextX)&0x3FFFFFF)<<12|((nextY)&0xFFF));
             nextX += Facing.offsetsXForSide[direction];
@@ -270,12 +270,12 @@ public abstract class PistonMixins extends BlockPistonBase {
         } while (push_index != push_write_index);
         for(;;) {
             push_index_global = push_index;
-            AddonHandler.logMessage("New push index "+push_index_global);
-            AddonHandler.logMessage("ParsePush ("+nextX+" "+nextY+" "+nextZ+")");
+            if (!world.isRemote) AddonHandler.logMessage("New push index "+push_index_global);
+            if (!world.isRemote) AddonHandler.logMessage("ParsePush ("+nextX+" "+nextY+" "+nextZ+")");
             packed_pos = ((long)(nextZ)<<12 +26|(long)((nextX)&0x3FFFFFF)<<12|((nextY)&0xFFF));
             for (int i = PUSH_LIST_START_INDEX; i < push_index; ++i) {
                 if (pushed_blocks[i] == packed_pos) {
-                    AddonHandler.logMessage("Hacky swap code");
+                    if (!world.isRemote) AddonHandler.logMessage("Hacky swap code");
                     int swap_max = gcd(push_index - PUSH_LIST_START_INDEX, push_count) + i;
                     for (int j = i; j < swap_max; ++j) {
                         int k = j;
@@ -302,7 +302,7 @@ public abstract class PistonMixins extends BlockPistonBase {
                             !((block)==null) &&
                             !this.add_branch(world, X, Y, Z, direction)
                         ) {
-                            AddonHandler.logMessage("Push failed move block branching ("+X+" "+Y+" "+Z+")");
+                            if (!world.isRemote) AddonHandler.logMessage("Push failed move block branching ("+X+" "+Y+" "+Z+")");
                             return false;
                         }
                     }
@@ -317,7 +317,7 @@ public abstract class PistonMixins extends BlockPistonBase {
                 packed_pos == piston_position ||
                 !next_block.canBlockBePushedByPiston(world, nextX, nextY, nextZ, direction)
             ) {
-                AddonHandler.logMessage("Push failed move block IDK ("+nextX+" "+nextY+" "+nextZ+")");
+                if (!world.isRemote) AddonHandler.logMessage("Push failed move block IDK ("+nextX+" "+nextY+" "+nextZ+")");
                 return false;
             }
             if (next_block.getMobilityFlag() == 1) {
@@ -357,7 +357,7 @@ public abstract class PistonMixins extends BlockPistonBase {
                 }
             }
             if (push_index == (PUSH_LIST_START_INDEX + PUSH_LIST_LENGTH)) {
-                AddonHandler.logMessage("Push failed limit reached B");
+                if (!world.isRemote) AddonHandler.logMessage("Push failed limit reached B");
                 return false;
             }
             data_list[push_index] = next_block_id;
@@ -388,17 +388,17 @@ public abstract class PistonMixins extends BlockPistonBase {
                 is_extending &&
                 block.getMobilityFlag() == 1
             ) {
-                AddonHandler.logMessage("Resolve destroy ("+X+" "+Y+" "+Z+")");
+                if (!world.isRemote) AddonHandler.logMessage("Resolve destroy ("+X+" "+Y+" "+Z+")");
                 data_list[destroy_index_global] = block_id;
                 pushed_blocks[destroy_index_global++] = packed_pos;
                 return true;
             }
-            AddonHandler.logMessage("Push failed immobile "+block_id+"("+X+" "+Y+" "+Z+")");
+            if (!world.isRemote) AddonHandler.logMessage("Push failed immobile "+block_id+"("+X+" "+Y+" "+Z+")");
             return false;
         }
-        AddonHandler.logMessage("Resolve add blocks ("+X+" "+Y+" "+Z+")");
+        if (!world.isRemote) AddonHandler.logMessage("Resolve add blocks ("+X+" "+Y+" "+Z+")");
         if (!this.add_moved_block(world, X, Y, Z, direction)) {
-            AddonHandler.logMessage("Push failed move block");
+            if (!world.isRemote) AddonHandler.logMessage("Push failed move block");
             return false;
         }
         for (int i = PUSH_LIST_START_INDEX; i < push_index_global; ++i) {
@@ -409,7 +409,7 @@ public abstract class PistonMixins extends BlockPistonBase {
             if (
                 !this.add_branch(world, X, Y, Z, direction)
             ) {
-                AddonHandler.logMessage("Push failed branching");
+                if (!world.isRemote) AddonHandler.logMessage("Push failed branching");
                 return false;
             }
         }
@@ -443,26 +443,26 @@ public abstract class PistonMixins extends BlockPistonBase {
         int block_meta;
         Block block;
         int i = destroy_index_global;
-        AddonHandler.logMessage("DestroyIndex "+i);
+        if (!world.isRemote) AddonHandler.logMessage("DestroyIndex "+i);
         while (--i >= DESTROY_LIST_START_INDEX) {
             packed_pos = pushed_blocks[i];
             {(X)=(int)((packed_pos)<<26>>(64)-26);(Z)=(int)((packed_pos)>>(64)-26);(Y)=(int)(packed_pos)<<(32)-12>>(32)-12;};
             block_id = data_list[i];
             block = Block.blocksList[block_id];
             block_meta = world.getBlockMetadata(X, Y, Z);
-            AddonHandler.logMessage("Destroy "+block_id+"."+block_meta+"("+X+" "+Y+" "+Z+")");
+            if (!world.isRemote) AddonHandler.logMessage("Destroy "+block_id+"."+block_meta+"("+X+" "+Y+" "+Z+")");
             block.onBrokenByPistonPush(world, X, Y, Z, block_meta);
             world.setBlock(X, Y, Z, 0, 0, 0x08 | 0x10);
         }
         i = push_index_global;
-        AddonHandler.logMessage("PushIndex "+i);
+        if (!world.isRemote) AddonHandler.logMessage("PushIndex "+i);
         while (--i >= PUSH_LIST_START_INDEX) {
             packed_pos = pushed_blocks[i];
             {(X)=(int)((packed_pos)<<26>>(64)-26);(Z)=(int)((packed_pos)>>(64)-26);(Y)=(int)(packed_pos)<<(32)-12>>(32)-12;};
             block_id = data_list[i];
             block = Block.blocksList[block_id];
             block_meta = world.getBlockMetadata(X, Y, Z);
-            AddonHandler.logMessage("Push "+block_id+"."+block_meta+"("+X+" "+Y+" "+Z+")");
+            if (!world.isRemote) AddonHandler.logMessage("Push "+block_id+"."+block_meta+"("+X+" "+Y+" "+Z+")");
             NBTTagCompound tile_entity_data = getBlockTileEntityData(world, X, Y, Z);
             world.removeBlockTileEntity(X, Y, Z);
             packed_pos = ((long)(Z + Facing.offsetsZForSide[direction])<<12 +26|(long)((X + Facing.offsetsXForSide[direction])&0x3FFFFFF)<<12|((Y + Facing.offsetsYForSide[direction])&0xFFF));
@@ -485,7 +485,7 @@ public abstract class PistonMixins extends BlockPistonBase {
             }
         }
         if (is_extending) {
-            AddonHandler.logMessage("PistonHead "+Block.pistonMoving.blockID+"."+(direction | (this.isSticky ? 8 : 0))+"("+headX+" "+headY+" "+headZ+")");
+            if (!world.isRemote) AddonHandler.logMessage("PistonHead "+Block.pistonMoving.blockID+"."+(direction | (this.isSticky ? 8 : 0))+"("+headX+" "+headY+" "+headZ+")");
             world.setBlock(headX, headY, headZ, Block.pistonMoving.blockID, direction | (this.isSticky ? 8 : 0), 0x08 | 0x20 | 0x40);
    world.setBlockTileEntity(headX, headY, headZ, BlockPistonMoving.getTileEntity(Block.pistonExtension.blockID, direction | (this.isSticky ? 8 : 0), direction, true, false));
         }
@@ -538,51 +538,52 @@ public abstract class PistonMixins extends BlockPistonBase {
         return true;
     }
     private static final int PISTON_EVENT_EXTENDING = 0;
-    private static final int PISTON_EVENT_RETRACTING = 1;
-    private static final int PISTON_EVENT_IDK = 2;
+    private static final int PISTON_EVENT_RETRACTING_NORMAL = 1;
+    private static final int PISTON_EVENT_RETRACTING_ZERO_TICK = 2;
     protected void updatePistonState(World world, int X, int Y, int Z) {
-        int meta = world.getBlockMetadata(X, Y, Z);
-        int direction = (((meta)&7));
-        if (direction != 7) {
-            boolean is_powered = ((IPistonBaseAccessMixins)(Object)this).callIsIndirectlyPowered(world, X, Y, Z, direction);
-            if (is_powered != ((((meta)>7)))) {
-                if (is_powered) {
-                    if (canExtend(world, X, Y, Z, direction)) {
-                        world.addBlockEvent(X, Y, Z, this.blockID, PISTON_EVENT_EXTENDING, direction);
-                    }
-                } else {
-                    int nextX = X + Facing.offsetsXForSide[direction] * 2;
-                    int nextY = Y + Facing.offsetsYForSide[direction] * 2;
-                    int nextZ = Z + Facing.offsetsZForSide[direction] * 2;
-                    int next_block_id = world.getBlockId(nextX, nextY, nextZ);
-                    TileEntity tile_entity;
-                    if (
-                        next_block_id == Block.pistonMoving.blockID &&
-                        (tile_entity = world.getBlockTileEntity(nextX, nextY, nextZ)) instanceof TileEntityPiston &&
-                        ((TileEntityPiston)tile_entity).getPistonOrientation() == direction &&
-                        ((TileEntityPiston)tile_entity).isExtending() &&
-                        (
-                            ((TileEntityPiston)tile_entity).getProgress(0.0f) < 0.5f ||
-                            world.getTotalWorldTime() == ((IBlockEntityPistonMixins)tile_entity).getLastTicked()
-                        )
-                    ) {
-                        world.addBlockEvent(X, Y, Z, this.blockID, PISTON_EVENT_IDK, direction);
+        if (!world.isRemote) {
+            int meta = world.getBlockMetadata(X, Y, Z);
+            int direction = (((meta)&7));
+            if (direction != 7) {
+                boolean is_powered = ((IPistonBaseAccessMixins)(Object)this).callIsIndirectlyPowered(world, X, Y, Z, direction);
+                if (is_powered != ((((meta)>7)))) {
+                    if (is_powered) {
+                        if (canExtend(world, X, Y, Z, direction)) {
+                            world.addBlockEvent(X, Y, Z, this.blockID, PISTON_EVENT_EXTENDING, direction);
+                        }
                     } else {
-                        world.addBlockEvent(X, Y, Z, this.blockID, PISTON_EVENT_RETRACTING, direction);
+                        int nextX = X + Facing.offsetsXForSide[direction] * 2;
+                        int nextY = Y + Facing.offsetsYForSide[direction] * 2;
+                        int nextZ = Z + Facing.offsetsZForSide[direction] * 2;
+                        int next_block_id = world.getBlockId(nextX, nextY, nextZ);
+                        TileEntity tile_entity;
+                        if (
+                            next_block_id == Block.pistonMoving.blockID &&
+                            (tile_entity = world.getBlockTileEntity(nextX, nextY, nextZ)) instanceof TileEntityPiston &&
+                            ((TileEntityPiston)tile_entity).getPistonOrientation() == direction &&
+                            ((TileEntityPiston)tile_entity).isExtending() &&
+                            (
+                                ((TileEntityPiston)tile_entity).getProgress(0.0f) < 0.5f ||
+                                world.getTotalWorldTime() == ((IBlockEntityPistonMixins)tile_entity).getLastTicked()
+                            )
+                        ) {
+                            world.addBlockEvent(X, Y, Z, this.blockID, PISTON_EVENT_RETRACTING_ZERO_TICK, direction);
+                        } else {
+                            world.addBlockEvent(X, Y, Z, this.blockID, PISTON_EVENT_RETRACTING_NORMAL, direction);
+                        }
                     }
                 }
             }
         }
     }
     public boolean onBlockEventReceived(World world, int X, int Y, int Z, int event_type, int direction) {
-        AddonHandler.logMessage("===== PistonCoords ("+X+" "+Y+" "+Z+")");
         if (!world.isRemote) {
             boolean is_powered = ((IPistonBaseAccessMixins)(Object)this).callIsIndirectlyPowered(world, X, Y, Z, direction);
             if (
                 is_powered &&
                 (
-                    event_type == PISTON_EVENT_RETRACTING ||
-                    event_type == PISTON_EVENT_IDK
+                    event_type == PISTON_EVENT_RETRACTING_NORMAL ||
+                    event_type == PISTON_EVENT_RETRACTING_ZERO_TICK
                 )
             ) {
                 world.setBlockMetadataWithNotify(X, Y, Z, (((direction)|8)), 0x02);
@@ -592,17 +593,20 @@ public abstract class PistonMixins extends BlockPistonBase {
                 return false;
             }
         }
+        if (!world.isRemote) AddonHandler.logMessage("===== PistonCoords ("+X+" "+Y+" "+Z+")");
         switch (event_type) {
             default:
                 return true;
             case PISTON_EVENT_EXTENDING:
+                if (!world.isRemote) AddonHandler.logMessage("Case PISTON_EVENT_EXTENDING");
                 if (!this.moveBlocks(world, X, Y, Z, direction, true)) {
                     return false;
                 }
                 world.setBlockMetadataWithNotify(X, Y, Z, (((direction)|8)), 0x01 | 0x02 | 0x20 | 0x40);
                 world.playSoundEffect((double)X + 0.5D, (double)Y + 0.5D, (double)Z + 0.5D, "tile.piston.out", 0.5F, world.rand.nextFloat() * 0.25F + 0.6F);
                 return true;
-            case PISTON_EVENT_RETRACTING: case PISTON_EVENT_IDK:
+            case PISTON_EVENT_RETRACTING_NORMAL: case PISTON_EVENT_RETRACTING_ZERO_TICK:
+                if (!world.isRemote) AddonHandler.logMessage("Case PISTON_EVENT_RETRACTING "+event_type);
                 int nextX = X + Facing.offsetsXForSide[direction];
                 int nextY = Y + Facing.offsetsYForSide[direction];
                 int nextZ = Z + Facing.offsetsZForSide[direction];
@@ -631,7 +635,7 @@ public abstract class PistonMixins extends BlockPistonBase {
                                 }
                             }
                         }
-                        if (event_type == PISTON_EVENT_RETRACTING) {
+                        if (event_type == PISTON_EVENT_RETRACTING_NORMAL) {
                             Block next_block = Block.blocksList[next_block_id];
                             if (
                                 !((next_block)==null) &&

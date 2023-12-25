@@ -15,7 +15,9 @@
     "RedstoneWireMixins",
     "IRedstoneWireAccessMixins",
     "BlockPistonExtensionMixins",
-    "BlockPistonMovingMixins"
+    "BlockPistonMovingMixins",
+    "IWorldAccessMixins",
+    "ChestMixins"
   ],
   "client": [
     "ZeroTestMixin"

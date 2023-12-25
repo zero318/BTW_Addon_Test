@@ -70,25 +70,41 @@ public class BlockEntityPistonMixins extends TileEntity implements IBlockEntityP
     @Overwrite
     public void restoreStoredBlock() {
         TileEntityPiston self = (TileEntityPiston)(Object)this;
+        
+        //if (!self.worldObj.isRemote) AddonHandler.logMessage("Restore block ("+self.xCoord+" "+self.yCoord+" "+self.zCoord+") at time "+last_ticked);
+        
         int stored_block_id = self.getStoredBlockID();
         Block stored_block = Block.blocksList[stored_block_id];
         int stored_meta = self.getBlockMetadata();
         if (!BLOCK_IS_AIR(stored_block)) {
             ((IWorldMixins)self.worldObj).updateFromNeighborShapes(self.xCoord, self.yCoord, self.zCoord, stored_block_id, stored_meta);
         }
+        
+        // Set scanningTileEntities to true
+        // so that the tile entity is always
+        // placed correctly
+        boolean scanning_tile_entities_temp = ((IWorldAccessMixins)self.worldObj).getScanningTileEntities();
+        ((IWorldAccessMixins)self.worldObj).setScanningTileEntities(true);
+        
         self.worldObj.setBlock(self.xCoord, self.yCoord, self.zCoord, stored_block_id, stored_meta, UPDATE_NEIGHBORS | UPDATE_CLIENTS);
         
-        //AddonHandler.logMessage("PLACE BLOCK "+stored_block_id+"."+stored_meta);
+        //if (!self.worldObj.isRemote) AddonHandler.logMessage("PLACE BLOCK "+stored_block_id+"."+stored_meta);
         
         if (self.storedTileEntityData != null) {
-			self.restoreBlockTileEntity();
-		}
-        self.worldObj.notifyBlockOfNeighborChange(self.xCoord, self.yCoord, self.zCoord, stored_block_id);
-        
-        if (stored_block_id != this.worldObj.getBlockId(self.xCoord, self.yCoord, self.zCoord)) {
-            //AddonHandler.logMessage("PLACE BLOCK BROKE DURING UPDATE "+stored_block_id+"."+stored_meta);
+            // setBlockTileEntity updates the entity
+            // coordinates itself when scanningTileEntities
+            // is true
+            worldObj.setBlockTileEntity(self.xCoord, self.yCoord, self.zCoord, TileEntity.createAndLoadEntity(self.storedTileEntityData));
         }
         
+        self.worldObj.notifyBlockOfNeighborChange(self.xCoord, self.yCoord, self.zCoord, stored_block_id);
+        
+        // Restore original value of scanningTileEntities
+        ((IWorldAccessMixins)self.worldObj).setScanningTileEntities(scanning_tile_entities_temp);
+        
+        //if (stored_block_id != this.worldObj.getBlockId(self.xCoord, self.yCoord, self.zCoord)) {
+            //AddonHandler.logMessage("PLACE BLOCK BROKE DURING UPDATE "+stored_block_id+"."+stored_meta);
+        //}
     }
     
     @Overwrite
@@ -124,6 +140,9 @@ public class BlockEntityPistonMixins extends TileEntity implements IBlockEntityP
     
     public long getLastTicked() {
         return this.last_ticked;
+    }
+    public void setLastTicked(long time) {
+        this.last_ticked = time;
     }
     
     @Overwrite

@@ -36,7 +36,7 @@ import zero.test.IBlockEntityPistonMixins;
 #define PISTON_PRINT_DEBUGGING 1
 
 #if PISTON_PRINT_DEBUGGING
-#define PISTON_DEBUG(...) AddonHandler.logMessage(__VA_ARGS__)
+#define PISTON_DEBUG(...) if (!world.isRemote) AddonHandler.logMessage(__VA_ARGS__)
 #else
 #define PISTON_DEBUG(...)
 #endif
@@ -792,45 +792,47 @@ public abstract class PistonMixins MACRO_IF(MACRO_IS_1(ENABLE_MOVING_BLOCK_CHAIN
     }
     
     private static final int PISTON_EVENT_EXTENDING = 0;
-    private static final int PISTON_EVENT_RETRACTING = 1;
-    private static final int PISTON_EVENT_IDK = 2;
+    private static final int PISTON_EVENT_RETRACTING_NORMAL = 1;
+    private static final int PISTON_EVENT_RETRACTING_ZERO_TICK = 2;
     
     //@Override
     protected void updatePistonState(World world, int X, int Y, int Z) {
-        int meta = world.getBlockMetadata(X, Y, Z);
-        int direction = READ_META_FIELD(meta, DIRECTION);
-        
-        // Why does the 1.5 code check for 7?
-        if (direction != 7) {
-            boolean is_powered = ((IPistonBaseAccessMixins)(Object)this).callIsIndirectlyPowered(world, X, Y, Z, direction);
-            if (is_powered != READ_META_FIELD(meta, EXTENDED)) {
-                if (is_powered) {
-                    // CRAP, canExtend is used here...
-                    if (canExtend(world, X, Y, Z, direction)) {
-                        world.addBlockEvent(X, Y, Z, this.blockID, PISTON_EVENT_EXTENDING, direction);
-                    }
-                } else {
-                    
-                    int nextX = X + Facing.offsetsXForSide[direction] * 2;
-                    int nextY = Y + Facing.offsetsYForSide[direction] * 2;
-                    int nextZ = Z + Facing.offsetsZForSide[direction] * 2;
-                    int next_block_id = world.getBlockId(nextX, nextY, nextZ);
-                    TileEntity tile_entity;
-                    if (
-                        next_block_id == Block.pistonMoving.blockID &&
-                        (tile_entity = world.getBlockTileEntity(nextX, nextY, nextZ)) instanceof TileEntityPiston &&
-                        ((TileEntityPiston)tile_entity).getPistonOrientation() == direction &&
-                        ((TileEntityPiston)tile_entity).isExtending() &&
-                        (
-                            ((TileEntityPiston)tile_entity).getProgress(0.0f) < 0.5f ||
-                            world.getTotalWorldTime() == ((IBlockEntityPistonMixins)tile_entity).getLastTicked()
-                            // something about "handling tick"?
-                        )
-                    ) {
-                        world.addBlockEvent(X, Y, Z, this.blockID, PISTON_EVENT_IDK, direction);
+        if (!world.isRemote) {
+            int meta = world.getBlockMetadata(X, Y, Z);
+            int direction = READ_META_FIELD(meta, DIRECTION);
+            
+            // Why does the 1.5 code check for 7?
+            if (direction != 7) {
+                boolean is_powered = ((IPistonBaseAccessMixins)(Object)this).callIsIndirectlyPowered(world, X, Y, Z, direction);
+                if (is_powered != READ_META_FIELD(meta, EXTENDED)) {
+                    if (is_powered) {
+                        // CRAP, canExtend is used here...
+                        if (canExtend(world, X, Y, Z, direction)) {
+                            world.addBlockEvent(X, Y, Z, this.blockID, PISTON_EVENT_EXTENDING, direction);
+                        }
                     } else {
-                        //world.setBlockMetadataWithNotify(X, Y, Z, direction, UPDATE_CLIENTS);
-                        world.addBlockEvent(X, Y, Z, this.blockID, PISTON_EVENT_RETRACTING, direction);
+                        
+                        int nextX = X + Facing.offsetsXForSide[direction] * 2;
+                        int nextY = Y + Facing.offsetsYForSide[direction] * 2;
+                        int nextZ = Z + Facing.offsetsZForSide[direction] * 2;
+                        int next_block_id = world.getBlockId(nextX, nextY, nextZ);
+                        TileEntity tile_entity;
+                        if (
+                            next_block_id == Block.pistonMoving.blockID &&
+                            (tile_entity = world.getBlockTileEntity(nextX, nextY, nextZ)) instanceof TileEntityPiston &&
+                            ((TileEntityPiston)tile_entity).getPistonOrientation() == direction &&
+                            ((TileEntityPiston)tile_entity).isExtending() &&
+                            (
+                                ((TileEntityPiston)tile_entity).getProgress(0.0f) < 0.5f ||
+                                world.getTotalWorldTime() == ((IBlockEntityPistonMixins)tile_entity).getLastTicked()
+                                // something about "handling tick"?
+                            )
+                        ) {
+                            world.addBlockEvent(X, Y, Z, this.blockID, PISTON_EVENT_RETRACTING_ZERO_TICK, direction);
+                        } else {
+                            //world.setBlockMetadataWithNotify(X, Y, Z, direction, UPDATE_CLIENTS);
+                            world.addBlockEvent(X, Y, Z, this.blockID, PISTON_EVENT_RETRACTING_NORMAL, direction);
+                        }
                     }
                 }
             }
@@ -839,14 +841,13 @@ public abstract class PistonMixins MACRO_IF(MACRO_IS_1(ENABLE_MOVING_BLOCK_CHAIN
     
     //@Override
     public boolean onBlockEventReceived(World world, int X, int Y, int Z, int event_type, int direction) {
-        PISTON_DEBUG("===== PistonCoords ("+X+" "+Y+" "+Z+")");
         if (!world.isRemote) {
             boolean is_powered = ((IPistonBaseAccessMixins)(Object)this).callIsIndirectlyPowered(world, X, Y, Z, direction);
             if (
                 is_powered &&
                 (
-                    event_type == PISTON_EVENT_RETRACTING ||
-                    event_type == PISTON_EVENT_IDK
+                    event_type == PISTON_EVENT_RETRACTING_NORMAL ||
+                    event_type == PISTON_EVENT_RETRACTING_ZERO_TICK
                 )
             ) {
                 world.setBlockMetadataWithNotify(X, Y, Z, MERGE_META_FIELD(direction, EXTENDED, true), UPDATE_CLIENTS);
@@ -856,11 +857,12 @@ public abstract class PistonMixins MACRO_IF(MACRO_IS_1(ENABLE_MOVING_BLOCK_CHAIN
                 return false;
             }
         }
+        PISTON_DEBUG("===== PistonCoords ("+X+" "+Y+" "+Z+")");
         switch (event_type) {
             default:
                 return true;
             case PISTON_EVENT_EXTENDING: // Extend
-                //PISTON_DEBUG("Case PISTON_EVENT_EXTENDING");
+                PISTON_DEBUG("Case PISTON_EVENT_EXTENDING");
                 if (!this.moveBlocks(world, X, Y, Z, direction, true)) {
                     return false;
                 }
@@ -868,8 +870,8 @@ public abstract class PistonMixins MACRO_IF(MACRO_IS_1(ENABLE_MOVING_BLOCK_CHAIN
                 world.setBlockMetadataWithNotify(X, Y, Z, MERGE_META_FIELD(direction, EXTENDED, true), UPDATE_NEIGHBORS | UPDATE_CLIENTS | UPDATE_SUPPRESS_DROPS | UPDATE_MOVE_BY_PISTON);
                 world.playSoundEffect((double)X + 0.5D, (double)Y + 0.5D, (double)Z + 0.5D, "tile.piston.out", 0.5F, world.rand.nextFloat() * 0.25F + 0.6F);
                 return true;
-            case PISTON_EVENT_RETRACTING: case PISTON_EVENT_IDK: // Retract
-                //PISTON_DEBUG("Case PISTON_EVENT_RETRACTING");
+            case PISTON_EVENT_RETRACTING_NORMAL: case PISTON_EVENT_RETRACTING_ZERO_TICK: // Retract
+                PISTON_DEBUG("Case PISTON_EVENT_RETRACTING "+event_type);
                 int nextX = X + Facing.offsetsXForSide[direction];
                 int nextY = Y + Facing.offsetsYForSide[direction];
                 int nextZ = Z + Facing.offsetsZForSide[direction];
@@ -904,7 +906,7 @@ public abstract class PistonMixins MACRO_IF(MACRO_IS_1(ENABLE_MOVING_BLOCK_CHAIN
                                 }
                             }
                         }
-                        if (event_type == PISTON_EVENT_RETRACTING) {
+                        if (event_type == PISTON_EVENT_RETRACTING_NORMAL) {
                             Block next_block = Block.blocksList[next_block_id];
                             if (
                                 !BLOCK_IS_AIR(next_block) &&

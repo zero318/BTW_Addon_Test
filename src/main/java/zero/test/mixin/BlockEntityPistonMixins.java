@@ -57,13 +57,14 @@ public class BlockEntityPistonMixins extends TileEntity implements IBlockEntityP
         if (!((stored_block)==null)) {
             ((IWorldMixins)self.worldObj).updateFromNeighborShapes(self.xCoord, self.yCoord, self.zCoord, stored_block_id, stored_meta);
         }
+        boolean scanning_tile_entities_temp = ((IWorldAccessMixins)self.worldObj).getScanningTileEntities();
+        ((IWorldAccessMixins)self.worldObj).setScanningTileEntities(true);
         self.worldObj.setBlock(self.xCoord, self.yCoord, self.zCoord, stored_block_id, stored_meta, 0x01 | 0x02);
         if (self.storedTileEntityData != null) {
-   self.restoreBlockTileEntity();
-  }
-        self.worldObj.notifyBlockOfNeighborChange(self.xCoord, self.yCoord, self.zCoord, stored_block_id);
-        if (stored_block_id != this.worldObj.getBlockId(self.xCoord, self.yCoord, self.zCoord)) {
+            worldObj.setBlockTileEntity(self.xCoord, self.yCoord, self.zCoord, TileEntity.createAndLoadEntity(self.storedTileEntityData));
         }
+        self.worldObj.notifyBlockOfNeighborChange(self.xCoord, self.yCoord, self.zCoord, stored_block_id);
+        ((IWorldAccessMixins)self.worldObj).setScanningTileEntities(scanning_tile_entities_temp);
     }
     @Overwrite
     public void clearPistonTileEntity() {
@@ -94,6 +95,9 @@ public class BlockEntityPistonMixins extends TileEntity implements IBlockEntityP
     }
     public long getLastTicked() {
         return this.last_ticked;
+    }
+    public void setLastTicked(long time) {
+        this.last_ticked = time;
     }
     @Overwrite
     private void updatePushedObjects(float par1, float par2) {
