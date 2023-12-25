@@ -8,8 +8,14 @@
     "BlockMixins",
     "ComparatorMixins",
     "PistonMixins",
-    "IPistonBaseMixins",
-    "BlockEntityPistonMixins"
+    "IPistonBaseAccessMixins",
+    "BlockEntityPistonMixins",
+    "IBlockEntityPistonAccessMixins",
+    "SoapMixins",
+    "RedstoneWireMixins",
+    "IRedstoneWireAccessMixins",
+    "BlockPistonExtensionMixins",
+    "BlockPistonMovingMixins"
   ],
   "client": [
     "ZeroTestMixin"

@@ -6,4 +6,7 @@ public class ZeroTestBlocks {
     public static Block observer_block;
     public static Block slime_block;
     public static Block glue_block;
+    public static Block iron_trapdoor;
+    public static Block pull_only_test_block;
+    public static Block dead_coral_fan;
 }

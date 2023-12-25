@@ -32,13 +32,13 @@ public class ObserverBlock extends BuddyBlock {
     }
     
     @Override
-	public boolean triggersBuddy() {
-		return true;
-	}
-    
-    public boolean caresAboutUpdateDirection() {
+    public boolean triggersBuddy() {
         return true;
     }
+    
+    //public boolean caresAboutUpdateDirection() {
+        //return true;
+    //}
     
     @Override
     public void onBlockAdded(World world, int X, int Y, int Z) {
@@ -57,6 +57,7 @@ public class ObserverBlock extends BuddyBlock {
     //        West  10
     //        East  8
     
+    /*
     @Override
     public void onNeighborBlockChange(World world, int X, int Y, int Z, int neighbor_id) {
         int update_direction = GET_UPDATE_DIRECTION(neighbor_id);
@@ -66,50 +67,99 @@ public class ObserverBlock extends BuddyBlock {
             update_direction == UPDATE_DIRECTION_FORCE
         ) {
             if (!READ_META_FIELD(meta, POWERED)) {
-                Block neighborBlock = blocksList[neighbor_id & BLOCK_ID_MASK];
+                Block neighbor_block = blocksList[neighbor_id & BLOCK_ID_MASK];
                 if (
-                    neighborBlock != null &&
-                    !world.isUpdatePendingThisTickForBlock(X, Y, Z, blockID)
+                    neighbor_block != null &&
+                    !world.isUpdateScheduledForBlock(X, Y, Z, blockID)
                 ) {
                     world.scheduleBlockUpdate(X, Y, Z, blockID, 2); 
                 }
             }
         }
     }
+    */
+    
+    @Override
+    public void onNeighborBlockChange(World world, int X, int Y, int Z, int neighbor_id) {
+    }
+    
+    public int updateShape(World world, int X, int Y, int Z, int direction, int meta) {
+        int update_direction = READ_META_FIELD(meta, DIRECTION);
+        if (update_direction == OPPOSITE_DIRECTION(direction)) {
+            if (!world.isUpdateScheduledForBlock(X, Y, Z, this.blockID)) {
+                world.scheduleBlockUpdate(X, Y, Z, this.blockID, 2);
+            }
+        } //else {
+            //AddonHandler.logMessage("Observer fail "+OPPOSITE_DIRECTION(direction)+" != "+update_direction);
+        //}
+        return meta;
+    }
+    
+    @Override
+    public void updateTick(World world, int X, int Y, int Z, Random random) {
+        int meta = world.getBlockMetadata(X, Y, Z);
+        
+        if (READ_META_FIELD(meta, POWERED)) {
+            world.setBlockMetadataWithClient(X, Y, Z, MERGE_META_FIELD(meta, POWERED, false));
+        } else {
+            world.setBlockMetadataWithClient(X, Y, Z, MERGE_META_FIELD(meta, POWERED, true));
+            world.scheduleBlockUpdate(X, Y, Z, this.blockID, 2); 
+        }
+        
+        //notifyNeigborsToFacingOfPowerChange(world, X, Y, Z, READ_META_FIELD(meta, DIRECTION));
+        
+        int direction = READ_META_FIELD(meta, DIRECTION);
+        
+        X += Facing.offsetsXForSide[direction];
+        Y += Facing.offsetsYForSide[direction];
+        Z += Facing.offsetsZForSide[direction];
+        
+        int neighbor_id = world.getBlockId(X, Y, Z);
+        Block neighbor_block = Block.blocksList[neighbor_id];
+        if (!BLOCK_IS_AIR(neighbor_block)) {
+            neighbor_block.onNeighborBlockChange(world, X, Y, Z, this.blockID);
+        }
+        world.notifyBlocksOfNeighborChange(X, Y, Z, this.blockID, OPPOSITE_DIRECTION(direction));
+    }
     
     // This just gets rid of the clicking sound
     @Override
-    public void setBlockRedstoneOn(World world, int i, int j, int k, boolean bOn) {
-    	if (bOn != isRedstoneOn(world, i, j, k) ) {
-	    	int iMetaData = world.getBlockMetadata(i, j, k);
-	    	
-	    	if ( bOn ) {
-	    		iMetaData = iMetaData | 1;
-	    	}
-	    	else {
-	    		iMetaData = iMetaData & (~1);
-	    	}
-	    	
-	        world.setBlockMetadataWithClient( i, j, k, iMetaData );
-	        
-	        // only notify on the output side to prevent weird shit like doors auto-closing when the block
-	        // goes off
-	        
-	        int iFacing = this.getFacing(world, i, j, k);
-	        
-	        notifyNeigborsToFacingOfPowerChange(world, i, j, k, iFacing);
-	        
-	        // the following forces a re-render (for texture change)
-	        
-	        world.markBlockRangeForRenderUpdate( i, j, k, i, j, k );    	
+    public void setBlockRedstoneOn(World world, int X, int Y, int Z, boolean is_activated) {
+        if (is_activated != isRedstoneOn(world, X, Y, Z)) {
+            int meta = world.getBlockMetadata(X, Y, Z);
+            
+            if (is_activated) {
+                meta |= 1;
+            }
+            else {
+                meta &= ~1;
+            }
+            
+            world.setBlockMetadataWithClient(X, Y, Z, meta);
+            
+            // only notify on the output side to prevent weird shit like doors auto-closing when the block
+            // goes off
+            
+            int direction = this.getFacing(world, X, Y, Z);
+            
+            notifyNeigborsToFacingOfPowerChange(world, X, Y, Z, direction);
+            
+            // the following forces a re-render (for texture change)
+            
+            world.markBlockRangeForRenderUpdate(X, Y, Z, X, Y, Z);    	
         }
     }
+    
+    /*@Override
+    public int onPreBlockPlacedByPiston(World world, int X, int Y, int Z, int meta, int direction) {
+        return meta;
+    }*/
     
     // Maybe this will prevent it getting stuck on when moved?
     @Override
     public int adjustMetadataForPistonMove(int meta) {
-		return MERGE_META_FIELD(meta, POWERED, false);
-	}
+        return MERGE_META_FIELD(meta, POWERED, false);
+    }
     
     @Environment(EnvType.CLIENT)
     private Icon texture_back_off;
@@ -125,9 +175,9 @@ public class ObserverBlock extends BuddyBlock {
     @Override
     @Environment(EnvType.CLIENT)
     public void registerIcons(IconRegister register) {
-		super.registerIcons(register);
+        super.registerIcons(register);
 
-		this.texture_back_off = register.registerIcon("observer_back");
+        this.texture_back_off = register.registerIcon("observer_back");
         this.texture_back_on = register.registerIcon("observer_back_on");
         this.texture_front = register.registerIcon("observer_front");
         this.texture_side = register.registerIcon("observer_side");
@@ -137,30 +187,96 @@ public class ObserverBlock extends BuddyBlock {
     @Override
     @Environment(EnvType.CLIENT)
     public Icon getIcon(int side, int meta) {
-		// item render
-        return side == 3 ? this.texture_front : this.blockIcon;
+        // item render
+        //return side == 3 ? this.texture_front : this.blockIcon;
+        /*
+        switch (side) {
+            case DIRECTION_UP:
+                return this.texture_top;
+            case DIRECTION_SOUTH:
+                return this.texture_front;
+            default:
+                return this.texture_side;
+        }
+        */
+        int facing = READ_META_FIELD(meta, DIRECTION);
+        
+        if (facing == side) {
+            return READ_META_FIELD(meta, POWERED)
+                    ? this.texture_back_on
+                    : this.texture_back_off;
+        }
+        if (facing == OPPOSITE_DIRECTION(side)) {
+            return this.texture_front;
+        }
+        
+        if (DIRECTION_AXIS(facing) != AXIS_Y) {
+            return DIRECTION_AXIS(side) == AXIS_Y ? this.texture_top : this.texture_side;
+        }
+        // When facing up, the non-arrow side should be on E/W
+        return DIRECTION_AXIS(side) == AXIS_X ? this.texture_top : this.texture_side;
     }
 
     @Override
     @Environment(EnvType.CLIENT)
-    public Icon getBlockTexture(IBlockAccess blockAccess, int X, int Y, int Z, int side) {
-    	int facing = getFacing(blockAccess, X, Y, Z);
-    	
-    	if (facing == side) {
-            return isRedstoneOn(blockAccess, X, Y, Z)
+    public Icon getBlockTexture(IBlockAccess block_access, int X, int Y, int Z, int side) {
+        return this.getIcon(side, block_access.getBlockMetadata(X, Y, Z));
+        /*
+        int facing = READ_META_FIELD(meta, DIRECTION);
+        
+        if (facing == side) {
+            return READ_META_FIELD(meta, POWERED)
                     ? this.texture_back_on
                     : this.texture_back_off;
-    	}
-        if (facing == (side^1)) {
+        }
+        if (facing == OPPOSITE_DIRECTION(side)) {
             return this.texture_front;
         }
         
-        if (DIRECTION_AXIS(facing) == AXIS_Y) {
-            // When facing up, the non-arrow side should be on E/W
-        } else {
-            
+        if (DIRECTION_AXIS(facing) != AXIS_Y) {
+            return DIRECTION_AXIS(side) == AXIS_Y ? this.texture_top : this.texture_side;
         }
-    	
-    	return blockIcon;
-    }   
+        // When facing up, the non-arrow side should be on E/W
+        return DIRECTION_AXIS(side) == AXIS_X ? this.texture_top : this.texture_side;
+        */
+    }
+    
+    @Override
+    @Environment(EnvType.CLIENT)
+    public boolean renderBlock(RenderBlocks render, int X, int Y, int Z) {
+        // IDK why these rotation values work
+        switch (READ_META_FIELD(render.blockAccess.getBlockMetadata(X, Y, Z), DIRECTION)) {
+            case DIRECTION_DOWN:
+                render.setUVRotateEast(3);
+                render.setUVRotateWest(3);
+                render.setUVRotateNorth(1);
+                render.setUVRotateSouth(2);
+                render.setUVRotateTop(3);
+                render.setUVRotateBottom(3);
+                break;
+            case DIRECTION_UP:
+                render.setUVRotateNorth(2);
+                render.setUVRotateSouth(1);
+                break;
+            case DIRECTION_NORTH:
+                break;
+            case DIRECTION_SOUTH:
+                render.setUVRotateTop(3);
+                render.setUVRotateBottom(3);
+                break;
+            case DIRECTION_WEST:
+                render.setUVRotateTop(2);
+                render.setUVRotateBottom(1);
+                break;
+            default:
+                render.setUVRotateTop(1);
+                render.setUVRotateBottom(2);
+                break;
+        }
+        
+        render.setRenderBounds(0.0, 0.0, 0.0, 1.0, 1.0, 1.0);
+        boolean ret = render.renderStandardBlock(this, X, Y, Z);
+        render.clearUVRotation();
+        return ret;
+    }
 }

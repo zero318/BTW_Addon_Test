@@ -7,6 +7,8 @@ import net.minecraft.src.World;
 
 public interface IWorldMixins {
 #if ENABLE_DIRECTIONAL_UPDATES
-    public void forceNotifyBlockOfNeighborChange(int X, int Y, int Z, int neighbor_id);
+    public void updateNeighbourShapes(int X, int Y, int Z, int flags);
+    
+    public int updateFromNeighborShapes(int X, int Y, int Z, int block_id, int block_meta);
 #endif
 }

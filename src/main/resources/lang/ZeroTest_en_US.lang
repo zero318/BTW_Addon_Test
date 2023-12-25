@@ -2,3 +2,6 @@ tile.cud_block.name=CUD
 tile.observer.name=Observer
 tile.slime_block.name=Slime Block
 tile.glue_block.name=Glue Block
+tile.iron_trapdoor.name=Iron Trapdoor
+tile.pull_only_test_block.name=Pull Only Test Block
+tile.dead_coral_fan.name=Dead Coral Fan

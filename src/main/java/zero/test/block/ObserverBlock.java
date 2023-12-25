@@ -20,10 +20,7 @@ public class ObserverBlock extends BuddyBlock {
         return 2;
     }
     @Override
- public boolean triggersBuddy() {
-  return true;
- }
-    public boolean caresAboutUpdateDirection() {
+    public boolean triggersBuddy() {
         return true;
     }
     @Override
@@ -31,43 +28,56 @@ public class ObserverBlock extends BuddyBlock {
     }
     @Override
     public void onNeighborBlockChange(World world, int X, int Y, int Z, int neighbor_id) {
-        int update_direction = ((neighbor_id)>>>28);
-        int meta = world.getBlockMetadata(X, Y, Z);
-        if (
-            update_direction == (meta | 1) ||
-            update_direction == 0xD
-        ) {
-            if (!((((meta)&1)!=0))) {
-                Block neighborBlock = blocksList[neighbor_id & 0xFFF];
-                if (
-                    neighborBlock != null &&
-                    !world.isUpdatePendingThisTickForBlock(X, Y, Z, blockID)
-                ) {
-                    world.scheduleBlockUpdate(X, Y, Z, blockID, 2);
-                }
+    }
+    public int updateShape(World world, int X, int Y, int Z, int direction, int meta) {
+        int update_direction = (((meta)>>>1));
+        if (update_direction == ((direction)^1)) {
+            if (!world.isUpdateScheduledForBlock(X, Y, Z, this.blockID)) {
+                world.scheduleBlockUpdate(X, Y, Z, this.blockID, 2);
             }
         }
+        return meta;
     }
     @Override
-    public void setBlockRedstoneOn(World world, int i, int j, int k, boolean bOn) {
-     if (bOn != isRedstoneOn(world, i, j, k) ) {
-      int iMetaData = world.getBlockMetadata(i, j, k);
-      if ( bOn ) {
-       iMetaData = iMetaData | 1;
-      }
-      else {
-       iMetaData = iMetaData & (~1);
-      }
-         world.setBlockMetadataWithClient( i, j, k, iMetaData );
-         int iFacing = this.getFacing(world, i, j, k);
-         notifyNeigborsToFacingOfPowerChange(world, i, j, k, iFacing);
-         world.markBlockRangeForRenderUpdate( i, j, k, i, j, k );
+    public void updateTick(World world, int X, int Y, int Z, Random random) {
+        int meta = world.getBlockMetadata(X, Y, Z);
+        if (((((meta)&1)!=0))) {
+            world.setBlockMetadataWithClient(X, Y, Z, (((meta)&14)));
+        } else {
+            world.setBlockMetadataWithClient(X, Y, Z, (((meta)|1)));
+            world.scheduleBlockUpdate(X, Y, Z, this.blockID, 2);
+        }
+        int direction = (((meta)>>>1));
+        X += Facing.offsetsXForSide[direction];
+        Y += Facing.offsetsYForSide[direction];
+        Z += Facing.offsetsZForSide[direction];
+        int neighbor_id = world.getBlockId(X, Y, Z);
+        Block neighbor_block = Block.blocksList[neighbor_id];
+        if (!((neighbor_block)==null)) {
+            neighbor_block.onNeighborBlockChange(world, X, Y, Z, this.blockID);
+        }
+        world.notifyBlocksOfNeighborChange(X, Y, Z, this.blockID, ((direction)^1));
+    }
+    @Override
+    public void setBlockRedstoneOn(World world, int X, int Y, int Z, boolean is_activated) {
+        if (is_activated != isRedstoneOn(world, X, Y, Z)) {
+            int meta = world.getBlockMetadata(X, Y, Z);
+            if (is_activated) {
+                meta |= 1;
+            }
+            else {
+                meta &= ~1;
+            }
+            world.setBlockMetadataWithClient(X, Y, Z, meta);
+            int direction = this.getFacing(world, X, Y, Z);
+            notifyNeigborsToFacingOfPowerChange(world, X, Y, Z, direction);
+            world.markBlockRangeForRenderUpdate(X, Y, Z, X, Y, Z);
         }
     }
     @Override
     public int adjustMetadataForPistonMove(int meta) {
-  return (((meta)&14));
- }
+        return (((meta)&14));
+    }
     @Environment(EnvType.CLIENT)
     private Icon texture_back_off;
     @Environment(EnvType.CLIENT)
@@ -81,8 +91,8 @@ public class ObserverBlock extends BuddyBlock {
     @Override
     @Environment(EnvType.CLIENT)
     public void registerIcons(IconRegister register) {
-  super.registerIcons(register);
-  this.texture_back_off = register.registerIcon("observer_back");
+        super.registerIcons(register);
+        this.texture_back_off = register.registerIcon("observer_back");
         this.texture_back_on = register.registerIcon("observer_back_on");
         this.texture_front = register.registerIcon("observer_front");
         this.texture_side = register.registerIcon("observer_side");
@@ -91,23 +101,59 @@ public class ObserverBlock extends BuddyBlock {
     @Override
     @Environment(EnvType.CLIENT)
     public Icon getIcon(int side, int meta) {
-        return side == 3 ? this.texture_front : this.blockIcon;
+        int facing = (((meta)>>>1));
+        if (facing == side) {
+            return ((((meta)&1)!=0))
+                    ? this.texture_back_on
+                    : this.texture_back_off;
+        }
+        if (facing == ((side)^1)) {
+            return this.texture_front;
+        }
+        if (((facing)&~1) != 0x0) {
+            return ((side)&~1) == 0x0 ? this.texture_top : this.texture_side;
+        }
+        return ((side)&~1) == 0x2 ? this.texture_top : this.texture_side;
     }
     @Override
     @Environment(EnvType.CLIENT)
-    public Icon getBlockTexture(IBlockAccess blockAccess, int X, int Y, int Z, int side) {
-     int facing = getFacing(blockAccess, X, Y, Z);
-     if (facing == side) {
-            return isRedstoneOn(blockAccess, X, Y, Z)
-                    ? this.texture_back_on
-                    : this.texture_back_off;
-     }
-        if (facing == (side^1)) {
-            return this.texture_front;
+    public Icon getBlockTexture(IBlockAccess block_access, int X, int Y, int Z, int side) {
+        return this.getIcon(side, block_access.getBlockMetadata(X, Y, Z));
+    }
+    @Override
+    @Environment(EnvType.CLIENT)
+    public boolean renderBlock(RenderBlocks render, int X, int Y, int Z) {
+        switch ((((render.blockAccess.getBlockMetadata(X, Y, Z))>>>1))) {
+            case 0:
+                render.setUVRotateEast(3);
+                render.setUVRotateWest(3);
+                render.setUVRotateNorth(1);
+                render.setUVRotateSouth(2);
+                render.setUVRotateTop(3);
+                render.setUVRotateBottom(3);
+                break;
+            case 1:
+                render.setUVRotateNorth(2);
+                render.setUVRotateSouth(1);
+                break;
+            case 2:
+                break;
+            case 3:
+                render.setUVRotateTop(3);
+                render.setUVRotateBottom(3);
+                break;
+            case 4:
+                render.setUVRotateTop(2);
+                render.setUVRotateBottom(1);
+                break;
+            default:
+                render.setUVRotateTop(1);
+                render.setUVRotateBottom(2);
+                break;
         }
-        if (((facing)&~1) == 0x0) {
-        } else {
-        }
-     return blockIcon;
+        render.setRenderBounds(0.0, 0.0, 0.0, 1.0, 1.0, 1.0);
+        boolean ret = render.renderStandardBlock(this, X, Y, Z);
+        render.clearUVRotation();
+        return ret;
     }
 }

@@ -1,25 +1,19 @@
 package zero.test.mixin;
-import net.minecraft.src.Block;
-import net.minecraft.src.World;
+import net.minecraft.src.*;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.Shadow;
 import zero.test.IBlockMixins;
+import zero.test.IWorldMixins;
 
 @Mixin(Block.class)
 public class BlockMixins implements IBlockMixins {
+    @Overwrite
+    public boolean hasLargeCenterHardPointToFacing(IBlockAccess block_access, int X, int Y, int Z, int direction, boolean ignore_transparency) {
+  return ((Block)(Object)this).isNormalCube(block_access, X, Y, Z);
+ }
     @Override
-    public boolean getWeakChanges(World world, int X, int Y, int Z, int meta) {
-        return false;
-    }
-    @Override
-    public boolean caresAboutUpdateDirection() {
-        return false;
-    }
-    @Override
-    public boolean isSticky(int X, int Y, int Z, int direction) {
-        return false;
-    }
-    @Override
-    public boolean canStickTo(int X, int Y, int Z, int direction, int neighbor_id) {
-        return true;
+    public int getMobilityFlag(World world, int X, int Y, int Z) {
+        return ((Block)(Object)this).getMobilityFlag();
     }
 }

@@ -14,4 +14,9 @@ public class ZeroTestBlocks {
     public static Block slime_block;
     public static Block glue_block;
 #endif
+    public static Block iron_trapdoor;
+#if ENABLE_PISTON_TEST_BLOCKS
+    public static Block pull_only_test_block;
+    public static Block dead_coral_fan;
+#endif
 }
