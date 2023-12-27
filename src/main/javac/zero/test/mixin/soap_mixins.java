@@ -23,5 +23,9 @@ public class SoapMixins {
     public boolean canBlockBePulledByPiston(World world, int X, int Y, int Z, int direction) {
         return world.getBlockMetadata(X, Y, Z) != AestheticOpaqueBlock.SUBTYPE_SOAP;
     }
+    
+    public boolean canBeStuckTo(World world, int X, int Y, int Z, int direction, int neighbor_id) {
+        return false;
+    }
 #endif
 }

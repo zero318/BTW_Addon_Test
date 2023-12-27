@@ -15,4 +15,7 @@ public class PullOnlyTestBlock extends Block {
     public boolean canBlockBePushedByPiston(World world, int X, int Y, int Z, int direction) {
         return false;
     }
+    public boolean canBeStuckTo(World world, int X, int Y, int Z, int direction, int neighbor_id) {
+        return false;
+    }
 }

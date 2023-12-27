@@ -146,58 +146,108 @@ public class BlockEntityPistonMixins extends TileEntity implements IBlockEntityP
     }
     
     @Overwrite
-    private void updatePushedObjects(float par1, float par2) {
+    private void updatePushedObjects(float progress, float par2) {
         TileEntityPiston self = (TileEntityPiston)(Object)this;
 		boolean extending = self.isExtending();
-        if (extending) {
-			par1 = 1.0F - par1;
-		}
-		else {
-			--par1;
-		}
-                
+        
+        double d = par2;
+        
         int stored_direction = self.getPistonOrientation();
         int stored_block_id = self.getStoredBlockID();
+        boolean is_bouncy = false;
+        boolean is_sticky = false;
+        Block block = Block.blocksList[stored_block_id];
+        if (!BLOCK_IS_AIR(block)) {
+            int stored_meta = self.getBlockMetadata();
+            if (extending) {
+                is_bouncy = ((IBlockMixins)(Object)block).isBouncyWhenMoved(stored_direction, stored_meta);
+            }
+            is_sticky = ((IBlockMixins)(Object)block).isStickyForEntitiesWhenMoved(stored_direction, stored_meta);
+        }
 		
-		AxisAlignedBB var3 = Block.pistonMoving.getAxisAlignedBB(self.worldObj, self.xCoord, self.yCoord, self.zCoord, stored_block_id, par1, stored_direction);
-		
-		if (var3 != null) {
-			List var4 = self.worldObj.getEntitiesWithinAABBExcludingEntity((Entity)null, var3);
+		AxisAlignedBB bounding_box = Block.pistonMoving.getAxisAlignedBB(self.worldObj, self.xCoord, self.yCoord, self.zCoord, stored_block_id, extending ? 1.0f - progress : progress - 1.0f, stored_direction);
+		if (bounding_box != null) {
+			List var4 = self.worldObj.getEntitiesWithinAABBExcludingEntity((Entity)null, bounding_box);
 			
 			if (!var4.isEmpty()) {
-                boolean is_bouncy = false;
-                boolean is_sticky = false;
-                if (extending) {
-                    Block block = Block.blocksList[stored_block_id];
-                    if (!BLOCK_IS_AIR(block)) {
-                        int stored_meta = self.getBlockMetadata();
-                        is_bouncy = ((IBlockMixins)(Object)block).isBouncyWhenMoved(stored_direction, stored_meta);
-                        is_sticky = ((IBlockMixins)(Object)block).isStickyForEntitiesWhenMoved(stored_direction, stored_meta);
-                    }
-                }
                 List pushed_objects = ((IBlockEntityPistonAccessMixins)self).getPushedObjects();
                 
 				pushed_objects.addAll(var4);
 				Iterator var5 = pushed_objects.iterator();
                 
-				
 				while (var5.hasNext()) {
-                    //AddonHandler.logMessage("ENTITY PUSH");
 					Entity entity = (Entity)var5.next();
                     entity.moveEntity(
-                        (double)(par2 * (float)Facing.offsetsXForSide[stored_direction]),
-                        (double)(par2 * (float)Facing.offsetsYForSide[stored_direction]),
-                        (double)(par2 * (float)Facing.offsetsZForSide[stored_direction])
+                        d * (double)Facing.offsetsXForSide[stored_direction],
+                        d * (double)Facing.offsetsYForSide[stored_direction],
+                        d * (double)Facing.offsetsZForSide[stored_direction]
                     );
                     if (is_bouncy) {
-                        entity.motionX += Facing.offsetsXForSide[stored_direction];
-                        entity.motionY += Facing.offsetsYForSide[stored_direction];
-                        entity.motionZ += Facing.offsetsZForSide[stored_direction];
+                        entity.motionX += (double)Facing.offsetsXForSide[stored_direction];
+                        entity.motionY += (double)Facing.offsetsYForSide[stored_direction];
+                        entity.motionZ += (double)Facing.offsetsZForSide[stored_direction];
                     }
 				}
-				
 				pushed_objects.clear();
 			}
 		}
+        float last_progress;
+        if (is_sticky && (last_progress = ((IBlockEntityPistonAccessMixins)self).getLastProgress()) < 1.0f) {
+            //bounding_box = Block.pistonMoving.getAxisAlignedBB(self.worldObj, self.xCoord, self.yCoord, self.zCoord, stored_block_id, extending ? 1.0f - progress : progress - 1.0f, stored_direction);
+            
+            bounding_box = block.getAsPistonMovingBoundingBox(self.worldObj, self.xCoord - Facing.offsetsXForSide[stored_direction], self.yCoord - Facing.offsetsYForSide[stored_direction], self.zCoord - Facing.offsetsZForSide[stored_direction]);
+            
+            double progress_offset = (stored_direction & 1) == 0 ? -last_progress : last_progress;
+            switch (stored_direction) {
+                case DIRECTION_DOWN: case DIRECTION_UP:
+                    bounding_box.minX = Math.floor(bounding_box.minX);
+                    bounding_box.minY += progress_offset;
+                    bounding_box.minZ = Math.floor(bounding_box.minZ);
+                    bounding_box.maxX = Math.ceil(bounding_box.maxX);
+                    bounding_box.maxY += progress_offset;
+                    bounding_box.maxZ = Math.ceil(bounding_box.maxZ);
+                    break;
+                case DIRECTION_NORTH: case DIRECTION_SOUTH:
+                    bounding_box.minX = Math.floor(bounding_box.minX);
+                    bounding_box.minY = Math.floor(bounding_box.minY);
+                    bounding_box.minZ += progress_offset;
+                    bounding_box.maxX = Math.ceil(bounding_box.maxX);
+                    bounding_box.maxY = Math.ceil(bounding_box.maxY);
+                    bounding_box.maxZ += progress_offset;
+                    break;
+                default:
+                    bounding_box.minX += progress_offset;
+                    bounding_box.minY = Math.floor(bounding_box.minY);
+                    bounding_box.minZ = Math.floor(bounding_box.minZ);
+                    bounding_box.maxX += progress_offset;
+                    bounding_box.maxY = Math.ceil(bounding_box.maxY);
+                    bounding_box.maxZ = Math.ceil(bounding_box.maxZ);
+                    break;
+            }
+            List var4 = self.worldObj.getEntitiesWithinAABBExcludingEntity((Entity)null, bounding_box);
+            
+            if (!self.worldObj.isRemote) {
+                AddonHandler.logMessage(""+self.worldObj.getTotalWorldTime()+" "+progress+" "+last_progress+" "+d);
+                AddonHandler.logMessage(" "+bounding_box.minX+" "+bounding_box.minY+" "+bounding_box.minZ);
+                AddonHandler.logMessage(" "+bounding_box.maxX+" "+bounding_box.maxY+" "+bounding_box.maxZ);
+            }
+			
+			if (!var4.isEmpty()) {
+                List pushed_objects = ((IBlockEntityPistonAccessMixins)self).getPushedObjects();
+                
+				pushed_objects.addAll(var4);
+				Iterator var5 = pushed_objects.iterator();
+                
+                d = progress - last_progress;
+				while (var5.hasNext()) {
+                    ((Entity)var5.next()).moveEntity(
+                        d * (double)Facing.offsetsXForSide[stored_direction],
+                        d * (double)Facing.offsetsYForSide[stored_direction],
+                        d * (double)Facing.offsetsZForSide[stored_direction]
+                    );
+				}
+				pushed_objects.clear();
+			}
+        }
 	}
 }

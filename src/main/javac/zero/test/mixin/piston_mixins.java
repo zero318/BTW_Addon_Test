@@ -33,7 +33,7 @@ import zero.test.IBlockEntityPistonMixins;
 #define EXTENDED_META_BITS 1
 #define EXTENDED_META_IS_BOOL true
 
-#define PISTON_PRINT_DEBUGGING 1
+#define PISTON_PRINT_DEBUGGING 0
 
 #if PISTON_PRINT_DEBUGGING
 #define PISTON_DEBUG(...) if (!world.isRemote) AddonHandler.logMessage(__VA_ARGS__)
@@ -61,132 +61,6 @@ public abstract class PistonMixins MACRO_IF(MACRO_IS_1(ENABLE_MOVING_BLOCK_CHAIN
     
     @Shadow
     protected abstract void onShovelEjectIntoBlock(World world, int X, int Y, int Z);
-    
-    @Overwrite
-    public boolean canExtend(World world, int X, int Y, int Z, int direction) {
-        int pushes_remaining = PISTON_PUSH_LIMIT;
-        do {
-            X += Facing.offsetsXForSide[direction];
-            Y += Facing.offsetsYForSide[direction];
-            Z += Facing.offsetsZForSide[direction];
-            if (!IS_VALID_BLOCK_Y_POS(Y)) {
-                return false;
-            }
-            Block next_block = Block.blocksList[world.getBlockId(X, Y, Z)];
-            if (next_block == null) {
-                return true;
-            }
-            if (!next_block.canBlockBePushedByPiston(world, X, Y, Z, direction)) {
-                return false;
-            }
-            if (
-                next_block.getMobilityFlag() == PISTON_CAN_BREAK ||
-                getPistonShovelEjectionDirection(world, X, Y, Z, direction) >= 0
-            ) {
-                return true;
-            }
-        } while (--pushes_remaining >= 0);
-        return false;
-    }
-    
-    @Overwrite
-    public boolean tryExtend(World world, int X, int Y, int Z, int direction) {
-        int nextX = X;
-        int nextY = Y;
-        int nextZ = Z;
-        
-        int tempX;
-        int tempY;
-        int tempZ;
-        
-        
-        goto_block(invalid_block) {
-            int pushes_remaining = PISTON_PUSH_LIMIT;
-            do {
-                nextX += Facing.offsetsXForSide[direction];
-                nextY += Facing.offsetsYForSide[direction];
-                nextZ += Facing.offsetsZForSide[direction];
-                if (!IS_VALID_BLOCK_Y_POS(nextY)) {
-                    return false;
-                }
-                int next_block_id = world.getBlockId(nextX, nextY, nextZ);
-                Block next_block = Block.blocksList[next_block_id];
-                if (next_block == null) {
-                    goto(invalid_block);
-                }
-                if (!next_block.canBlockBePushedByPiston(world, nextX, nextY, nextZ, direction)) {
-                    return false;
-                }
-                if (next_block.getMobilityFlag() == PISTON_CAN_BREAK) {
-                    next_block.onBrokenByPistonPush(world, nextX, nextY, nextZ, world.getBlockMetadata(nextX, nextY, nextZ));
-                    break;
-                }
-                int shovel_direction = getPistonShovelEjectionDirection(world, nextX, nextY, nextZ, direction);
-                if (shovel_direction >= 0) {
-                    int shoveling_meta = next_block.adjustMetadataForPistonMove(world.getBlockMetadata(nextX, nextY, nextZ));
-                    tempX = nextX + Facing.offsetsXForSide[shovel_direction];
-                    tempY = nextY + Facing.offsetsYForSide[shovel_direction];
-                    tempZ = nextZ + Facing.offsetsZForSide[shovel_direction];
-                    
-                    onShovelEjectIntoBlock(world, tempX, tempY, tempZ);
-                    
-                    world.setBlock(tempX, tempY, tempZ, Block.pistonMoving.blockID, shoveling_meta, UPDATE_INVISIBLE);
-                    
-                    world.setBlockTileEntity(tempX, tempY, tempZ, PistonBlockMoving.getShoveledTileEntity(next_block_id, shoveling_meta, shovel_direction));
-                    break;
-                }
-            } while (--pushes_remaining >= 0);
-            
-            world.setBlockToAir(nextX, nextY, nextZ);
-        } goto_target(invalid_block);
-        
-        int currentX = nextX;
-        int currentY = nextY;
-        int currentZ = nextZ;
-        
-        int[] block_list = new int[13];
-        int block_index = 0;
-        do {
-            tempX = currentX - Facing.offsetsXForSide[direction];
-            tempY = currentY - Facing.offsetsYForSide[direction];
-            tempZ = currentZ - Facing.offsetsZForSide[direction];
-            int moving_block_id = world.getBlockId(tempX, tempY, tempZ);
-            NBTTagCompound block_entity_nbt = PistonBlockBase.getBlockTileEntityData(world, tempX, tempY, tempZ);
-            world.removeBlockTileEntity(tempX, tempY, tempZ);
-            if (
-                moving_block_id == ((PistonBlockBase)(Object)this).blockID &&
-                tempX == X && tempY == Y && tempZ == Z
-            ) {
-                world.setBlock(currentX, currentY, currentZ, Block.pistonMoving.blockID, direction | (this.isSticky ? 8 : 0), UPDATE_INVISIBLE);
-                world.setBlockTileEntity(currentX, currentY, currentZ, BlockPistonMoving.getTileEntity(Block.pistonExtension.blockID, direction | (this.isSticky ? 8 : 0), direction, true, false));
-            } else {
-                int moving_meta = world.getBlockMetadata(tempX, tempY, tempZ);
-                Block moving_block = Block.blocksList[moving_block_id];
-                if (moving_block != null) {
-                    moving_meta = moving_block.adjustMetadataForPistonMove(moving_meta);
-                }
-                world.setBlock(currentX, currentY, currentZ, Block.pistonMoving.blockID, moving_meta, UPDATE_INVISIBLE);
-                world.setBlockTileEntity(currentX, currentY, currentZ, BlockPistonMoving.getTileEntity(moving_block_id, moving_meta, direction, true, false));
-                if (block_entity_nbt != null) {
-                    ((TileEntityPiston)world.getBlockTileEntity(currentX, currentY, currentZ)).storeTileEntity(block_entity_nbt);
-                }
-            }
-            block_list[block_index++] = moving_block_id;
-            
-            currentX = tempX;
-            currentY = tempY;
-            currentZ = tempZ;
-        } while (currentX != X || currentY != Y || currentZ != Z);
-        
-        block_index = 0;
-        do {
-            nextX -= Facing.offsetsXForSide[direction];
-            nextY -= Facing.offsetsYForSide[direction];
-            nextZ -= Facing.offsetsZForSide[direction];
-            world.notifyBlocksOfNeighborChange(nextX, nextY, nextZ, block_list[block_index++]);
-        } while (nextX != X || nextY != Y || nextZ != Z);
-        return true;
-    }
 
 #pragma push_macro("PISTON_PUSH_LIMIT")
 #undef PISTON_PUSH_LIMIT
@@ -196,76 +70,83 @@ public abstract class PistonMixins MACRO_IF(MACRO_IS_1(ENABLE_MOVING_BLOCK_CHAIN
 #undef PISTON_PUSH_LIMIT
 
     /*
-        Shovel list:
-            Contains XYZ coordinates being ejected into by shovels
 
         Push list:
             Contains XYZ coordinates of blocks being moved
-
+        
         Destroy list:
             Contains XYZ coordinates of blocks being destroyed
         
-        Shovel ID list:
-            Contains the block IDs of blocks being shoveled.
-            Indices correspond to the shovel list.
-                        
-        Push block ID list:
-            Contains the block IDs of blocks being moved.
+        Shovel eject list:
+            Contains XYZ coordinates being ejected into by shovels
+        
+        Shovel list:
+            Contains XYZ coordinates blocks being shoveled.
+            Indexed separately from the eject list since
+            multiple blocks can be ejected towards the same place
+        
+        Push block state list:
+            Contains the block IDs/meta of blocks being moved.
             Indices correspond to the push list.
             Exists so that neighbor updates can still
             recieve correct IDs after moving pistons
             have been created.
-                            
-        Destroy block ID list:
-            Contains the block IDs of blocks being destroyed.
+        
+        Destroy block state list:
+            Contains the block IDs/meta of blocks being destroyed.
             Indices correspond to the destroy list.
             Exists so that neighbor updates can still
             recieve correct IDs after moving pistons
             have been created.
-            
+        
+        Shovel block state list:
+            Contains the block IDs/meta of blocks being shoveled.
+            Indices correspond to the shovel list.
+        
         Shovel direction list:
             Contains the ejection directions of blocks being shoveled.
-            Indices correspond to the shovel list.
-            
-        Shovel meta list:
-            Contains the metadata values of blocks being shoveled.
             Indices correspond to the shovel list.
     
     */
     
     private static final int PUSH_LIST_LENGTH = PISTON_PUSH_LIMIT;
-    private static final int SHOVEL_LIST_LENGTH = PUSH_LIST_LENGTH;
     private static final int DESTROY_LIST_LENGTH = PUSH_LIST_LENGTH;
+    private static final int SHOVEL_EJECT_LIST_LENGTH = PUSH_LIST_LENGTH;
+    private static final int SHOVEL_LIST_LENGTH = PUSH_LIST_LENGTH;
 
-    private static final int SHOVEL_LIST_START_INDEX = 0;
-    private static final int PUSH_LIST_START_INDEX = SHOVEL_LIST_START_INDEX + SHOVEL_LIST_LENGTH;
+    private static final int PUSH_LIST_START_INDEX = 0;
     private static final int DESTROY_LIST_START_INDEX = PUSH_LIST_START_INDEX + PUSH_LIST_LENGTH;
+    private static final int SHOVEL_EJECT_LIST_START_INDEX = DESTROY_LIST_START_INDEX + DESTROY_LIST_LENGTH;
+    private static final int SHOVEL_LIST_START_INDEX = SHOVEL_EJECT_LIST_START_INDEX + SHOVEL_EJECT_LIST_LENGTH;
     
-    private static final int SHOVEL_BLOCK_ID_LIST_LENGTH = SHOVEL_LIST_LENGTH;
-    private static final int PUSH_BLOCK_ID_LIST_LENGTH = PUSH_LIST_LENGTH;
-    private static final int DESTROY_BLOCK_ID_LIST_LENGTH = DESTROY_LIST_LENGTH;
+    private static final int SHOVEL_LIST_OFFSET = SHOVEL_EJECT_LIST_LENGTH;
+    
+    private static final int PUSH_BLOCK_STATE_LIST_LENGTH = PUSH_LIST_LENGTH;
+    private static final int DESTROY_BLOCK_STATE_LIST_LENGTH = DESTROY_LIST_LENGTH;
+    private static final int SHOVEL_BLOCK_STATE_LIST_LENGTH = SHOVEL_LIST_LENGTH;
     private static final int SHOVEL_DIRECTION_LIST_LENGTH = SHOVEL_LIST_LENGTH;
-    private static final int SHOVEL_BLOCK_META_LIST_LENGTH = SHOVEL_LIST_LENGTH;
     
-    private static final int SHOVEL_BLOCK_ID_LIST_START_INDEX = 0;
-    private static final int PUSH_BLOCK_ID_LIST_START_INDEX = SHOVEL_BLOCK_ID_LIST_START_INDEX + SHOVEL_BLOCK_ID_LIST_LENGTH;
-    private static final int DESTROY_BLOCK_ID_LIST_START_INDEX = PUSH_BLOCK_ID_LIST_START_INDEX + PUSH_BLOCK_ID_LIST_LENGTH;
-    private static final int SHOVEL_DIRECTION_LIST_START_INDEX = DESTROY_BLOCK_ID_LIST_START_INDEX + DESTROY_BLOCK_ID_LIST_LENGTH;
-    private static final int SHOVEL_BLOCK_META_LIST_START_INDEX = SHOVEL_DIRECTION_LIST_START_INDEX + SHOVEL_DIRECTION_LIST_LENGTH;
+    private static final int PUSH_BLOCK_STATE_LIST_START_INDEX = 0;
+    private static final int DESTROY_BLOCK_STATE_LIST_START_INDEX = PUSH_BLOCK_STATE_LIST_START_INDEX + PUSH_BLOCK_STATE_LIST_LENGTH;
+    private static final int SHOVEL_BLOCK_STATE_LIST_START_INDEX = DESTROY_BLOCK_STATE_LIST_START_INDEX + DESTROY_BLOCK_STATE_LIST_LENGTH;
+    private static final int SHOVEL_DIRECTION_LIST_START_INDEX = SHOVEL_BLOCK_STATE_LIST_START_INDEX + SHOVEL_BLOCK_STATE_LIST_LENGTH;
+    
+    private static final int SHOVEL_BLOCK_STATE_LIST_OFFSET = 0;
+    private static final int SHOVEL_DIRECTION_LIST_OFFSET = SHOVEL_BLOCK_STATE_LIST_LENGTH;
 
     
     // The destroy list can't be longer than the push list, right?
     // TODO: TEST THIS ASSUMPTION
-    private static long[] pushed_blocks = new long[SHOVEL_LIST_LENGTH + PUSH_LIST_LENGTH + DESTROY_LIST_LENGTH];
-    private static int[] data_list = new int[SHOVEL_BLOCK_ID_LIST_LENGTH + PUSH_BLOCK_ID_LIST_LENGTH + DESTROY_BLOCK_ID_LIST_LENGTH + SHOVEL_DIRECTION_LIST_LENGTH + SHOVEL_BLOCK_META_LIST_LENGTH];
+    private static final long[] pushed_blocks = new long[PUSH_LIST_LENGTH + DESTROY_LIST_LENGTH + SHOVEL_EJECT_LIST_LENGTH + SHOVEL_LIST_LENGTH];
+    private static final int[] data_list = new int[PUSH_BLOCK_STATE_LIST_LENGTH + DESTROY_BLOCK_STATE_LIST_LENGTH + SHOVEL_BLOCK_STATE_LIST_LENGTH + SHOVEL_DIRECTION_LIST_LENGTH];
 
     // Position of the piston 
     private static long piston_position;
     
     // Becase screw java and by value semantics
     private static int push_index_global;
-    private static int shovel_index_global;
     private static int destroy_index_global;
+    private static int shovel_index_global;
     
     // This is only called in situations when the
     // current block is known to not be air
@@ -274,14 +155,16 @@ public abstract class PistonMixins MACRO_IF(MACRO_IS_1(ENABLE_MOVING_BLOCK_CHAIN
     // which cancels all movement.
     // Returns true otherwise.
     protected boolean add_branch(World world, int X, int Y, int Z, int direction) {
+        // This could be pulled from the static lists if an index was passed in
         int block_id = world.getBlockId(X, Y, Z);
         Block block = Block.blocksList[block_id];
         PISTON_DEBUG("Branching Block ("+X+" "+Y+" "+Z+")"+direction);
         
-        for (int facing = 0; facing < 6; ++facing) {
-            PISTON_DEBUG("Facing/Direction ("+facing+"/"+direction+") ("+DIRECTION_AXIS(facing)+"/"+DIRECTION_AXIS(direction)+")");
+        int facing = 0;
+        do {
+            //PISTON_DEBUG("Facing/Direction ("+facing+"/"+direction+") ("+DIRECTION_AXIS(facing)+"/"+DIRECTION_AXIS(direction)+")");
             if (DIRECTION_AXIS(facing) != DIRECTION_AXIS(direction)) {
-                PISTON_DEBUG("Adding branch "+facing);
+                //PISTON_DEBUG("Adding branch "+facing);
                 if (((IBlockMixins)block).isStickyForBlocks(world, X, Y, Z, facing)) {
                     int nextX = X + Facing.offsetsXForSide[facing];
                     int nextY = Y + Facing.offsetsYForSide[facing];
@@ -289,18 +172,18 @@ public abstract class PistonMixins MACRO_IF(MACRO_IS_1(ENABLE_MOVING_BLOCK_CHAIN
                     Block neighbor_block = Block.blocksList[world.getBlockId(nextX, nextY, nextZ)];
                     if (
                         !BLOCK_IS_AIR(neighbor_block) &&
-                        ((IBlockMixins)neighbor_block).canStickTo(world, nextX, nextY, nextZ, facing, block_id) &&
+                        ((IBlockMixins)neighbor_block).canBeStuckTo(world, nextX, nextY, nextZ, facing, block_id) &&
                         !this.add_moved_block(world, nextX, nextY, nextZ, direction)
                     ) {
                         return false;
                     }
                 }
             }
-        }
+        } while (++facing < 6);
         return true;
     }
 
-
+    // TODO: Make this less naive
     protected int gcd(int A, int B) {
         return B == 0 ? A : gcd(B, A % B);
     }
@@ -328,7 +211,7 @@ public abstract class PistonMixins MACRO_IF(MACRO_IS_1(ENABLE_MOVING_BLOCK_CHAIN
                 // sticky blocks, blocks that can't be pulled need
                 // to be detected separately. Vanilla solves this by
                 // having a more complicated implementation of pushing
-                // logic, but 
+                // logic.
                 ((IBlockMixins)block).getMobilityFlag(world, X, Y, Z) != PISTON_CAN_PUSH_ONLY &&
                 !block.canBlockBePulledByPiston(world, X, Y, Z, direction)
             )
@@ -344,11 +227,22 @@ public abstract class PistonMixins MACRO_IF(MACRO_IS_1(ENABLE_MOVING_BLOCK_CHAIN
         int push_index = push_index_global;
         
         // This replaces toPush.contains
-        for (int i = PUSH_LIST_START_INDEX; i < push_index; ++i) {
+        for (int i = push_index; --i >= PUSH_LIST_START_INDEX;) {
             if (pushed_blocks[i] == packed_pos) {
                 return true;
             }
         }
+        // START SHOVEL CODE
+        // Don't push blocks that're already
+        // getting shoveled. This helps prevent
+        // duping blocks when slime tries
+        // to push a block in front of a shovel.
+        for (int i = shovel_index_global + SHOVEL_LIST_OFFSET; --i >= SHOVEL_LIST_START_INDEX;) {
+            if (pushed_blocks[i] == packed_pos) {
+                return true;
+            }
+        }
+        // END SHOVEL CODE
         
         int push_write_index = push_index;
         
@@ -357,6 +251,7 @@ public abstract class PistonMixins MACRO_IF(MACRO_IS_1(ENABLE_MOVING_BLOCK_CHAIN
         int nextX = X;
         int nextY = Y;
         int nextZ = Z;
+        long next_packed_pos = packed_pos;
         int next_block_id = block_id;
         Block next_block = block;
         
@@ -365,10 +260,11 @@ public abstract class PistonMixins MACRO_IF(MACRO_IS_1(ENABLE_MOVING_BLOCK_CHAIN
             PISTON_DEBUG("StickySearch ("+nextX+" "+nextY+" "+nextZ+")");
             
             // Check the push limit
-            if (++push_write_index == (PUSH_LIST_START_INDEX + PUSH_LIST_LENGTH)) {
+            if (push_write_index == (PUSH_LIST_START_INDEX + PUSH_LIST_LENGTH)) {
                 PISTON_DEBUG("Push failed limit reached A");
                 return false;
             }
+            ++push_write_index;
             
             if (!((IBlockMixins)next_block).isStickyForBlocks(world, nextX, nextY, nextZ, direction)) {
                 PISTON_DEBUG("IsSticky false");
@@ -379,14 +275,15 @@ public abstract class PistonMixins MACRO_IF(MACRO_IS_1(ENABLE_MOVING_BLOCK_CHAIN
             int tempX = nextX - Facing.offsetsXForSide[direction];
             int tempY = nextY - Facing.offsetsYForSide[direction];
             int tempZ = nextZ - Facing.offsetsZForSide[direction];
-            if (BLOCK_POS_PACK(tempX, tempY, tempZ) == piston_position) {
+            long temp_packed_pos = BLOCK_POS_PACK(tempX, tempY, tempZ);
+            if (temp_packed_pos == piston_position) {
                 break;
             }
             block_id = world.getBlockId(tempX, tempY, tempZ);
             next_block = Block.blocksList[block_id];
             if (
                 BLOCK_IS_AIR(next_block) ||
-                !((IBlockMixins)next_block).canStickTo(world, tempX, tempY, tempZ, direction, next_block_id) ||
+                !((IBlockMixins)next_block).canBeStuckTo(world, tempX, tempY, tempZ, direction, next_block_id) ||
                 !next_block.canBlockBePulledByPiston(world, tempX, tempY, tempZ, direction)
             ) {
                 break;
@@ -395,6 +292,7 @@ public abstract class PistonMixins MACRO_IF(MACRO_IS_1(ENABLE_MOVING_BLOCK_CHAIN
             nextY = tempY;
             nextZ = tempZ;
             next_block_id = block_id;
+            next_packed_pos = temp_packed_pos;
         }
         
         int push_count = push_write_index - push_index;
@@ -402,51 +300,69 @@ public abstract class PistonMixins MACRO_IF(MACRO_IS_1(ENABLE_MOVING_BLOCK_CHAIN
         // pulled blocks to the push list.
         // Regardless of what the previous loop does,
         // nextX,nextY,nextZ will contain the position
-        // of the furthest away block being moved, which
-        // is potentially the starting block.
+        // of the furthest away block being moved,
+        // next_packed_pos will contain that same position,
+        // and next_block_id will contain the ID of the
+        // block at that position.
+        // This is potentially the starting block.
         do {
             // Index back towards the start
             PISTON_DEBUG("AddPush ("+nextX+" "+nextY+" "+nextZ+")");
-            data_list[push_index] = next_block_id;
-            pushed_blocks[push_index++] = BLOCK_POS_PACK(nextX, nextY, nextZ);
+            data_list[push_index] = BLOCK_STATE_PACK(next_block_id, world.getBlockMetadata(nextX, nextY, nextZ));
+            pushed_blocks[push_index++] = next_packed_pos;
             nextX += Facing.offsetsXForSide[direction];
             nextY += Facing.offsetsYForSide[direction];
             nextZ += Facing.offsetsZForSide[direction];
+            next_packed_pos = BLOCK_POS_PACK(nextX, nextY, nextZ);
             next_block_id = world.getBlockId(nextX, nextY, nextZ);
         } while (push_index != push_write_index);
         
+        PISTON_DEBUG("PushCount "+push_count);
+        
         // This loop handles pushing blocks.
         // X,Y,Z still contain the initial
-        // movement position on entry, block
-        // contains the block at that position,
+        // movement position on entry, packed_pos
+        // still contains the initial position,
+        // block contains the block at that position,
         // nextX,nextY,nextZ contain the position
         // of the first block to check for pushing,
+        // next_packed_pos contains that same position,
         // and next_block_id contains the id of the
         // first block to check for pushing.
         loop {
             push_index_global = push_index;
             PISTON_DEBUG("New push index "+push_index_global);
             PISTON_DEBUG("ParsePush ("+nextX+" "+nextY+" "+nextZ+")");
-            packed_pos = BLOCK_POS_PACK(nextX, nextY, nextZ);
             
+            // This loop must index forwards
             for (int i = PUSH_LIST_START_INDEX; i < push_index; ++i) {
                 // Loop will never continue when this is true
-                if (pushed_blocks[i] == packed_pos) {
-                    // Does this even run? It looks like dead code...
-                    // CRAP IT'S NOT DEAD CODE
-                    // AND IT'S BROKEN
+                if (pushed_blocks[i] == next_packed_pos) {
+                    // This branch handles two
+                    // sticky blocks trying to push
+                    // the same block at once
                     PISTON_DEBUG("Hacky swap code");
+                    //PISTON_DEBUG("Swap stats "+"n3="+push_count+" n4="+i);
                     
-                    // Hacky in place array rotation
+                    //PISTON_DEBUG(""+" "+pushed_blocks[PUSH_LIST_START_INDEX]+" "+pushed_blocks[PUSH_LIST_START_INDEX+1]+" "+pushed_blocks[PUSH_LIST_START_INDEX+2]+" "+pushed_blocks[PUSH_LIST_START_INDEX+3]+" "+pushed_blocks[PUSH_LIST_START_INDEX+4]+" "+pushed_blocks[PUSH_LIST_START_INDEX+5]+" "+pushed_blocks[PUSH_LIST_START_INDEX+6]+" "+pushed_blocks[PUSH_LIST_START_INDEX+7]+" "+pushed_blocks[PUSH_LIST_START_INDEX+8]+" "+pushed_blocks[PUSH_LIST_START_INDEX+9]+" "+pushed_blocks[PUSH_LIST_START_INDEX+10]+" "+pushed_blocks[PUSH_LIST_START_INDEX+11]);
+                    
+                    // WARNING:
+                    // This section requires
+                    // the push list to be first
+                    
+                    // Hacky in place array right rotation
                     // Based on the first suitable thing
                     // I found on Google: https://www.codewhoop.com/array/rotation-in-place.html
-                    int swap_max = gcd(push_index - PUSH_LIST_START_INDEX, push_count) + i;
+                    
+                    int swap_max = push_index - gcd(push_index -= i, push_count);
+                    push_write_index = push_count - i;
+                    
                     for (int j = i; j < swap_max; ++j) {
                         int k = j;
                         block_id = data_list[j];
                         packed_pos = pushed_blocks[j];
                         loop {
-                            int d = (k + push_count) % push_index;
+                            int d = i + (k + push_write_index) % push_index;
                             if (d == j) {
                                 break;
                             }
@@ -457,18 +373,20 @@ public abstract class PistonMixins MACRO_IF(MACRO_IS_1(ENABLE_MOVING_BLOCK_CHAIN
                         data_list[k] = block_id;
                         pushed_blocks[k] = packed_pos;
                     }
+                    i += push_count;
                     
-                    for (int j = PUSH_LIST_START_INDEX; j < i + push_count; ++j) {
+                    //PISTON_DEBUG(""+" "+pushed_blocks[PUSH_LIST_START_INDEX]+" "+pushed_blocks[PUSH_LIST_START_INDEX+1]+" "+pushed_blocks[PUSH_LIST_START_INDEX+2]+" "+pushed_blocks[PUSH_LIST_START_INDEX+3]+" "+pushed_blocks[PUSH_LIST_START_INDEX+4]+" "+pushed_blocks[PUSH_LIST_START_INDEX+5]+" "+pushed_blocks[PUSH_LIST_START_INDEX+6]+" "+pushed_blocks[PUSH_LIST_START_INDEX+7]+" "+pushed_blocks[PUSH_LIST_START_INDEX+8]+" "+pushed_blocks[PUSH_LIST_START_INDEX+9]+" "+pushed_blocks[PUSH_LIST_START_INDEX+10]+" "+pushed_blocks[PUSH_LIST_START_INDEX+11]);
+                    
+                    for (int j = PUSH_LIST_START_INDEX; j < i; ++j) {
                         packed_pos = pushed_blocks[j];
                         BLOCK_POS_UNPACK(packed_pos, X, Y, Z);
                         
-                        block_id = data_list[j];
-                        block = Block.blocksList[block_id];
                         // Vanilla checks stickiness as part of this statement,
                         // but supporting directional stickiness required
                         // moving the check into add_branch
                         if (
-                            !BLOCK_IS_AIR(block) &&
+                            // Air can't be added to the push list,
+                            // so no need to check for that here
                             !this.add_branch(world, X, Y, Z, direction)
                         ) {
                             PISTON_DEBUG("Push failed move block branching ("+X+" "+Y+" "+Z+")");
@@ -486,15 +404,16 @@ public abstract class PistonMixins MACRO_IF(MACRO_IS_1(ENABLE_MOVING_BLOCK_CHAIN
                 return true;
             }
             if (
-                packed_pos == piston_position ||
+                next_packed_pos == piston_position ||
                 !next_block.canBlockBePushedByPiston(world, nextX, nextY, nextZ, direction)
             ) {
                 PISTON_DEBUG("Push failed move block IDK ("+nextX+" "+nextY+" "+nextZ+")");
                 return false;
             }
+            int next_block_meta = world.getBlockMetadata(nextX, nextY, nextZ);
             if (next_block.getMobilityFlag() == PISTON_CAN_BREAK) {
-                data_list[destroy_index_global] = next_block_id;
-                pushed_blocks[destroy_index_global++] = packed_pos;
+                data_list[destroy_index_global] = BLOCK_STATE_PACK(next_block_id, next_block_meta);
+                pushed_blocks[destroy_index_global++] = next_packed_pos;
                 return true;
             }
             // START SHOVEL CODE
@@ -517,22 +436,17 @@ public abstract class PistonMixins MACRO_IF(MACRO_IS_1(ENABLE_MOVING_BLOCK_CHAIN
                         packed_pos = BLOCK_POS_PACK(X, Y, Z);
                         goto_block(block_is_shoveled) {
                             // Make sure the ejection block isn't already being used
-                            int i = shovel_index_global;
-                            while (--i >= SHOVEL_LIST_START_INDEX) {
+                            for (int i = shovel_index_global; --i >= SHOVEL_EJECT_LIST_START_INDEX;) {
                                 if (pushed_blocks[i] == packed_pos) {
                                     goto(block_is_shoveled);
                                 }
                             }
-                            data_list[shovel_index_global + SHOVEL_BLOCK_ID_LIST_START_INDEX] = next_block_id;
-                            data_list[shovel_index_global + SHOVEL_DIRECTION_LIST_START_INDEX] = eject_direction;
-                            data_list[shovel_index_global + SHOVEL_BLOCK_META_LIST_START_INDEX] = next_block.adjustMetadataForPistonMove(world.getBlockMetadata(nextX, nextY, nextZ));
+                            data_list[shovel_index_global] = BLOCK_STATE_PACK(next_block_id, next_block_meta);
+                            data_list[shovel_index_global + SHOVEL_DIRECTION_LIST_OFFSET] = eject_direction;
                             
-                            // This prevents duping shoveled blocks.
-                            // TODO: Should this be moved into the lists somehow to
-                            // prevent update order weirdness?
-                            world.setBlock(nextX, nextY, nextZ, 0, 0, UPDATE_INVISIBLE);
-                            
-                            pushed_blocks[shovel_index_global++] = packed_pos;
+                            pushed_blocks[shovel_index_global] = packed_pos;
+                            pushed_blocks[shovel_index_global + SHOVEL_LIST_OFFSET] = next_packed_pos;
+                            ++shovel_index_global;
                             return true;
                         } goto_target(block_is_shoveled);
                     }
@@ -545,20 +459,22 @@ public abstract class PistonMixins MACRO_IF(MACRO_IS_1(ENABLE_MOVING_BLOCK_CHAIN
                 PISTON_DEBUG("Push failed limit reached B");
                 return false;
             }
-            data_list[push_index] = next_block_id;
-            pushed_blocks[push_index++] = packed_pos;
+            data_list[push_index] = BLOCK_STATE_PACK(next_block_id, next_block_meta);
+            pushed_blocks[push_index++] = next_packed_pos;
             ++push_count;
             // Set X,Y,Z to the position of the currently
             // pushed block, since it's now the previous
             X = nextX;
             Y = nextY;
             Z = nextZ;
+            packed_pos = next_packed_pos;
+            block = next_block;
             // Index nextX,nextY,nextZ to the position of
             // the next potential pushed block
             nextX += Facing.offsetsXForSide[direction];
             nextY += Facing.offsetsYForSide[direction];
             nextZ += Facing.offsetsZForSide[direction];
-            block = next_block;
+            next_packed_pos = BLOCK_POS_PACK(nextX, nextY, nextZ);
             next_block_id = world.getBlockId(nextX, nextY, nextZ);
         }
         // unreachable
@@ -582,7 +498,7 @@ public abstract class PistonMixins MACRO_IF(MACRO_IS_1(ENABLE_MOVING_BLOCK_CHAIN
             ) {
                 // Add destroy
                 PISTON_DEBUG("Resolve destroy ("+X+" "+Y+" "+Z+")");
-                data_list[destroy_index_global] = block_id;
+                data_list[destroy_index_global] = BLOCK_STATE_PACK(block_id, world.getBlockMetadata(X, Y, Z));
                 pushed_blocks[destroy_index_global++] = packed_pos;
                 return true;
             }
@@ -601,16 +517,14 @@ public abstract class PistonMixins MACRO_IF(MACRO_IS_1(ENABLE_MOVING_BLOCK_CHAIN
         for (int i = PUSH_LIST_START_INDEX; i < push_index_global; ++i) {
             // Set X,Y,Z to the position of the next block in push list
             packed_pos = pushed_blocks[i];
-            BLOCK_POS_UNPACK(packed_pos, X, Y, Z);
             
-            block_id = data_list[i];
-            block = Block.blocksList[block_id];
+            // Air will never be added to the push list,
+            // so no checks are done for that.
             if (
-                //!BLOCK_IS_AIR(block) &&
                 // Vanilla checks stickiness as part of this statement,
                 // but supporting directional stickiness required
                 // moving the check into add_branch
-                !this.add_branch(world, X, Y, Z, direction)
+                !this.add_branch(world, BLOCK_POS_UNPACK_ARGS(packed_pos), direction)
             ) {
                 PISTON_DEBUG("Push failed branching");
                 return false;
@@ -623,9 +537,9 @@ public abstract class PistonMixins MACRO_IF(MACRO_IS_1(ENABLE_MOVING_BLOCK_CHAIN
         
         // Set initial global values
         piston_position = BLOCK_POS_PACK(X,Y,Z);
-        shovel_index_global = SHOVEL_LIST_START_INDEX;
         push_index_global = PUSH_LIST_START_INDEX;
         destroy_index_global = DESTROY_LIST_START_INDEX;
+        shovel_index_global = SHOVEL_EJECT_LIST_START_INDEX;
         
         X += Facing.offsetsXForSide[direction];
         Y += Facing.offsetsYForSide[direction];
@@ -652,6 +566,7 @@ public abstract class PistonMixins MACRO_IF(MACRO_IS_1(ENABLE_MOVING_BLOCK_CHAIN
         long packed_pos;
         int block_id;
         int block_meta;
+        int block_state;
         Block block;
         
         int i = destroy_index_global;
@@ -662,14 +577,14 @@ public abstract class PistonMixins MACRO_IF(MACRO_IS_1(ENABLE_MOVING_BLOCK_CHAIN
             BLOCK_POS_UNPACK(packed_pos, X, Y, Z);
             
             // Get data about destroyed block
-            block_id = data_list[i];
+            block_state = data_list[i];
+            BLOCK_STATE_UNPACK(block_state, block_id, block_meta);
             block = Block.blocksList[block_id];
-            block_meta = world.getBlockMetadata(X, Y, Z);
+            block_meta = block.adjustMetadataForPistonMove(block_meta);
             
             PISTON_DEBUG("Destroy "+block_id+"."+block_meta+"("+X+" "+Y+" "+Z+")");
             
             block.onBrokenByPistonPush(world, X, Y, Z, block_meta);
-            //world.setBlockToAir(X, Y, Z);
             world.setBlock(X, Y, Z, 0, 0, UPDATE_IMMEDIATE | UPDATE_KNOWN_SHAPE);
         }
         
@@ -682,9 +597,10 @@ public abstract class PistonMixins MACRO_IF(MACRO_IS_1(ENABLE_MOVING_BLOCK_CHAIN
             BLOCK_POS_UNPACK(packed_pos, X, Y, Z);
             
             // Get data about pushed block
-            block_id = data_list[i];
+            block_state = data_list[i];
+            BLOCK_STATE_UNPACK(block_state, block_id, block_meta);
             block = Block.blocksList[block_id];
-            block_meta = world.getBlockMetadata(X, Y, Z);
+            block_meta = block.adjustMetadataForPistonMove(block_meta);
             
             PISTON_DEBUG("Push "+block_id+"."+block_meta+"("+X+" "+Y+" "+Z+")");
             
@@ -694,7 +610,8 @@ public abstract class PistonMixins MACRO_IF(MACRO_IS_1(ENABLE_MOVING_BLOCK_CHAIN
             packed_pos = BLOCK_POS_PACK(X + Facing.offsetsXForSide[direction], Y + Facing.offsetsYForSide[direction], Z + Facing.offsetsZForSide[direction]);
             
             goto_block(coord_will_move) {
-                for (int j = 0; j < i; ++j) {
+                //for (int j = 0; j < i; ++j) {
+                for (int j = i; --j > PUSH_LIST_START_INDEX;) {
                     if (pushed_blocks[j] == packed_pos) {
                         goto(coord_will_move);
                     }
@@ -709,10 +626,6 @@ public abstract class PistonMixins MACRO_IF(MACRO_IS_1(ENABLE_MOVING_BLOCK_CHAIN
             X += Facing.offsetsXForSide[direction];
             Y += Facing.offsetsYForSide[direction];
             Z += Facing.offsetsZForSide[direction];
-            //if (!BLOCK_IS_AIR(block)) {
-                block_meta = block.adjustMetadataForPistonMove(block_meta);
-            //}
-            //world.setBlock(X, Y, Z, Block.pistonMoving.blockID, block_meta, UPDATE_INVISIBLE);
             world.setBlock(X, Y, Z, Block.pistonMoving.blockID, block_meta, UPDATE_IMMEDIATE | UPDATE_SUPPRESS_DROPS | UPDATE_MOVE_BY_PISTON);
             world.setBlockTileEntity(X, Y, Z, BlockPistonMoving.getTileEntity(block_id, block_meta, direction, true, false));
             if (tile_entity_data != null) {
@@ -722,24 +635,24 @@ public abstract class PistonMixins MACRO_IF(MACRO_IS_1(ENABLE_MOVING_BLOCK_CHAIN
         
         // Place a moving piston entity for the head
         if (is_extending) {
-            PISTON_DEBUG("PistonHead "+Block.pistonMoving.blockID+"."+(direction | (this.isSticky ? 8 : 0))+"("+headX+" "+headY+" "+headZ+")");
-            //world.setBlock(headX, headY, headZ, Block.pistonMoving.blockID, direction | (this.isSticky ? 8 : 0), UPDATE_INVISIBLE);
-            world.setBlock(headX, headY, headZ, Block.pistonMoving.blockID, direction | (this.isSticky ? 8 : 0), UPDATE_IMMEDIATE | UPDATE_SUPPRESS_DROPS | UPDATE_MOVE_BY_PISTON);
-			world.setBlockTileEntity(headX, headY, headZ, BlockPistonMoving.getTileEntity(Block.pistonExtension.blockID, direction | (this.isSticky ? 8 : 0), direction, true, false));
+            block_meta = direction | (this.isSticky ? 8 : 0);
+            PISTON_DEBUG("PistonHead "+Block.pistonMoving.blockID+"."+block_meta+"("+headX+" "+headY+" "+headZ+")");
+            world.setBlock(headX, headY, headZ, Block.pistonMoving.blockID, block_meta, UPDATE_IMMEDIATE | UPDATE_SUPPRESS_DROPS | UPDATE_MOVE_BY_PISTON);
+			world.setBlockTileEntity(headX, headY, headZ, BlockPistonMoving.getTileEntity(Block.pistonExtension.blockID, block_meta, direction, true, false));
         }
         
         // START SHOVEL CODE
         i = shovel_index_global;
-        while (--i >= SHOVEL_LIST_START_INDEX) {
+        while (--i >= SHOVEL_EJECT_LIST_START_INDEX) {
             // Set X,Y,Z to position of ejection destination block in shovel list
             packed_pos = pushed_blocks[i];
             BLOCK_POS_UNPACK(packed_pos, X, Y, Z);
             
-            block_id = world.getBlockId(X, Y, Z);
-            block = Block.blocksList[block_id]; // Get ejection block
-            block_id = data_list[i + SHOVEL_BLOCK_ID_LIST_START_INDEX];
-            int eject_direction = data_list[i + SHOVEL_DIRECTION_LIST_START_INDEX];
-            block_meta = data_list[i + SHOVEL_BLOCK_META_LIST_START_INDEX];
+            block_state = data_list[i];
+            BLOCK_STATE_UNPACK(block_state, block_id, block_meta);
+            block = Block.blocksList[block_id];
+            block_meta =  block.adjustMetadataForPistonMove(block_meta);
+            int eject_direction = data_list[i + SHOVEL_DIRECTION_LIST_OFFSET];
             
             if (
                 BLOCK_IS_AIR(block) ||
@@ -783,12 +696,31 @@ public abstract class PistonMixins MACRO_IF(MACRO_IS_1(ENABLE_MOVING_BLOCK_CHAIN
         while (--i >= PUSH_LIST_START_INDEX) {
             // Set X,Y,Z to position of block in push list
             packed_pos = pushed_blocks[i];
-            world.notifyBlocksOfNeighborChange(BLOCK_POS_UNPACK_ARGS(packed_pos), data_list[i]);
+            world.notifyBlocksOfNeighborChange(BLOCK_POS_UNPACK_ARGS(packed_pos), data_list[i] & 0xFFFF);
         }
         if (is_extending) {
             world.notifyBlocksOfNeighborChange(headX, headY, headZ, Block.pistonExtension.blockID);
         }
         return true;
+    }
+    
+    @Overwrite
+    public boolean tryExtend(World world, int X, int Y, int Z, int direction) {
+        return this.moveBlocks(world, X, Y, Z, direction, true);
+    }
+    
+    @Overwrite
+    public boolean canExtend(World world, int X, int Y, int Z, int direction) {
+        piston_position = BLOCK_POS_PACK(X,Y,Z);
+        push_index_global = PUSH_LIST_START_INDEX;
+        destroy_index_global = DESTROY_LIST_START_INDEX;
+        shovel_index_global = SHOVEL_EJECT_LIST_START_INDEX;
+        
+        X += Facing.offsetsXForSide[direction];
+        Y += Facing.offsetsYForSide[direction];
+        Z += Facing.offsetsZForSide[direction];
+        
+        return this.resolve(world, X, Y, Z, direction, true);
     }
     
     private static final int PISTON_EVENT_EXTENDING = 0;
@@ -806,33 +738,36 @@ public abstract class PistonMixins MACRO_IF(MACRO_IS_1(ENABLE_MOVING_BLOCK_CHAIN
                 boolean is_powered = ((IPistonBaseAccessMixins)(Object)this).callIsIndirectlyPowered(world, X, Y, Z, direction);
                 if (is_powered != READ_META_FIELD(meta, EXTENDED)) {
                     if (is_powered) {
-                        // CRAP, canExtend is used here...
-                        if (canExtend(world, X, Y, Z, direction)) {
+                        // Yes, it does matter. Without this, the standard
+                        // redstone block engine doesn't work.
+                        // TODO: Why?
+                        if (this.canExtend(world, X, Y, Z, direction)) {
                             world.addBlockEvent(X, Y, Z, this.blockID, PISTON_EVENT_EXTENDING, direction);
                         }
                     } else {
-                        
-                        int nextX = X + Facing.offsetsXForSide[direction] * 2;
-                        int nextY = Y + Facing.offsetsYForSide[direction] * 2;
-                        int nextZ = Z + Facing.offsetsZForSide[direction] * 2;
+                        int nextX = Facing.offsetsXForSide[direction];
+                        int nextY = Facing.offsetsYForSide[direction];
+                        int nextZ = Facing.offsetsZForSide[direction];
+                        nextX += nextX + X;
+                        nextY += nextY + Y;
+                        nextZ += nextZ + Z;
                         int next_block_id = world.getBlockId(nextX, nextY, nextZ);
                         TileEntity tile_entity;
-                        if (
-                            next_block_id == Block.pistonMoving.blockID &&
-                            (tile_entity = world.getBlockTileEntity(nextX, nextY, nextZ)) instanceof TileEntityPiston &&
-                            ((TileEntityPiston)tile_entity).getPistonOrientation() == direction &&
-                            ((TileEntityPiston)tile_entity).isExtending() &&
+                        world.addBlockEvent(
+                            X, Y, Z, this.blockID,
                             (
-                                ((TileEntityPiston)tile_entity).getProgress(0.0f) < 0.5f ||
-                                world.getTotalWorldTime() == ((IBlockEntityPistonMixins)tile_entity).getLastTicked()
-                                // something about "handling tick"?
-                            )
-                        ) {
-                            world.addBlockEvent(X, Y, Z, this.blockID, PISTON_EVENT_RETRACTING_ZERO_TICK, direction);
-                        } else {
-                            //world.setBlockMetadataWithNotify(X, Y, Z, direction, UPDATE_CLIENTS);
-                            world.addBlockEvent(X, Y, Z, this.blockID, PISTON_EVENT_RETRACTING_NORMAL, direction);
-                        }
+                                next_block_id == Block.pistonMoving.blockID &&
+                                (tile_entity = world.getBlockTileEntity(nextX, nextY, nextZ)) instanceof TileEntityPiston &&
+                                ((TileEntityPiston)tile_entity).getPistonOrientation() == direction &&
+                                ((TileEntityPiston)tile_entity).isExtending() &&
+                                (
+                                    ((TileEntityPiston)tile_entity).getProgress(0.0f) < 0.5f ||
+                                    world.getTotalWorldTime() == ((IBlockEntityPistonMixins)tile_entity).getLastTicked()
+                                    // something about "handling tick"?
+                                )
+                            ) ? PISTON_EVENT_RETRACTING_ZERO_TICK : PISTON_EVENT_RETRACTING_NORMAL,
+                            direction
+                        );
                     }
                 }
             }
@@ -866,7 +801,6 @@ public abstract class PistonMixins MACRO_IF(MACRO_IS_1(ENABLE_MOVING_BLOCK_CHAIN
                 if (!this.moveBlocks(world, X, Y, Z, direction, true)) {
                     return false;
                 }
-                //world.setBlockMetadataWithNotify(X, Y, Z, direction | 8, UPDATE_CLIENTS);
                 world.setBlockMetadataWithNotify(X, Y, Z, MERGE_META_FIELD(direction, EXTENDED, true), UPDATE_NEIGHBORS | UPDATE_CLIENTS | UPDATE_SUPPRESS_DROPS | UPDATE_MOVE_BY_PISTON);
                 world.playSoundEffect((double)X + 0.5D, (double)Y + 0.5D, (double)Z + 0.5D, "tile.piston.out", 0.5F, world.rand.nextFloat() * 0.25F + 0.6F);
                 return true;
@@ -879,7 +813,6 @@ public abstract class PistonMixins MACRO_IF(MACRO_IS_1(ENABLE_MOVING_BLOCK_CHAIN
                 if (tile_entity instanceof TileEntityPiston) {
                     ((TileEntityPiston)tile_entity).clearPistonTileEntity();
                 }
-                //world.setBlock(X, Y, Z, Block.pistonMoving.blockID, direction, UPDATE_ALL);
                 world.setBlock(X, Y, Z, Block.pistonMoving.blockID, direction, UPDATE_SUPPRESS_DROPS);
                 world.setBlockTileEntity(X, Y, Z, BlockPistonMoving.getTileEntity(this.blockID, direction, direction, false, true));
                 if (this.isSticky) {
@@ -887,8 +820,6 @@ public abstract class PistonMixins MACRO_IF(MACRO_IS_1(ENABLE_MOVING_BLOCK_CHAIN
                     int currentY = nextY + Facing.offsetsYForSide[direction];
                     int currentZ = nextZ + Facing.offsetsZForSide[direction];
                     int next_block_id = world.getBlockId(currentX, currentY, currentZ);
-                    //int next_block_meta = par1World.getBlockMetadata(currentX, currentY, currentZ);
-                    //boolean block_set_from_moving_piston = false;
                     goto_block(block_set_from_moving_piston) {
                         if (next_block_id == Block.pistonMoving.blockID) {
                             TileEntity next_tile_entity = world.getBlockTileEntity(currentX, currentY, currentZ);
@@ -899,9 +830,6 @@ public abstract class PistonMixins MACRO_IF(MACRO_IS_1(ENABLE_MOVING_BLOCK_CHAIN
                                     piston_tile_entity.isExtending()
                                 ) {
                                     piston_tile_entity.clearPistonTileEntity();
-                                    //next_block_id = piston_tile_entity.getStoredBlockID();
-                                    //next_block_meta = piston_tile_entity.getBlockMetadata();
-                                    //block_set_from_moving_piston = true;
                                     goto(block_set_from_moving_piston);
                                 }
                             }

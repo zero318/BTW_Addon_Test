@@ -12,12 +12,14 @@
     "BlockEntityPistonMixins",
     "IBlockEntityPistonAccessMixins",
     "SoapMixins",
-    "RedstoneWireMixins",
-    "IRedstoneWireAccessMixins",
     "BlockPistonExtensionMixins",
     "BlockPistonMovingMixins",
     "IWorldAccessMixins",
-    "ChestMixins"
+    "ChestMixins",
+    "MortarReceiverBlockMixins",
+    "MortarReceiverSlabBlockMixins",
+    "MortarReceiverStairsBlockMixins",
+    "LavaReceiverBlockMixins"
   ],
   "client": [
     "ZeroTestMixin"

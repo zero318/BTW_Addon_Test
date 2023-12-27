@@ -1209,8 +1209,6 @@ MACRO_CATW(METAFW_,META_BITS(f),v)
 
 /// Fake Direction Metadata
 
-#define BLOCK_ID_MASK 0xFFF
-
 #define DIRECTION_DOWN 0
 #define DIRECTION_UP 1
 #define DIRECTION_NORTH 2
@@ -1305,5 +1303,56 @@ _OFFSET_DIRECTION_ARGS(X, Y, Z, MACRO_CAT(direction,_OFFSETS))
 
 #define BLOCK_POS_UNPACK(pos,X,Y,Z) _BLOCK_POS_UNPACK(X,Y,Z,BLOCK_POS_UNPACK_ARGS(pos))
 
+#define BLOCK_ID_MIN 0
+#define BLOCK_ID_MAX 4095
+#define BLOCK_ID_BITS 12
+#define BLOCK_ID_MASK 0xFFF
+
+#define BLOCK_META_MIN 0
+#define BLOCK_META_MAX 15
+#define BLOCK_META_BITS 4
+#define BLOCK_META_MASK 0xF
+
+#define BLOCK_STATE_PACK_SHORT_RAW(id,meta)\
+((short)((id)|(meta)<<BLOCK_ID_BITS))
+#define BLOCK_STATE_PACK_SHORT(id,meta)\
+BLOCK_STATE_PACK_SHORT_RAW((id)&BLOCK_ID_MASK,(meta))
+
+#define BLOCK_STATE_PACK_RAW(id,meta)\
+((id)|(meta)<<16)
+#define BLOCK_STATE_PACK(id,meta)\
+BLOCK_STATE_PACK_RAW((id)&0xFFFF,(meta))
+
+#define BLOCK_STATE_PACK_LONG_RAW(id,meta,extmeta)\
+((long)((id)|(meta)<<16)|(long)extmeta<<32)
+#define BLOCK_STATE_PACK_LONG(id,meta,extmeta)\
+BLOCK_STATE_PACK_LONG_RAW((id)&0xFFFF,meta,extmeta)
+
+#define __BLOCK_STATE_UNPACK(id,meta,idV,metaV) {(id)=idV;(meta)=metaV;}
+#define _BLOCK_STATE_UNPACK(id,meta,...) __BLOCK_STATE_UNPACK(id,meta,__VA_ARGS__)
+
+#define BLOCK_STATE_UNPACK_SHORT_ARGS(state)\
+((state)&BLOCK_ID_MASK),\
+((state)>>>BLOCK_ID_BITS)
+
+#define BLOCK_STATE_UNPACK_SHORT(state,id,meta)\
+_BLOCK_STATE_UNPACK(id,meta,BLOCK_STATE_UNPACK_SHORT_ARGS(state))
+
+#define BLOCK_STATE_UNPACK_ARGS(state)\
+((state)&0xFFFF),\
+((state)>>>16)
+
+#define BLOCK_STATE_UNPACK(state,id,meta)\
+_BLOCK_STATE_UNPACK(id,meta,BLOCK_STATE_UNPACK_ARGS(state))
+
+#define BLOCK_STATE_UNPACK_LONG_ARGS(state)\
+((int)(state)&0xFFFF),\
+((int)(state)>>>16),\
+((int)((state)>>>32))
+
+#define __BLOCK_STATE_UNPACK_LONG(id,meta,extmeta,idV,metaV,extmetaV) {(id)=idV;(meta)=metaV;(extmeta)=extmetaV;}
+#define _BLOCK_STATE_UNPACK_LONG(id,meta,extmeta,...) __BLOCK_STATE_UNPACK_LONG(id,meta,extmeta,__VA_ARGS__)
+#define BLOCK_STATE_UNPACK_LONG(state,id,meta,extmeta)\
+_BLOCK_STATE_UNPACK_LONG(id,meta,extmeta,BLOCK_STATE_UNPACK_LONG_ARGS(state))
 
 #endif

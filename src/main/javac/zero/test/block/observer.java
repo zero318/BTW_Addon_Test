@@ -50,35 +50,6 @@ public class ObserverBlock extends BuddyBlock {
         // is still empty and doing nothing.
     }
     
-    // Power: Down  0
-    //        Up    1
-    //        North 6
-    //        South 4
-    //        West  10
-    //        East  8
-    
-    /*
-    @Override
-    public void onNeighborBlockChange(World world, int X, int Y, int Z, int neighbor_id) {
-        int update_direction = GET_UPDATE_DIRECTION(neighbor_id);
-        int meta = world.getBlockMetadata(X, Y, Z);
-        if (
-            update_direction == (meta | 1) ||
-            update_direction == UPDATE_DIRECTION_FORCE
-        ) {
-            if (!READ_META_FIELD(meta, POWERED)) {
-                Block neighbor_block = blocksList[neighbor_id & BLOCK_ID_MASK];
-                if (
-                    neighbor_block != null &&
-                    !world.isUpdateScheduledForBlock(X, Y, Z, blockID)
-                ) {
-                    world.scheduleBlockUpdate(X, Y, Z, blockID, 2); 
-                }
-            }
-        }
-    }
-    */
-    
     @Override
     public void onNeighborBlockChange(World world, int X, int Y, int Z, int neighbor_id) {
     }
@@ -187,41 +158,24 @@ public class ObserverBlock extends BuddyBlock {
     @Override
     @Environment(EnvType.CLIENT)
     public Icon getIcon(int side, int meta) {
-        // item render
-        //return side == 3 ? this.texture_front : this.blockIcon;
-        /*
+        // Why are these different from the regular block texture directions?
         switch (side) {
+            case DIRECTION_DOWN:
             case DIRECTION_UP:
                 return this.texture_top;
+            case DIRECTION_NORTH:
+                return this.texture_back_off;
             case DIRECTION_SOUTH:
                 return this.texture_front;
             default:
                 return this.texture_side;
         }
-        */
-        int facing = READ_META_FIELD(meta, DIRECTION);
-        
-        if (facing == side) {
-            return READ_META_FIELD(meta, POWERED)
-                    ? this.texture_back_on
-                    : this.texture_back_off;
-        }
-        if (facing == OPPOSITE_DIRECTION(side)) {
-            return this.texture_front;
-        }
-        
-        if (DIRECTION_AXIS(facing) != AXIS_Y) {
-            return DIRECTION_AXIS(side) == AXIS_Y ? this.texture_top : this.texture_side;
-        }
-        // When facing up, the non-arrow side should be on E/W
-        return DIRECTION_AXIS(side) == AXIS_X ? this.texture_top : this.texture_side;
     }
 
     @Override
     @Environment(EnvType.CLIENT)
     public Icon getBlockTexture(IBlockAccess block_access, int X, int Y, int Z, int side) {
-        return this.getIcon(side, block_access.getBlockMetadata(X, Y, Z));
-        /*
+        int meta = block_access.getBlockMetadata(X, Y, Z);
         int facing = READ_META_FIELD(meta, DIRECTION);
         
         if (facing == side) {
@@ -238,7 +192,6 @@ public class ObserverBlock extends BuddyBlock {
         }
         // When facing up, the non-arrow side should be on E/W
         return DIRECTION_AXIS(side) == AXIS_X ? this.texture_top : this.texture_side;
-        */
     }
     
     @Override

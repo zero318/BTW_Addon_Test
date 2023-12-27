@@ -10,4 +10,6 @@
 // Push only and dead coral fans
 #define ENABLE_PISTON_TEST_BLOCKS 1
 
+#define ENABLE_SLIME_SUPPORTING_MORTAR_BLOCKS 1
+
 #endif

@@ -32,151 +32,40 @@ public abstract class PistonMixins extends BlockPistonBase {
     protected abstract int getPistonShovelEjectionDirection(World world, int X, int Y, int Z, int direction);
     @Shadow
     protected abstract void onShovelEjectIntoBlock(World world, int X, int Y, int Z);
-    @Overwrite
-    public boolean canExtend(World world, int X, int Y, int Z, int direction) {
-        int pushes_remaining = 12;
-        do {
-            X += Facing.offsetsXForSide[direction];
-            Y += Facing.offsetsYForSide[direction];
-            Z += Facing.offsetsZForSide[direction];
-            if (!((((Integer.compareUnsigned(((Y))-(0),(255)-(0)))<=0)))) {
-                return false;
-            }
-            Block next_block = Block.blocksList[world.getBlockId(X, Y, Z)];
-            if (next_block == null) {
-                return true;
-            }
-            if (!next_block.canBlockBePushedByPiston(world, X, Y, Z, direction)) {
-                return false;
-            }
-            if (
-                next_block.getMobilityFlag() == 1 ||
-                getPistonShovelEjectionDirection(world, X, Y, Z, direction) >= 0
-            ) {
-                return true;
-            }
-        } while (--pushes_remaining >= 0);
-        return false;
-    }
-    @Overwrite
-    public boolean tryExtend(World world, int X, int Y, int Z, int direction) {
-        int nextX = X;
-        int nextY = Y;
-        int nextZ = Z;
-        int tempX;
-        int tempY;
-        int tempZ;
-        invalid_block: do {
-            int pushes_remaining = 12;
-            do {
-                nextX += Facing.offsetsXForSide[direction];
-                nextY += Facing.offsetsYForSide[direction];
-                nextZ += Facing.offsetsZForSide[direction];
-                if (!((((Integer.compareUnsigned(((nextY))-(0),(255)-(0)))<=0)))) {
-                    return false;
-                }
-                int next_block_id = world.getBlockId(nextX, nextY, nextZ);
-                Block next_block = Block.blocksList[next_block_id];
-                if (next_block == null) {
-                    break invalid_block;
-                }
-                if (!next_block.canBlockBePushedByPiston(world, nextX, nextY, nextZ, direction)) {
-                    return false;
-                }
-                if (next_block.getMobilityFlag() == 1) {
-                    next_block.onBrokenByPistonPush(world, nextX, nextY, nextZ, world.getBlockMetadata(nextX, nextY, nextZ));
-                    break;
-                }
-                int shovel_direction = getPistonShovelEjectionDirection(world, nextX, nextY, nextZ, direction);
-                if (shovel_direction >= 0) {
-                    int shoveling_meta = next_block.adjustMetadataForPistonMove(world.getBlockMetadata(nextX, nextY, nextZ));
-                    tempX = nextX + Facing.offsetsXForSide[shovel_direction];
-                    tempY = nextY + Facing.offsetsYForSide[shovel_direction];
-                    tempZ = nextZ + Facing.offsetsZForSide[shovel_direction];
-                    onShovelEjectIntoBlock(world, tempX, tempY, tempZ);
-                    world.setBlock(tempX, tempY, tempZ, Block.pistonMoving.blockID, shoveling_meta, 0x04);
-                    world.setBlockTileEntity(tempX, tempY, tempZ, PistonBlockMoving.getShoveledTileEntity(next_block_id, shoveling_meta, shovel_direction));
-                    break;
-                }
-            } while (--pushes_remaining >= 0);
-            world.setBlockToAir(nextX, nextY, nextZ);
-        } while(false);
-        int currentX = nextX;
-        int currentY = nextY;
-        int currentZ = nextZ;
-        int[] block_list = new int[13];
-        int block_index = 0;
-        do {
-            tempX = currentX - Facing.offsetsXForSide[direction];
-            tempY = currentY - Facing.offsetsYForSide[direction];
-            tempZ = currentZ - Facing.offsetsZForSide[direction];
-            int moving_block_id = world.getBlockId(tempX, tempY, tempZ);
-            NBTTagCompound block_entity_nbt = PistonBlockBase.getBlockTileEntityData(world, tempX, tempY, tempZ);
-            world.removeBlockTileEntity(tempX, tempY, tempZ);
-            if (
-                moving_block_id == ((PistonBlockBase)(Object)this).blockID &&
-                tempX == X && tempY == Y && tempZ == Z
-            ) {
-                world.setBlock(currentX, currentY, currentZ, Block.pistonMoving.blockID, direction | (this.isSticky ? 8 : 0), 0x04);
-                world.setBlockTileEntity(currentX, currentY, currentZ, BlockPistonMoving.getTileEntity(Block.pistonExtension.blockID, direction | (this.isSticky ? 8 : 0), direction, true, false));
-            } else {
-                int moving_meta = world.getBlockMetadata(tempX, tempY, tempZ);
-                Block moving_block = Block.blocksList[moving_block_id];
-                if (moving_block != null) {
-                    moving_meta = moving_block.adjustMetadataForPistonMove(moving_meta);
-                }
-                world.setBlock(currentX, currentY, currentZ, Block.pistonMoving.blockID, moving_meta, 0x04);
-                world.setBlockTileEntity(currentX, currentY, currentZ, BlockPistonMoving.getTileEntity(moving_block_id, moving_meta, direction, true, false));
-                if (block_entity_nbt != null) {
-                    ((TileEntityPiston)world.getBlockTileEntity(currentX, currentY, currentZ)).storeTileEntity(block_entity_nbt);
-                }
-            }
-            block_list[block_index++] = moving_block_id;
-            currentX = tempX;
-            currentY = tempY;
-            currentZ = tempZ;
-        } while (currentX != X || currentY != Y || currentZ != Z);
-        block_index = 0;
-        do {
-            nextX -= Facing.offsetsXForSide[direction];
-            nextY -= Facing.offsetsYForSide[direction];
-            nextZ -= Facing.offsetsZForSide[direction];
-            world.notifyBlocksOfNeighborChange(nextX, nextY, nextZ, block_list[block_index++]);
-        } while (nextX != X || nextY != Y || nextZ != Z);
-        return true;
-    }
     private static final int PISTON_PUSH_LIMIT =
     12;
     private static final int PUSH_LIST_LENGTH = PISTON_PUSH_LIMIT;
-    private static final int SHOVEL_LIST_LENGTH = PUSH_LIST_LENGTH;
     private static final int DESTROY_LIST_LENGTH = PUSH_LIST_LENGTH;
-    private static final int SHOVEL_LIST_START_INDEX = 0;
-    private static final int PUSH_LIST_START_INDEX = SHOVEL_LIST_START_INDEX + SHOVEL_LIST_LENGTH;
+    private static final int SHOVEL_EJECT_LIST_LENGTH = PUSH_LIST_LENGTH;
+    private static final int SHOVEL_LIST_LENGTH = PUSH_LIST_LENGTH;
+    private static final int PUSH_LIST_START_INDEX = 0;
     private static final int DESTROY_LIST_START_INDEX = PUSH_LIST_START_INDEX + PUSH_LIST_LENGTH;
-    private static final int SHOVEL_BLOCK_ID_LIST_LENGTH = SHOVEL_LIST_LENGTH;
-    private static final int PUSH_BLOCK_ID_LIST_LENGTH = PUSH_LIST_LENGTH;
-    private static final int DESTROY_BLOCK_ID_LIST_LENGTH = DESTROY_LIST_LENGTH;
+    private static final int SHOVEL_EJECT_LIST_START_INDEX = DESTROY_LIST_START_INDEX + DESTROY_LIST_LENGTH;
+    private static final int SHOVEL_LIST_START_INDEX = SHOVEL_EJECT_LIST_START_INDEX + SHOVEL_EJECT_LIST_LENGTH;
+    private static final int SHOVEL_LIST_OFFSET = SHOVEL_EJECT_LIST_LENGTH;
+    private static final int PUSH_BLOCK_STATE_LIST_LENGTH = PUSH_LIST_LENGTH;
+    private static final int DESTROY_BLOCK_STATE_LIST_LENGTH = DESTROY_LIST_LENGTH;
+    private static final int SHOVEL_BLOCK_STATE_LIST_LENGTH = SHOVEL_LIST_LENGTH;
     private static final int SHOVEL_DIRECTION_LIST_LENGTH = SHOVEL_LIST_LENGTH;
-    private static final int SHOVEL_BLOCK_META_LIST_LENGTH = SHOVEL_LIST_LENGTH;
-    private static final int SHOVEL_BLOCK_ID_LIST_START_INDEX = 0;
-    private static final int PUSH_BLOCK_ID_LIST_START_INDEX = SHOVEL_BLOCK_ID_LIST_START_INDEX + SHOVEL_BLOCK_ID_LIST_LENGTH;
-    private static final int DESTROY_BLOCK_ID_LIST_START_INDEX = PUSH_BLOCK_ID_LIST_START_INDEX + PUSH_BLOCK_ID_LIST_LENGTH;
-    private static final int SHOVEL_DIRECTION_LIST_START_INDEX = DESTROY_BLOCK_ID_LIST_START_INDEX + DESTROY_BLOCK_ID_LIST_LENGTH;
-    private static final int SHOVEL_BLOCK_META_LIST_START_INDEX = SHOVEL_DIRECTION_LIST_START_INDEX + SHOVEL_DIRECTION_LIST_LENGTH;
-    private static long[] pushed_blocks = new long[SHOVEL_LIST_LENGTH + PUSH_LIST_LENGTH + DESTROY_LIST_LENGTH];
-    private static int[] data_list = new int[SHOVEL_BLOCK_ID_LIST_LENGTH + PUSH_BLOCK_ID_LIST_LENGTH + DESTROY_BLOCK_ID_LIST_LENGTH + SHOVEL_DIRECTION_LIST_LENGTH + SHOVEL_BLOCK_META_LIST_LENGTH];
+    private static final int PUSH_BLOCK_STATE_LIST_START_INDEX = 0;
+    private static final int DESTROY_BLOCK_STATE_LIST_START_INDEX = PUSH_BLOCK_STATE_LIST_START_INDEX + PUSH_BLOCK_STATE_LIST_LENGTH;
+    private static final int SHOVEL_BLOCK_STATE_LIST_START_INDEX = DESTROY_BLOCK_STATE_LIST_START_INDEX + DESTROY_BLOCK_STATE_LIST_LENGTH;
+    private static final int SHOVEL_DIRECTION_LIST_START_INDEX = SHOVEL_BLOCK_STATE_LIST_START_INDEX + SHOVEL_BLOCK_STATE_LIST_LENGTH;
+    private static final int SHOVEL_BLOCK_STATE_LIST_OFFSET = 0;
+    private static final int SHOVEL_DIRECTION_LIST_OFFSET = SHOVEL_BLOCK_STATE_LIST_LENGTH;
+    private static final long[] pushed_blocks = new long[PUSH_LIST_LENGTH + DESTROY_LIST_LENGTH + SHOVEL_EJECT_LIST_LENGTH + SHOVEL_LIST_LENGTH];
+    private static final int[] data_list = new int[PUSH_BLOCK_STATE_LIST_LENGTH + DESTROY_BLOCK_STATE_LIST_LENGTH + SHOVEL_BLOCK_STATE_LIST_LENGTH + SHOVEL_DIRECTION_LIST_LENGTH];
     private static long piston_position;
     private static int push_index_global;
-    private static int shovel_index_global;
     private static int destroy_index_global;
+    private static int shovel_index_global;
     protected boolean add_branch(World world, int X, int Y, int Z, int direction) {
         int block_id = world.getBlockId(X, Y, Z);
         Block block = Block.blocksList[block_id];
-        if (!world.isRemote) AddonHandler.logMessage("Branching Block ("+X+" "+Y+" "+Z+")"+direction);
-        for (int facing = 0; facing < 6; ++facing) {
-            if (!world.isRemote) AddonHandler.logMessage("Facing/Direction ("+facing+"/"+direction+") ("+((facing)&~1)+"/"+((direction)&~1)+")");
+                                                                     ;
+        int facing = 0;
+        do {
             if (((facing)&~1) != ((direction)&~1)) {
-                if (!world.isRemote) AddonHandler.logMessage("Adding branch "+facing);
                 if (((IBlockMixins)block).isStickyForBlocks(world, X, Y, Z, facing)) {
                     int nextX = X + Facing.offsetsXForSide[facing];
                     int nextY = Y + Facing.offsetsYForSide[facing];
@@ -184,14 +73,14 @@ public abstract class PistonMixins extends BlockPistonBase {
                     Block neighbor_block = Block.blocksList[world.getBlockId(nextX, nextY, nextZ)];
                     if (
                         !((neighbor_block)==null) &&
-                        ((IBlockMixins)neighbor_block).canStickTo(world, nextX, nextY, nextZ, facing, block_id) &&
+                        ((IBlockMixins)neighbor_block).canBeStuckTo(world, nextX, nextY, nextZ, facing, block_id) &&
                         !this.add_moved_block(world, nextX, nextY, nextZ, direction)
                     ) {
                         return false;
                     }
                 }
             }
-        }
+        } while (++facing < 6);
         return true;
     }
     protected int gcd(int A, int B) {
@@ -214,9 +103,14 @@ public abstract class PistonMixins extends BlockPistonBase {
         ) {
             return true;
         }
-        if (!world.isRemote) AddonHandler.logMessage("SearchForExistingPush ("+X+" "+Y+" "+Z+")");
+                                                                 ;
         int push_index = push_index_global;
-        for (int i = PUSH_LIST_START_INDEX; i < push_index; ++i) {
+        for (int i = push_index; --i >= PUSH_LIST_START_INDEX;) {
+            if (pushed_blocks[i] == packed_pos) {
+                return true;
+            }
+        }
+        for (int i = shovel_index_global + SHOVEL_LIST_OFFSET; --i >= SHOVEL_LIST_START_INDEX;) {
             if (pushed_blocks[i] == packed_pos) {
                 return true;
             }
@@ -225,30 +119,33 @@ public abstract class PistonMixins extends BlockPistonBase {
         int nextX = X;
         int nextY = Y;
         int nextZ = Z;
+        long next_packed_pos = packed_pos;
         int next_block_id = block_id;
         Block next_block = block;
         for(;;) {
-            if (!world.isRemote) AddonHandler.logMessage("StickySearch ("+nextX+" "+nextY+" "+nextZ+")");
-            if (++push_write_index == (PUSH_LIST_START_INDEX + PUSH_LIST_LENGTH)) {
-                if (!world.isRemote) AddonHandler.logMessage("Push failed limit reached A");
+                                                                        ;
+            if (push_write_index == (PUSH_LIST_START_INDEX + PUSH_LIST_LENGTH)) {
+                                                           ;
                 return false;
             }
+            ++push_write_index;
             if (!((IBlockMixins)next_block).isStickyForBlocks(world, nextX, nextY, nextZ, direction)) {
-                if (!world.isRemote) AddonHandler.logMessage("IsSticky false");
+                                              ;
                 break;
             }
-            if (!world.isRemote) AddonHandler.logMessage("IsSticky true");
+                                         ;
             int tempX = nextX - Facing.offsetsXForSide[direction];
             int tempY = nextY - Facing.offsetsYForSide[direction];
             int tempZ = nextZ - Facing.offsetsZForSide[direction];
-            if (((long)(tempZ)<<12 +26|(long)((tempX)&0x3FFFFFF)<<12|((tempY)&0xFFF)) == piston_position) {
+            long temp_packed_pos = ((long)(tempZ)<<12 +26|(long)((tempX)&0x3FFFFFF)<<12|((tempY)&0xFFF));
+            if (temp_packed_pos == piston_position) {
                 break;
             }
             block_id = world.getBlockId(tempX, tempY, tempZ);
             next_block = Block.blocksList[block_id];
             if (
                 ((next_block)==null) ||
-                !((IBlockMixins)next_block).canStickTo(world, tempX, tempY, tempZ, direction, next_block_id) ||
+                !((IBlockMixins)next_block).canBeStuckTo(world, tempX, tempY, tempZ, direction, next_block_id) ||
                 !next_block.canBlockBePulledByPiston(world, tempX, tempY, tempZ, direction)
             ) {
                 break;
@@ -257,32 +154,35 @@ public abstract class PistonMixins extends BlockPistonBase {
             nextY = tempY;
             nextZ = tempZ;
             next_block_id = block_id;
+            next_packed_pos = temp_packed_pos;
         }
         int push_count = push_write_index - push_index;
         do {
-            if (!world.isRemote) AddonHandler.logMessage("AddPush ("+nextX+" "+nextY+" "+nextZ+")");
-            data_list[push_index] = next_block_id;
-            pushed_blocks[push_index++] = ((long)(nextZ)<<12 +26|(long)((nextX)&0x3FFFFFF)<<12|((nextY)&0xFFF));
+                                                                   ;
+            data_list[push_index] = (((next_block_id)&0xFFFF)|((world.getBlockMetadata(nextX, nextY, nextZ)))<<16);
+            pushed_blocks[push_index++] = next_packed_pos;
             nextX += Facing.offsetsXForSide[direction];
             nextY += Facing.offsetsYForSide[direction];
             nextZ += Facing.offsetsZForSide[direction];
+            next_packed_pos = ((long)(nextZ)<<12 +26|(long)((nextX)&0x3FFFFFF)<<12|((nextY)&0xFFF));
             next_block_id = world.getBlockId(nextX, nextY, nextZ);
         } while (push_index != push_write_index);
+                                             ;
         for(;;) {
             push_index_global = push_index;
-            if (!world.isRemote) AddonHandler.logMessage("New push index "+push_index_global);
-            if (!world.isRemote) AddonHandler.logMessage("ParsePush ("+nextX+" "+nextY+" "+nextZ+")");
-            packed_pos = ((long)(nextZ)<<12 +26|(long)((nextX)&0x3FFFFFF)<<12|((nextY)&0xFFF));
+                                                             ;
+                                                                     ;
             for (int i = PUSH_LIST_START_INDEX; i < push_index; ++i) {
-                if (pushed_blocks[i] == packed_pos) {
-                    if (!world.isRemote) AddonHandler.logMessage("Hacky swap code");
-                    int swap_max = gcd(push_index - PUSH_LIST_START_INDEX, push_count) + i;
+                if (pushed_blocks[i] == next_packed_pos) {
+                                                   ;
+                    int swap_max = push_index - gcd(push_index -= i, push_count);
+                    push_write_index = push_count - i;
                     for (int j = i; j < swap_max; ++j) {
                         int k = j;
                         block_id = data_list[j];
                         packed_pos = pushed_blocks[j];
                         for(;;) {
-                            int d = (k + push_count) % push_index;
+                            int d = i + (k + push_write_index) % push_index;
                             if (d == j) {
                                 break;
                             }
@@ -293,16 +193,14 @@ public abstract class PistonMixins extends BlockPistonBase {
                         data_list[k] = block_id;
                         pushed_blocks[k] = packed_pos;
                     }
-                    for (int j = PUSH_LIST_START_INDEX; j < i + push_count; ++j) {
+                    i += push_count;
+                    for (int j = PUSH_LIST_START_INDEX; j < i; ++j) {
                         packed_pos = pushed_blocks[j];
                         {(X)=(int)((packed_pos)<<26>>(64)-26);(Z)=(int)((packed_pos)>>(64)-26);(Y)=(int)(packed_pos)<<(32)-12>>(32)-12;};
-                        block_id = data_list[j];
-                        block = Block.blocksList[block_id];
                         if (
-                            !((block)==null) &&
                             !this.add_branch(world, X, Y, Z, direction)
                         ) {
-                            if (!world.isRemote) AddonHandler.logMessage("Push failed move block branching ("+X+" "+Y+" "+Z+")");
+                                                                                                ;
                             return false;
                         }
                     }
@@ -314,15 +212,16 @@ public abstract class PistonMixins extends BlockPistonBase {
                 return true;
             }
             if (
-                packed_pos == piston_position ||
+                next_packed_pos == piston_position ||
                 !next_block.canBlockBePushedByPiston(world, nextX, nextY, nextZ, direction)
             ) {
-                if (!world.isRemote) AddonHandler.logMessage("Push failed move block IDK ("+nextX+" "+nextY+" "+nextZ+")");
+                                                                                          ;
                 return false;
             }
+            int next_block_meta = world.getBlockMetadata(nextX, nextY, nextZ);
             if (next_block.getMobilityFlag() == 1) {
-                data_list[destroy_index_global] = next_block_id;
-                pushed_blocks[destroy_index_global++] = packed_pos;
+                data_list[destroy_index_global] = (((next_block_id)&0xFFFF)|((next_block_meta))<<16);
+                pushed_blocks[destroy_index_global++] = next_packed_pos;
                 return true;
             }
             if (next_block.canBePistonShoveled(world, nextX, nextY, nextZ)) {
@@ -340,36 +239,37 @@ public abstract class PistonMixins extends BlockPistonBase {
                     ) {
                         packed_pos = ((long)(Z)<<12 +26|(long)((X)&0x3FFFFFF)<<12|((Y)&0xFFF));
                         block_is_shoveled: do {
-                            int i = shovel_index_global;
-                            while (--i >= SHOVEL_LIST_START_INDEX) {
+                            for (int i = shovel_index_global; --i >= SHOVEL_EJECT_LIST_START_INDEX;) {
                                 if (pushed_blocks[i] == packed_pos) {
                                     break block_is_shoveled;
                                 }
                             }
-                            data_list[shovel_index_global + SHOVEL_BLOCK_ID_LIST_START_INDEX] = next_block_id;
-                            data_list[shovel_index_global + SHOVEL_DIRECTION_LIST_START_INDEX] = eject_direction;
-                            data_list[shovel_index_global + SHOVEL_BLOCK_META_LIST_START_INDEX] = next_block.adjustMetadataForPistonMove(world.getBlockMetadata(nextX, nextY, nextZ));
-                            world.setBlock(nextX, nextY, nextZ, 0, 0, 0x04);
-                            pushed_blocks[shovel_index_global++] = packed_pos;
+                            data_list[shovel_index_global] = (((next_block_id)&0xFFFF)|((next_block_meta))<<16);
+                            data_list[shovel_index_global + SHOVEL_DIRECTION_LIST_OFFSET] = eject_direction;
+                            pushed_blocks[shovel_index_global] = packed_pos;
+                            pushed_blocks[shovel_index_global + SHOVEL_LIST_OFFSET] = next_packed_pos;
+                            ++shovel_index_global;
                             return true;
                         } while(false);
                     }
                 }
             }
             if (push_index == (PUSH_LIST_START_INDEX + PUSH_LIST_LENGTH)) {
-                if (!world.isRemote) AddonHandler.logMessage("Push failed limit reached B");
+                                                           ;
                 return false;
             }
-            data_list[push_index] = next_block_id;
-            pushed_blocks[push_index++] = packed_pos;
+            data_list[push_index] = (((next_block_id)&0xFFFF)|((next_block_meta))<<16);
+            pushed_blocks[push_index++] = next_packed_pos;
             ++push_count;
             X = nextX;
             Y = nextY;
             Z = nextZ;
+            packed_pos = next_packed_pos;
+            block = next_block;
             nextX += Facing.offsetsXForSide[direction];
             nextY += Facing.offsetsYForSide[direction];
             nextZ += Facing.offsetsZForSide[direction];
-            block = next_block;
+            next_packed_pos = ((long)(nextZ)<<12 +26|(long)((nextX)&0x3FFFFFF)<<12|((nextY)&0xFFF));
             next_block_id = world.getBlockId(nextX, nextY, nextZ);
         }
     }
@@ -388,28 +288,25 @@ public abstract class PistonMixins extends BlockPistonBase {
                 is_extending &&
                 block.getMobilityFlag() == 1
             ) {
-                if (!world.isRemote) AddonHandler.logMessage("Resolve destroy ("+X+" "+Y+" "+Z+")");
-                data_list[destroy_index_global] = block_id;
+                                                                   ;
+                data_list[destroy_index_global] = (((block_id)&0xFFFF)|((world.getBlockMetadata(X, Y, Z)))<<16);
                 pushed_blocks[destroy_index_global++] = packed_pos;
                 return true;
             }
-            if (!world.isRemote) AddonHandler.logMessage("Push failed immobile "+block_id+"("+X+" "+Y+" "+Z+")");
+                                                                                ;
             return false;
         }
-        if (!world.isRemote) AddonHandler.logMessage("Resolve add blocks ("+X+" "+Y+" "+Z+")");
+                                                              ;
         if (!this.add_moved_block(world, X, Y, Z, direction)) {
-            if (!world.isRemote) AddonHandler.logMessage("Push failed move block");
+                                                  ;
             return false;
         }
         for (int i = PUSH_LIST_START_INDEX; i < push_index_global; ++i) {
             packed_pos = pushed_blocks[i];
-            {(X)=(int)((packed_pos)<<26>>(64)-26);(Z)=(int)((packed_pos)>>(64)-26);(Y)=(int)(packed_pos)<<(32)-12>>(32)-12;};
-            block_id = data_list[i];
-            block = Block.blocksList[block_id];
             if (
-                !this.add_branch(world, X, Y, Z, direction)
+                !this.add_branch(world, (int)((packed_pos)<<26>>(64)-26),(int)(packed_pos)<<(32)-12>>(32)-12,(int)((packed_pos)>>(64)-26), direction)
             ) {
-                if (!world.isRemote) AddonHandler.logMessage("Push failed branching");
+                                                     ;
                 return false;
             }
         }
@@ -417,9 +314,9 @@ public abstract class PistonMixins extends BlockPistonBase {
     }
     public boolean moveBlocks(World world, int X, int Y, int Z, int direction, boolean is_extending) {
         piston_position = ((long)(Z)<<12 +26|(long)((X)&0x3FFFFFF)<<12|((Y)&0xFFF));
-        shovel_index_global = SHOVEL_LIST_START_INDEX;
         push_index_global = PUSH_LIST_START_INDEX;
         destroy_index_global = DESTROY_LIST_START_INDEX;
+        shovel_index_global = SHOVEL_EJECT_LIST_START_INDEX;
         X += Facing.offsetsXForSide[direction];
         Y += Facing.offsetsYForSide[direction];
         Z += Facing.offsetsZForSide[direction];
@@ -441,33 +338,36 @@ public abstract class PistonMixins extends BlockPistonBase {
         long packed_pos;
         int block_id;
         int block_meta;
+        int block_state;
         Block block;
         int i = destroy_index_global;
-        if (!world.isRemote) AddonHandler.logMessage("DestroyIndex "+i);
+                                       ;
         while (--i >= DESTROY_LIST_START_INDEX) {
             packed_pos = pushed_blocks[i];
             {(X)=(int)((packed_pos)<<26>>(64)-26);(Z)=(int)((packed_pos)>>(64)-26);(Y)=(int)(packed_pos)<<(32)-12>>(32)-12;};
-            block_id = data_list[i];
+            block_state = data_list[i];
+            {(block_id)=((block_state)&0xFFFF);(block_meta)=((block_state)>>>16);};
             block = Block.blocksList[block_id];
-            block_meta = world.getBlockMetadata(X, Y, Z);
-            if (!world.isRemote) AddonHandler.logMessage("Destroy "+block_id+"."+block_meta+"("+X+" "+Y+" "+Z+")");
+            block_meta = block.adjustMetadataForPistonMove(block_meta);
+                                                                                  ;
             block.onBrokenByPistonPush(world, X, Y, Z, block_meta);
             world.setBlock(X, Y, Z, 0, 0, 0x08 | 0x10);
         }
         i = push_index_global;
-        if (!world.isRemote) AddonHandler.logMessage("PushIndex "+i);
+                                    ;
         while (--i >= PUSH_LIST_START_INDEX) {
             packed_pos = pushed_blocks[i];
             {(X)=(int)((packed_pos)<<26>>(64)-26);(Z)=(int)((packed_pos)>>(64)-26);(Y)=(int)(packed_pos)<<(32)-12>>(32)-12;};
-            block_id = data_list[i];
+            block_state = data_list[i];
+            {(block_id)=((block_state)&0xFFFF);(block_meta)=((block_state)>>>16);};
             block = Block.blocksList[block_id];
-            block_meta = world.getBlockMetadata(X, Y, Z);
-            if (!world.isRemote) AddonHandler.logMessage("Push "+block_id+"."+block_meta+"("+X+" "+Y+" "+Z+")");
+            block_meta = block.adjustMetadataForPistonMove(block_meta);
+                                                                               ;
             NBTTagCompound tile_entity_data = getBlockTileEntityData(world, X, Y, Z);
             world.removeBlockTileEntity(X, Y, Z);
             packed_pos = ((long)(Z + Facing.offsetsZForSide[direction])<<12 +26|(long)((X + Facing.offsetsXForSide[direction])&0x3FFFFFF)<<12|((Y + Facing.offsetsYForSide[direction])&0xFFF));
             coord_will_move: do {
-                for (int j = 0; j < i; ++j) {
+                for (int j = i; --j > PUSH_LIST_START_INDEX;) {
                     if (pushed_blocks[j] == packed_pos) {
                         break coord_will_move;
                     }
@@ -477,7 +377,6 @@ public abstract class PistonMixins extends BlockPistonBase {
             X += Facing.offsetsXForSide[direction];
             Y += Facing.offsetsYForSide[direction];
             Z += Facing.offsetsZForSide[direction];
-                block_meta = block.adjustMetadataForPistonMove(block_meta);
             world.setBlock(X, Y, Z, Block.pistonMoving.blockID, block_meta, 0x08 | 0x20 | 0x40);
             world.setBlockTileEntity(X, Y, Z, BlockPistonMoving.getTileEntity(block_id, block_meta, direction, true, false));
             if (tile_entity_data != null) {
@@ -485,19 +384,20 @@ public abstract class PistonMixins extends BlockPistonBase {
             }
         }
         if (is_extending) {
-            if (!world.isRemote) AddonHandler.logMessage("PistonHead "+Block.pistonMoving.blockID+"."+(direction | (this.isSticky ? 8 : 0))+"("+headX+" "+headY+" "+headZ+")");
-            world.setBlock(headX, headY, headZ, Block.pistonMoving.blockID, direction | (this.isSticky ? 8 : 0), 0x08 | 0x20 | 0x40);
-   world.setBlockTileEntity(headX, headY, headZ, BlockPistonMoving.getTileEntity(Block.pistonExtension.blockID, direction | (this.isSticky ? 8 : 0), direction, true, false));
+            block_meta = direction | (this.isSticky ? 8 : 0);
+                                                                                                                   ;
+            world.setBlock(headX, headY, headZ, Block.pistonMoving.blockID, block_meta, 0x08 | 0x20 | 0x40);
+   world.setBlockTileEntity(headX, headY, headZ, BlockPistonMoving.getTileEntity(Block.pistonExtension.blockID, block_meta, direction, true, false));
         }
         i = shovel_index_global;
-        while (--i >= SHOVEL_LIST_START_INDEX) {
+        while (--i >= SHOVEL_EJECT_LIST_START_INDEX) {
             packed_pos = pushed_blocks[i];
             {(X)=(int)((packed_pos)<<26>>(64)-26);(Z)=(int)((packed_pos)>>(64)-26);(Y)=(int)(packed_pos)<<(32)-12>>(32)-12;};
-            block_id = world.getBlockId(X, Y, Z);
+            block_state = data_list[i];
+            {(block_id)=((block_state)&0xFFFF);(block_meta)=((block_state)>>>16);};
             block = Block.blocksList[block_id];
-            block_id = data_list[i + SHOVEL_BLOCK_ID_LIST_START_INDEX];
-            int eject_direction = data_list[i + SHOVEL_DIRECTION_LIST_START_INDEX];
-            block_meta = data_list[i + SHOVEL_BLOCK_META_LIST_START_INDEX];
+            block_meta = block.adjustMetadataForPistonMove(block_meta);
+            int eject_direction = data_list[i + SHOVEL_DIRECTION_LIST_OFFSET];
             if (
                 ((block)==null) ||
                 block.getMobilityFlag() == 1
@@ -530,12 +430,27 @@ public abstract class PistonMixins extends BlockPistonBase {
         i = push_index_global;
         while (--i >= PUSH_LIST_START_INDEX) {
             packed_pos = pushed_blocks[i];
-            world.notifyBlocksOfNeighborChange((int)((packed_pos)<<26>>(64)-26),(int)(packed_pos)<<(32)-12>>(32)-12,(int)((packed_pos)>>(64)-26), data_list[i]);
+            world.notifyBlocksOfNeighborChange((int)((packed_pos)<<26>>(64)-26),(int)(packed_pos)<<(32)-12>>(32)-12,(int)((packed_pos)>>(64)-26), data_list[i] & 0xFFFF);
         }
         if (is_extending) {
             world.notifyBlocksOfNeighborChange(headX, headY, headZ, Block.pistonExtension.blockID);
         }
         return true;
+    }
+    @Overwrite
+    public boolean tryExtend(World world, int X, int Y, int Z, int direction) {
+        return this.moveBlocks(world, X, Y, Z, direction, true);
+    }
+    @Overwrite
+    public boolean canExtend(World world, int X, int Y, int Z, int direction) {
+        piston_position = ((long)(Z)<<12 +26|(long)((X)&0x3FFFFFF)<<12|((Y)&0xFFF));
+        push_index_global = PUSH_LIST_START_INDEX;
+        destroy_index_global = DESTROY_LIST_START_INDEX;
+        shovel_index_global = SHOVEL_EJECT_LIST_START_INDEX;
+        X += Facing.offsetsXForSide[direction];
+        Y += Facing.offsetsYForSide[direction];
+        Z += Facing.offsetsZForSide[direction];
+        return this.resolve(world, X, Y, Z, direction, true);
     }
     private static final int PISTON_EVENT_EXTENDING = 0;
     private static final int PISTON_EVENT_RETRACTING_NORMAL = 1;
@@ -548,29 +463,32 @@ public abstract class PistonMixins extends BlockPistonBase {
                 boolean is_powered = ((IPistonBaseAccessMixins)(Object)this).callIsIndirectlyPowered(world, X, Y, Z, direction);
                 if (is_powered != ((((meta)>7)))) {
                     if (is_powered) {
-                        if (canExtend(world, X, Y, Z, direction)) {
+                        if (this.canExtend(world, X, Y, Z, direction)) {
                             world.addBlockEvent(X, Y, Z, this.blockID, PISTON_EVENT_EXTENDING, direction);
                         }
                     } else {
-                        int nextX = X + Facing.offsetsXForSide[direction] * 2;
-                        int nextY = Y + Facing.offsetsYForSide[direction] * 2;
-                        int nextZ = Z + Facing.offsetsZForSide[direction] * 2;
+                        int nextX = Facing.offsetsXForSide[direction];
+                        int nextY = Facing.offsetsYForSide[direction];
+                        int nextZ = Facing.offsetsZForSide[direction];
+                        nextX += nextX + X;
+                        nextY += nextY + Y;
+                        nextZ += nextZ + Z;
                         int next_block_id = world.getBlockId(nextX, nextY, nextZ);
                         TileEntity tile_entity;
-                        if (
-                            next_block_id == Block.pistonMoving.blockID &&
-                            (tile_entity = world.getBlockTileEntity(nextX, nextY, nextZ)) instanceof TileEntityPiston &&
-                            ((TileEntityPiston)tile_entity).getPistonOrientation() == direction &&
-                            ((TileEntityPiston)tile_entity).isExtending() &&
+                        world.addBlockEvent(
+                            X, Y, Z, this.blockID,
                             (
-                                ((TileEntityPiston)tile_entity).getProgress(0.0f) < 0.5f ||
-                                world.getTotalWorldTime() == ((IBlockEntityPistonMixins)tile_entity).getLastTicked()
-                            )
-                        ) {
-                            world.addBlockEvent(X, Y, Z, this.blockID, PISTON_EVENT_RETRACTING_ZERO_TICK, direction);
-                        } else {
-                            world.addBlockEvent(X, Y, Z, this.blockID, PISTON_EVENT_RETRACTING_NORMAL, direction);
-                        }
+                                next_block_id == Block.pistonMoving.blockID &&
+                                (tile_entity = world.getBlockTileEntity(nextX, nextY, nextZ)) instanceof TileEntityPiston &&
+                                ((TileEntityPiston)tile_entity).getPistonOrientation() == direction &&
+                                ((TileEntityPiston)tile_entity).isExtending() &&
+                                (
+                                    ((TileEntityPiston)tile_entity).getProgress(0.0f) < 0.5f ||
+                                    world.getTotalWorldTime() == ((IBlockEntityPistonMixins)tile_entity).getLastTicked()
+                                )
+                            ) ? PISTON_EVENT_RETRACTING_ZERO_TICK : PISTON_EVENT_RETRACTING_NORMAL,
+                            direction
+                        );
                     }
                 }
             }
@@ -593,12 +511,12 @@ public abstract class PistonMixins extends BlockPistonBase {
                 return false;
             }
         }
-        if (!world.isRemote) AddonHandler.logMessage("===== PistonCoords ("+X+" "+Y+" "+Z+")");
+                                                              ;
         switch (event_type) {
             default:
                 return true;
             case PISTON_EVENT_EXTENDING:
-                if (!world.isRemote) AddonHandler.logMessage("Case PISTON_EVENT_EXTENDING");
+                                                           ;
                 if (!this.moveBlocks(world, X, Y, Z, direction, true)) {
                     return false;
                 }
@@ -606,7 +524,7 @@ public abstract class PistonMixins extends BlockPistonBase {
                 world.playSoundEffect((double)X + 0.5D, (double)Y + 0.5D, (double)Z + 0.5D, "tile.piston.out", 0.5F, world.rand.nextFloat() * 0.25F + 0.6F);
                 return true;
             case PISTON_EVENT_RETRACTING_NORMAL: case PISTON_EVENT_RETRACTING_ZERO_TICK:
-                if (!world.isRemote) AddonHandler.logMessage("Case PISTON_EVENT_RETRACTING "+event_type);
+                                                                        ;
                 int nextX = X + Facing.offsetsXForSide[direction];
                 int nextY = Y + Facing.offsetsYForSide[direction];
                 int nextZ = Z + Facing.offsetsZForSide[direction];

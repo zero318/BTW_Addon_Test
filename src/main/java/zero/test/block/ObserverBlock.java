@@ -101,6 +101,22 @@ public class ObserverBlock extends BuddyBlock {
     @Override
     @Environment(EnvType.CLIENT)
     public Icon getIcon(int side, int meta) {
+        switch (side) {
+            case 0:
+            case 1:
+                return this.texture_top;
+            case 2:
+                return this.texture_back_off;
+            case 3:
+                return this.texture_front;
+            default:
+                return this.texture_side;
+        }
+    }
+    @Override
+    @Environment(EnvType.CLIENT)
+    public Icon getBlockTexture(IBlockAccess block_access, int X, int Y, int Z, int side) {
+        int meta = block_access.getBlockMetadata(X, Y, Z);
         int facing = (((meta)>>>1));
         if (facing == side) {
             return ((((meta)&1)!=0))
@@ -114,11 +130,6 @@ public class ObserverBlock extends BuddyBlock {
             return ((side)&~1) == 0x0 ? this.texture_top : this.texture_side;
         }
         return ((side)&~1) == 0x2 ? this.texture_top : this.texture_side;
-    }
-    @Override
-    @Environment(EnvType.CLIENT)
-    public Icon getBlockTexture(IBlockAccess block_access, int X, int Y, int Z, int side) {
-        return this.getIcon(side, block_access.getBlockMetadata(X, Y, Z));
     }
     @Override
     @Environment(EnvType.CLIENT)

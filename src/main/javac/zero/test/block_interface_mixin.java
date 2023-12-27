@@ -1,5 +1,7 @@
 package zero.test;
 
+import btw.AddonHandler;
+
 import net.minecraft.src.Block;
 import net.minecraft.src.World;
 
@@ -35,7 +37,7 @@ public interface IBlockMixins {
     
     // This is only called after the face shared with the
     // neighbor block is already known to be sticky
-    default public boolean canStickTo(World world, int X, int Y, int Z, int direction, int neighbor_id) {
+    default public boolean canBeStuckTo(World world, int X, int Y, int Z, int direction, int neighbor_id) {
         return true;
     }
     
@@ -48,5 +50,11 @@ public interface IBlockMixins {
     default public boolean isStickyForEntitiesWhenMoved(int direction, int meta) {
         return false;
     }
+    
+#if ENABLE_SLIME_SUPPORTING_MORTAR_BLOCKS
+    default public boolean permanentlySupportsMortarBlocks(World world, int X, int Y, int Z, int direction) {
+        return false;
+    }
+#endif
 #endif
 }
