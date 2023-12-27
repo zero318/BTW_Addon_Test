@@ -64,7 +64,7 @@ public class SlimeBlock extends Block {
         if (!entity.isSneaking()) {
             entity.fallDistance = 0.0f;
             double newY = entity.motionY;
-            AddonHandler.logMessage("Landed on slime "+newY);
+            //AddonHandler.logMessage("Landed on slime "+newY);
             if (newY < 0.0) {
                 //entity.isAirBorne = true;
                 // This doesn't work...?

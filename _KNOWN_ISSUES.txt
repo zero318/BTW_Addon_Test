@@ -1,7 +1,4 @@
 -All blocks appear twice in the creative menu
 -Textures are slightly broken
--Observers don't detect block placement
--Observers don't create a clock when facing each other
--Slime/glue blocks have broken transparency (might remove)
--Slime/glue blocks have no special properties beyond moving additional blocks with pistons and being conductive. Sounds, bouncing, instant breaking, etc. are not implemented yet.
+-Slime/glue blocks have broken transparency
 -The CUD recipe is lazy AF
