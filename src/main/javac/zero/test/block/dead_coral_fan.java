@@ -28,7 +28,7 @@ public class DeadCoralFan extends Block {
     }
     
     public int updateShape(World world, int X, int Y, int Z, int direction, int meta) {
-        AddonHandler.logMessage("CORAL META "+meta);
+        //AddonHandler.logMessage("CORAL META "+meta);
         int attached_face = READ_META_FIELD(meta, DIRECTION);
         if (attached_face != 7) {
             X -= Facing.offsetsXForSide[attached_face];
