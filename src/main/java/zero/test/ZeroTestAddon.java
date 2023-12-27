@@ -8,6 +8,9 @@ import btw.crafting.recipe.RecipeManager;
 import btw.inventory.util.InventoryUtils;
 import zero.test.block.*;
 import zero.test.block.ZeroTestBlocks;
+// Vanilla observers
+// Slime blocks
+// Push only and dead coral fans
 
 public class ZeroTestAddon extends BTWAddon {
     private static ZeroTestAddon instance;
@@ -16,6 +19,7 @@ public class ZeroTestAddon extends BTWAddon {
     }
     @Override
     public void initialize() {
+        //AddonHandler.logMessage(this.getName() + " Version " + this.getVersionString() + " Initializing...");
         ZeroTestBlocks.cud_block = new CUDBlock(1318);
         Item.itemsList[1318 -256] = new ItemBlock(1318 -256);
         ZeroTestBlocks.observer_block = new ObserverBlock(1319);
@@ -33,6 +37,8 @@ public class ZeroTestAddon extends BTWAddon {
     }
     @Override
     public void postInitialize() {
+        // TODO: Make this less lazy so it's not expensive
+        // CUD Block
         RecipeManager.addShapelessRecipe(
             new ItemStack(ZeroTestBlocks.cud_block, 1, 0),
             new ItemStack[] {
@@ -40,6 +46,7 @@ public class ZeroTestAddon extends BTWAddon {
                 new ItemStack(BTWBlocks.buddyBlock, 1, 0)
             }
         );
+        // Observer recipe
   RecipeManager.addSoulforgeRecipe(
             new ItemStack(ZeroTestBlocks.observer_block, 1),
             new Object[] {
@@ -52,15 +59,18 @@ public class ZeroTestAddon extends BTWAddon {
     'Y', Item.netherQuartz
             }
         );
+        // Slime block
         RecipeManager.addPistonPackingRecipe(
             ZeroTestBlocks.slime_block,
             new ItemStack(Item.slimeBall, 9)
         );
+        // Glue block
         RecipeManager.addPistonPackingRecipe(
             ZeroTestBlocks.glue_block,
             new ItemStack(BTWItems.glue, 4)
         );
     }
+    // Is this important?
     public static ZeroTestAddon getInstance() {
         if (instance != null)
             instance = new ZeroTestAddon();

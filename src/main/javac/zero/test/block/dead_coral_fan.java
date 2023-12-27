@@ -48,13 +48,6 @@ public class DeadCoralFan extends Block {
     
     @Override
     public int onBlockPlaced(World world, int X, int Y, int Z, int side, float hitX, float hitY, float hitZ, int meta) {
-        int ret = -1;
-        int neighbor_id;
-        
-        //AddonHandler.logMessage("CORAL SIDE "+side);
-        //AddonHandler.logMessage("CORAL META "+meta);
-        
-        
         X -= Facing.offsetsXForSide[side];
         Y -= Facing.offsetsYForSide[side];
         Z -= Facing.offsetsZForSide[side];

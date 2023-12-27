@@ -9,6 +9,7 @@ public class IronTrapDoor extends TrapDoorBlock {
         this.setPicksEffectiveOn(true);
   this.setStepSound(soundMetalFootstep);
   this.setUnlocalizedName("iron_trapdoor");
+        //disable_stats();
     }
     @Override
  public boolean onBlockActivated(World world, int X, int Y, int Z, EntityPlayer player, int side, float hitX, float hitY, float hitZ) {

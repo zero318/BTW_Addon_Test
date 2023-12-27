@@ -1,5 +1,8 @@
 package zero.test.block;
 import net.minecraft.src.Block;
+// Vanilla observers
+// Slime blocks
+// Push only and dead coral fans
 
 public class ZeroTestBlocks {
     public static Block cud_block;
