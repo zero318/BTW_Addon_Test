@@ -5,3 +5,5 @@ tile.glue_block.name=Glue Block
 tile.iron_trapdoor.name=Iron Trapdoor
 tile.pull_only_test_block.name=Pull Only Test Block
 tile.dead_coral_fan.name=Dead Coral Fan
+tile.block_breaker.name=Block Breaker
+tile.block_placer.name=Block Placer

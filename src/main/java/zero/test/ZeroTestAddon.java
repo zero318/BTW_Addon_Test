@@ -11,6 +11,12 @@ import zero.test.block.ZeroTestBlocks;
 // Vanilla observers
 // Slime blocks
 // Push only and dead coral fans
+// Allow slime to keep loose blocks
+// suspended in midair as if they
+// had mortar applied
+// Fix how most BTW blocks recieve power
+// Allow block dispensers to respond to short pulses
+// Block Breaker and Block Placer
 
 public class ZeroTestAddon extends BTWAddon {
     private static ZeroTestAddon instance;
@@ -34,6 +40,10 @@ public class ZeroTestAddon extends BTWAddon {
         Item.itemsList[1323 -256] = new ItemBlock(1323 -256);
         ZeroTestBlocks.dead_coral_fan = new DeadCoralFan(1324);
         Item.itemsList[1324 -256] = new ItemBlock(1324 -256);
+        ZeroTestBlocks.block_breaker = new BlockBreaker(1325);
+        Item.itemsList[1325 -256] = new ItemBlock(1325 -256);
+        ZeroTestBlocks.block_placer = new BlockPlacer(1326);
+        Item.itemsList[1326 -256] = new ItemBlock(1326 -256);
     }
     @Override
     public void postInitialize() {
@@ -68,6 +78,13 @@ public class ZeroTestAddon extends BTWAddon {
         RecipeManager.addPistonPackingRecipe(
             ZeroTestBlocks.glue_block,
             new ItemStack(BTWItems.glue, 4)
+        );
+        RecipeManager.addSawRecipe(
+            new ItemStack[] {
+                new ItemStack(ZeroTestBlocks.block_breaker, 1, 0),
+                new ItemStack(ZeroTestBlocks.block_placer, 1, 0)
+            },
+            BTWBlocks.blockDispenser
         );
     }
     // Is this important?

@@ -46,6 +46,12 @@ public class ZeroTestAddon extends BTWAddon {
         ZeroTestBlocks.dead_coral_fan = new DeadCoralFan(DEAD_CORAL_FAN_ID);
         Item.itemsList[DEAD_CORAL_FAN_ID-256] = new ItemBlock(DEAD_CORAL_FAN_ID-256);
 #endif
+#if ENABLE_BLOCK_DISPENSER_VARIANTS
+        ZeroTestBlocks.block_breaker = new BlockBreaker(BLOCK_BREAKER_ID);
+        Item.itemsList[BLOCK_BREAKER_ID-256] = new ItemBlock(BLOCK_BREAKER_ID-256);
+        ZeroTestBlocks.block_placer = new BlockPlacer(BLOCK_PLACER_ID);
+        Item.itemsList[BLOCK_PLACER_ID-256] = new ItemBlock(BLOCK_PLACER_ID-256);
+#endif
     }
     
     @Override
@@ -87,6 +93,16 @@ public class ZeroTestAddon extends BTWAddon {
         RecipeManager.addPistonPackingRecipe(
             ZeroTestBlocks.glue_block,
             new ItemStack(BTWItems.glue, 4)
+        );
+#endif
+
+#if ENABLE_BLOCK_DISPENSER_VARIANTS
+        RecipeManager.addSawRecipe(
+            new ItemStack[] {
+                new ItemStack(ZeroTestBlocks.block_breaker, 1, 0),
+                new ItemStack(ZeroTestBlocks.block_placer, 1, 0)
+            },
+            BTWBlocks.blockDispenser
         );
 #endif
     }

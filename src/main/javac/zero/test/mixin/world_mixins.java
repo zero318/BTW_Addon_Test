@@ -25,6 +25,14 @@ import zero.test.IWorldMixins;
 public class WorldMixins implements IWorldMixins {
     
     /*
+    public boolean is_handling_piston_move = false;
+    
+    public boolean get_is_handling_piston_move() {
+        return this.is_handling_piston_move;
+    }
+    */
+    
+    /*
         Changes:
         - Added getWeakChanges instead of hardcoding the comparator ID
     */
@@ -185,6 +193,15 @@ public class WorldMixins implements IWorldMixins {
                 current_block_id = chunk.getBlockID(X & 0xF, Y, Z & 0xF);
             }
             
+            /*
+            boolean prev_handling_piston = false;
+            if (!world.isRemote) {
+                prev_handling_piston = is_handling_piston_move;
+                is_handling_piston_move = (flags & UPDATE_MOVE_BY_PISTON) != 0;
+            }
+            AddonHandler.logMessage("Piston move state: "+is_handling_piston_move);
+            */
+            
             boolean block_changed = chunk.setBlockIDWithMetadata(X & 0xF, Y, Z & 0xF, block_id, meta);
             
             if ((flags & UPDATE_SUPPRESS_LIGHT) == 0) {
@@ -231,6 +248,11 @@ public class WorldMixins implements IWorldMixins {
                     //}
                 }
             }
+            /*
+            if (!world.isRemote) {
+                is_handling_piston_move = prev_handling_piston;
+            }
+            */
             return block_changed;
         }
         return false;
@@ -253,6 +275,14 @@ public class WorldMixins implements IWorldMixins {
             */
             
             if (block_changed) {
+                /*
+                boolean prev_handling_piston = false;
+                if (!world.isRemote) {
+                    prev_handling_piston= is_handling_piston_move;
+                    is_handling_piston_move = (flags & UPDATE_MOVE_BY_PISTON) != 0;
+                }
+                */
+                
                 //int current_block_id = 0;
                 //if (
                     //(flags & (UPDATE_NEIGHBORS | UPDATE_KNOWN_SHAPE)) != UPDATE_KNOWN_SHAPE
@@ -291,10 +321,26 @@ public class WorldMixins implements IWorldMixins {
                     //}
                     this.updateNeighbourShapes(X, Y, Z, flags & ~(UPDATE_NEIGHBORS | UPDATE_SUPPRESS_DROPS));
                 }
+                /*
+                if (!world.isRemote) {
+                    is_handling_piston_move = prev_handling_piston;
+                }
+                */
             }
             return block_changed;
         }
         return false;
+    }
+#endif
+
+#if ENABLE_LESS_CRAP_BTW_BLOCK_POWERING
+    // Ideally this would be changed inside the code
+    // of each BTW block, but since nothing in vanilla
+    // calls this function anyway it can be changed here
+    // to simplify the mixins.
+    @Overwrite
+    public boolean isBlockGettingPowered(int X, int Y, int Z) {
+        return ((World)(Object)this).isBlockIndirectlyGettingPowered(X, Y, Z);
     }
 #endif
 }

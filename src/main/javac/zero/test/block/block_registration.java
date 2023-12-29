@@ -19,4 +19,8 @@ public class ZeroTestBlocks {
     public static Block pull_only_test_block;
     public static Block dead_coral_fan;
 #endif
+#if ENABLE_BLOCK_DISPENSER_VARIANTS
+    public static Block block_breaker;
+    public static Block block_placer;
+#endif
 }

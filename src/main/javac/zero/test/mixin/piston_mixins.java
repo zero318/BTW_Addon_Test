@@ -42,7 +42,11 @@ import zero.test.IBlockEntityPistonMixins;
 #endif
 
 @Mixin(PistonBlockBase.class)
-public abstract class PistonMixins MACRO_IF(MACRO_IS_1(ENABLE_MOVING_BLOCK_CHAINING), extends BlockPistonBase) {
+public abstract class PistonMixins extends BlockPistonBase {
+
+    public PistonMixins(int block_id, boolean is_sticky) {
+        super(block_id, is_sticky);
+    }
     
     
     public boolean hasLargeCenterHardPointToFacing(IBlockAccess block_access, int X, int Y, int Z, int direction, boolean ignore_transparency) {
@@ -51,10 +55,6 @@ public abstract class PistonMixins MACRO_IF(MACRO_IS_1(ENABLE_MOVING_BLOCK_CHAIN
     }
     
 #if ENABLE_MOVING_BLOCK_CHAINING
-
-    public PistonMixins(int block_id, boolean is_sticky) {
-        super(block_id, is_sticky);
-    }
     
     @Shadow
     protected abstract int getPistonShovelEjectionDirection(World world, int X, int Y, int Z, int direction);
@@ -690,7 +690,7 @@ public abstract class PistonMixins MACRO_IF(MACRO_IS_1(ENABLE_MOVING_BLOCK_CHAIN
         while (--i >= DESTROY_LIST_START_INDEX) {
             // Set X,Y,Z to position of block in destroy list
             packed_pos = pushed_blocks[i];
-            world.notifyBlocksOfNeighborChange(BLOCK_POS_UNPACK_ARGS(packed_pos), data_list[i]);
+            world.notifyBlocksOfNeighborChange(BLOCK_POS_UNPACK_ARGS(packed_pos), data_list[i] & 0xFFFF);
         }
         i = push_index_global;
         while (--i >= PUSH_LIST_START_INDEX) {

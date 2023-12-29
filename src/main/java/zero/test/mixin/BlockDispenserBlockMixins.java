@@ -1,4 +1,11 @@
-package zero.test.block;
+package zero.test.mixin;
+import net.minecraft.src.*;
+import btw.block.blocks.*;
+import btw.AddonHandler;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
+import java.util.Random;
+import zero.test.IBlockMixins;
 /// Utility Macro Defs
 /// Mutable Pos Move X
 /// Mutable Pos Move Y
@@ -64,22 +71,10 @@ case NEIGHBOR_UP_SOUTH:
 // Allow block dispensers to respond to short pulses
 // Block Breaker and Block Placer
 
-import net.minecraft.src.*;
-public class PullOnlyTestBlock extends Block {
-    public PullOnlyTestBlock(int block_id) {
-        super(block_id, Material.rock);
-        this.setUnlocalizedName("pull_only_test_block");
-        this.setCreativeTab(CreativeTabs.tabRedstone);
-    }
-    @Override
-    public boolean canBlockBePulledByPiston(World world, int X, int Y, int Z, int direction) {
+@Mixin(BlockDispenserBlock.class)
+public class BlockDispenserBlockMixins {
+    @Overwrite
+    private boolean validateBlockDispenser(World world, int X, int Y, int Z) {
         return true;
-    }
-    @Override
-    public boolean canBlockBePushedByPiston(World world, int X, int Y, int Z, int direction) {
-        return false;
-    }
-    public boolean canBeStuckTo(World world, int X, int Y, int Z, int direction, int neighbor_id) {
-        return false;
     }
 }

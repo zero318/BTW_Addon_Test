@@ -5,6 +5,12 @@ import net.minecraft.src.World;
 // Vanilla observers
 // Slime blocks
 // Push only and dead coral fans
+// Allow slime to keep loose blocks
+// suspended in midair as if they
+// had mortar applied
+// Fix how most BTW blocks recieve power
+// Allow block dispensers to respond to short pulses
+// Block Breaker and Block Placer
 
 public interface IBlockMixins {
     // Whether or not the block should have onNeighborBlockChange

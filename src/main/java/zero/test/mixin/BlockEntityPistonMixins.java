@@ -42,6 +42,12 @@ import java.util.List;
 // Vanilla observers
 // Slime blocks
 // Push only and dead coral fans
+// Allow slime to keep loose blocks
+// suspended in midair as if they
+// had mortar applied
+// Fix how most BTW blocks recieve power
+// Allow block dispensers to respond to short pulses
+// Block Breaker and Block Placer
 /// Utility Macro Defs
 /// Mutable Pos Move X
 /// Mutable Pos Move Y
@@ -142,13 +148,34 @@ public class BlockEntityPistonMixins extends TileEntity implements IBlockEntityP
         ((IWorldAccessMixins)self.worldObj).setScanningTileEntities(true);
         self.worldObj.setBlock(self.xCoord, self.yCoord, self.zCoord, stored_block_id, stored_meta, 0x01 | 0x02);
         //if (!self.worldObj.isRemote) AddonHandler.logMessage("PLACE BLOCK "+stored_block_id+"."+stored_meta);
+        NBTTagCompound prev_tile_entity_data = self.storedTileEntityData;
         if (self.storedTileEntityData != null) {
             // setBlockTileEntity updates the entity
             // coordinates itself when scanningTileEntities
             // is true
+            //if (!self.worldObj.isRemote) AddonHandler.logMessage()
             worldObj.setBlockTileEntity(self.xCoord, self.yCoord, self.zCoord, TileEntity.createAndLoadEntity(self.storedTileEntityData));
+            self.cachedTileEntity = null;
         }
         self.worldObj.notifyBlockOfNeighborChange(self.xCoord, self.yCoord, self.zCoord, stored_block_id);
+        NBTTagCompound new_tile_entity_data = null;
+        TileEntity new_tile_entity = self.worldObj.getBlockTileEntity(self.xCoord, self.yCoord, self.zCoord);
+        if (new_tile_entity != null) {
+            new_tile_entity_data = new NBTTagCompound();
+            new_tile_entity.writeToNBT(new_tile_entity_data);
+        }
+        if (
+            prev_tile_entity_data != null &&
+            prev_tile_entity_data != new_tile_entity_data
+        ) {
+            AddonHandler.logMessage("META FAIL");
+            AddonHandler.logMessage("Old: "+prev_tile_entity_data.toString());
+            if (new_tile_entity_data != null) {
+                AddonHandler.logMessage("New: "+new_tile_entity_data.toString());
+            } else {
+                AddonHandler.logMessage("New: null");
+            }
+        }
         // Restore original value of scanningTileEntities
         ((IWorldAccessMixins)self.worldObj).setScanningTileEntities(scanning_tile_entities_temp);
         //if (stored_block_id != this.worldObj.getBlockId(self.xCoord, self.yCoord, self.zCoord)) {
@@ -191,7 +218,7 @@ public class BlockEntityPistonMixins extends TileEntity implements IBlockEntityP
     @Overwrite
     private void updatePushedObjects(float progress, float par2) {
         TileEntityPiston self = (TileEntityPiston)(Object)this;
-  boolean extending = self.isExtending();
+        boolean extending = self.isExtending();
         double d = par2;
         int stored_direction = self.getPistonOrientation();
         int stored_block_id = self.getStoredBlockID();
@@ -205,15 +232,15 @@ public class BlockEntityPistonMixins extends TileEntity implements IBlockEntityP
             }
             is_sticky = ((IBlockMixins)(Object)block).isStickyForEntitiesWhenMoved(stored_direction, stored_meta);
         }
-  AxisAlignedBB bounding_box = Block.pistonMoving.getAxisAlignedBB(self.worldObj, self.xCoord, self.yCoord, self.zCoord, stored_block_id, extending ? 1.0f - progress : progress - 1.0f, stored_direction);
-  if (bounding_box != null) {
-   List var4 = self.worldObj.getEntitiesWithinAABBExcludingEntity((Entity)null, bounding_box);
-   if (!var4.isEmpty()) {
+        AxisAlignedBB bounding_box = Block.pistonMoving.getAxisAlignedBB(self.worldObj, self.xCoord, self.yCoord, self.zCoord, stored_block_id, extending ? 1.0f - progress : progress - 1.0f, stored_direction);
+        if (bounding_box != null) {
+            List var4 = self.worldObj.getEntitiesWithinAABBExcludingEntity((Entity)null, bounding_box);
+            if (!var4.isEmpty()) {
                 List pushed_objects = ((IBlockEntityPistonAccessMixins)self).getPushedObjects();
-    pushed_objects.addAll(var4);
-    Iterator var5 = pushed_objects.iterator();
-    while (var5.hasNext()) {
-     Entity entity = (Entity)var5.next();
+                pushed_objects.addAll(var4);
+                Iterator var5 = pushed_objects.iterator();
+                while (var5.hasNext()) {
+                    Entity entity = (Entity)var5.next();
                     entity.moveEntity(
                         d * (double)Facing.offsetsXForSide[stored_direction],
                         d * (double)Facing.offsetsYForSide[stored_direction],
@@ -224,10 +251,10 @@ public class BlockEntityPistonMixins extends TileEntity implements IBlockEntityP
                         entity.motionY += (double)Facing.offsetsYForSide[stored_direction];
                         entity.motionZ += (double)Facing.offsetsZForSide[stored_direction];
                     }
-    }
-    pushed_objects.clear();
-   }
-  }
+                }
+                pushed_objects.clear();
+            }
+        }
         float last_progress;
         if (is_sticky && (last_progress = ((IBlockEntityPistonAccessMixins)self).getLastProgress()) < 1.0f) {
             //bounding_box = Block.pistonMoving.getAxisAlignedBB(self.worldObj, self.xCoord, self.yCoord, self.zCoord, stored_block_id, extending ? 1.0f - progress : progress - 1.0f, stored_direction);
@@ -260,25 +287,27 @@ public class BlockEntityPistonMixins extends TileEntity implements IBlockEntityP
                     break;
             }
             List var4 = self.worldObj.getEntitiesWithinAABBExcludingEntity((Entity)null, bounding_box);
+            /*
             if (!self.worldObj.isRemote) {
                 AddonHandler.logMessage(""+self.worldObj.getTotalWorldTime()+" "+progress+" "+last_progress+" "+d);
                 AddonHandler.logMessage(" "+bounding_box.minX+" "+bounding_box.minY+" "+bounding_box.minZ);
                 AddonHandler.logMessage(" "+bounding_box.maxX+" "+bounding_box.maxY+" "+bounding_box.maxZ);
             }
-   if (!var4.isEmpty()) {
+            */
+            if (!var4.isEmpty()) {
                 List pushed_objects = ((IBlockEntityPistonAccessMixins)self).getPushedObjects();
-    pushed_objects.addAll(var4);
-    Iterator var5 = pushed_objects.iterator();
+                pushed_objects.addAll(var4);
+                Iterator var5 = pushed_objects.iterator();
                 d = progress - last_progress;
-    while (var5.hasNext()) {
+                while (var5.hasNext()) {
                     ((Entity)var5.next()).moveEntity(
                         d * (double)Facing.offsetsXForSide[stored_direction],
                         d * (double)Facing.offsetsYForSide[stored_direction],
                         d * (double)Facing.offsetsZForSide[stored_direction]
                     );
-    }
-    pushed_objects.clear();
-   }
+                }
+                pushed_objects.clear();
+            }
         }
- }
+    }
 }

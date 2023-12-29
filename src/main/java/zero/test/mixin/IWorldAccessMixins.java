@@ -26,6 +26,12 @@ import zero.test.IBlockMixins;
 // Vanilla observers
 // Slime blocks
 // Push only and dead coral fans
+// Allow slime to keep loose blocks
+// suspended in midair as if they
+// had mortar applied
+// Fix how most BTW blocks recieve power
+// Allow block dispensers to respond to short pulses
+// Block Breaker and Block Placer
 /// Utility Macro Defs
 /// Mutable Pos Move X
 /// Mutable Pos Move Y

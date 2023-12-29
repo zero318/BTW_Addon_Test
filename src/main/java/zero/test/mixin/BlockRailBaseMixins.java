@@ -1,4 +1,24 @@
-package zero.test.block;
+package zero.test.mixin;
+import net.minecraft.src.*;
+import btw.AddonHandler;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import zero.test.IWorldMixins;
+import zero.test.IBlockBaseRailLogicMixins;
+import zero.test.mixin.IBlockBaseRailLogicAccessMixins;
+// Vanilla observers
+// Slime blocks
+// Push only and dead coral fans
+// Allow slime to keep loose blocks
+// suspended in midair as if they
+// had mortar applied
+// Fix how most BTW blocks recieve power
+// Allow block dispensers to respond to short pulses
+// Block Breaker and Block Placer
 /// Utility Macro Defs
 /// Mutable Pos Move X
 /// Mutable Pos Move Y
@@ -54,32 +74,27 @@ case NEIGHBOR_UP_SOUTH:
 /// Misc. Flags
 // Glazed terracotta
 // Z doesn't need to be masked because it's in the top bits anyway
-// Vanilla observers
-// Slime blocks
-// Push only and dead coral fans
-// Allow slime to keep loose blocks
-// suspended in midair as if they
-// had mortar applied
-// Fix how most BTW blocks recieve power
-// Allow block dispensers to respond to short pulses
-// Block Breaker and Block Placer
-
-import net.minecraft.src.*;
-public class PullOnlyTestBlock extends Block {
-    public PullOnlyTestBlock(int block_id) {
-        super(block_id, Material.rock);
-        this.setUnlocalizedName("pull_only_test_block");
-        this.setCreativeTab(CreativeTabs.tabRedstone);
+@Mixin(BlockRailBase.class)
+public class BlockRailBaseMixins {
+    /*
+    @Inject(
+        method = "breakBlock(Lnet/minecraft/src/World;IIIII)V",
+        at = @At("HEAD"),
+        cancellable = true
+    )
+    public void break_block_new(World world, int X, int Y, int Z, int par5, int meta, CallbackInfo callback_info) {
+        if (((IWorldMixins)world).get_is_handling_piston_move()) {
+            //AddonHandler.logMessage("Cancel break rail");
+            callback_info.cancel();
+        }
+        //AddonHandler.logMessage("Break rail");
     }
-    @Override
-    public boolean canBlockBePulledByPiston(World world, int X, int Y, int Z, int direction) {
-        return true;
-    }
-    @Override
-    public boolean canBlockBePushedByPiston(World world, int X, int Y, int Z, int direction) {
-        return false;
-    }
-    public boolean canBeStuckTo(World world, int X, int Y, int Z, int direction, int neighbor_id) {
-        return false;
+    */
+    //@Override
+    public int preBlockPlacedBy(World world, int X, int Y, int Z, int meta, EntityLiving entity_living) {
+        return entity_living instanceof EntityPlayer &&
+               0x2 != ((Direction.directionToFacing[(int)Math.floor(entity_living.rotationYaw / 90.0 + 0.5) & 3])&~1)
+                ? 1
+                : 0;
     }
 }

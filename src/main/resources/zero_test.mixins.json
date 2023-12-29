@@ -19,7 +19,12 @@
     "MortarReceiverBlockMixins",
     "MortarReceiverSlabBlockMixins",
     "MortarReceiverStairsBlockMixins",
-    "LavaReceiverBlockMixins"
+    "LavaReceiverBlockMixins",
+    "BlockBaseRailLogicMixins",
+    "IBlockBaseRailLogicAccessMixins",
+    "BlockRailBaseMixins",
+    "BlockDispenserBlockMixins",
+    "IBlockDispenserBlockAccessMixins"
   ],
   "client": [
     "ZeroTestMixin"

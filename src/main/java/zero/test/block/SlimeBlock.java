@@ -64,6 +64,12 @@ case NEIGHBOR_UP_SOUTH:
 // Vanilla observers
 // Slime blocks
 // Push only and dead coral fans
+// Allow slime to keep loose blocks
+// suspended in midair as if they
+// had mortar applied
+// Fix how most BTW blocks recieve power
+// Allow block dispensers to respond to short pulses
+// Block Breaker and Block Placer
 
 public class SlimeBlock extends Block {
     public SlimeBlock(int block_id) {
