@@ -35,6 +35,13 @@ import zero.test.IBlockEntityPistonMixins;
 
 @Mixin(BlockPistonMoving.class)
 public class BlockPistonMovingMixins {
+#if ENABLE_BETTER_BUDDY_DETECTION
+    //@Override
+    public boolean triggersBuddy() {
+        return false;
+    }
+#endif
+    
     public boolean hasLargeCenterHardPointToFacing(IBlockAccess block_access, int X, int Y, int Z, int direction, boolean ignore_transparency) {
         TileEntity tile_entity = block_access.getBlockTileEntity(X, Y, Z);
         if (tile_entity instanceof TileEntityPiston) {

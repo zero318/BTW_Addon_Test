@@ -23,4 +23,25 @@ public class BlockMixins implements IBlockMixins {
     public int getMobilityFlag(World world, int X, int Y, int Z) {
         return ((Block)(Object)this).getMobilityFlag();
     }
+    
+#if ENABLE_DIRECTIONAL_UPDATES
+    @Overwrite
+    public boolean rotateAroundJAxis(World world, int X, int Y, int Z, boolean reverse) {
+        int prev_meta = world.getBlockMetadata(X, Y, Z);
+        
+        Block self = (Block)(Object)this;
+
+        int new_meta = self.rotateMetadataAroundJAxis(prev_meta, reverse);
+
+        if (prev_meta != new_meta) {
+            new_meta = ((IWorldMixins)world).updateFromNeighborShapes(X, Y, Z, self.blockID, new_meta);
+            
+            world.setBlockMetadataWithNotify(X, Y, Z, new_meta, UPDATE_NEIGHBORS | UPDATE_CLIENTS);
+
+            return true;
+        }
+
+        return false;
+    }
+#endif
 }

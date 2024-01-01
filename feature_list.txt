@@ -37,10 +37,18 @@ Rails and other movable blocks that need support:
 - Should no longer break when pushed in most situations
 
 Tile Entities:
-- No longer get reinitialized when quickly pushed by a piston
+- Mostly no longer get reinitialized when quickly pushed by a piston
 
 Chests:
 - Can't form triple chests when quickly pushed by a piston
+
+Comparators:
+- Enabled rotation on turntables
+- Fixed placement from block dispensers
+- Fixed MC-8911, MC-10653, MC-12211, MC-63669, and MC-195351
+
+Repeaters:
+- Fixed MC-9194
 
 ///
 Debug Features (No recipes and more broken)
@@ -61,13 +69,13 @@ Planned Features
 - Giving slime/glue meaningful functionality with turntables
 - Finishing iron trapdoors to have a recipe and work properly
 - Adding an iron fence gate
+- Adding a /noclip command
 
 ///
 Known Issues
 ///
 - All new blocks are listed in the creative menu twice
 - Slime/glue have kinda broken rendering just because 1.5.2
-- There are no recipes for uncrafting slime/glue blocks
 - Slime blocks don't bounce entities that fall on them despite having code for it
 - Glue blocks are conductive and allow placing blocks that require support on them (tempted to make this a feature though, since that sucks about honey)
 - Players touching the south/bottom of a glue block have glitchy interactions with the "can't see when inside a solid block" mechanic
@@ -75,3 +83,4 @@ Known Issues
 - The CUD block recipe sucks
 - Observers are conductive
 - Sloped rails don't flatten out when the rail they're connected to is moved down by a piston
+- /noclip seems to not work on the serverside?

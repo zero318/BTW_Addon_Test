@@ -35,6 +35,13 @@ import zero.test.IBlockEntityPistonMixins;
 
 @Mixin(BlockPistonExtension.class)
 public class BlockPistonExtensionMixins {
+#if ENABLE_BETTER_BUDDY_DETECTION
+    //@Override
+    public boolean triggersBuddy() {
+        return false;
+    }
+#endif
+    
     public boolean hasLargeCenterHardPointToFacing(IBlockAccess block_access, int X, int Y, int Z, int direction, boolean ignore_transparency) {
         int meta = block_access.getBlockMetadata(X, Y, Z);
         return direction == READ_META_FIELD(meta, DIRECTION);

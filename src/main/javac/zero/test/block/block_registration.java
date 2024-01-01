@@ -23,4 +23,8 @@ public class ZeroTestBlocks {
     public static Block block_breaker;
     public static Block block_placer;
 #endif
+#if ENABLE_MORE_VANILLA_BLOCKS
+    public static Block packed_ice;
+    public static Block blue_ice;
+#endif
 }

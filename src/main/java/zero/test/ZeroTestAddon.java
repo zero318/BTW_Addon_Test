@@ -7,21 +7,13 @@ import btw.item.BTWItems;
 import btw.crafting.recipe.RecipeManager;
 import btw.inventory.util.InventoryUtils;
 import zero.test.block.*;
+import zero.test.command.*;
 import zero.test.block.ZeroTestBlocks;
-// Vanilla observers
-// Slime blocks
-// Push only and dead coral fans
-// Allow slime to keep loose blocks
-// suspended in midair as if they
-// had mortar applied
-// Fix how most BTW blocks recieve power
-// Allow block dispensers to respond to short pulses
-// Block Breaker and Block Placer
 
 public class ZeroTestAddon extends BTWAddon {
     private static ZeroTestAddon instance;
     private ZeroTestAddon() {
-        super("Zero Test Addon", "0.0.3", "ZeroTest");
+        super("Zero Test Addon", "0.0.4", "ZeroTest");
     }
     @Override
     public void initialize() {
@@ -72,12 +64,24 @@ public class ZeroTestAddon extends BTWAddon {
         // Slime block
         RecipeManager.addPistonPackingRecipe(
             ZeroTestBlocks.slime_block,
-            new ItemStack(Item.slimeBall, 9)
+            new ItemStack(Item.slimeBall, 9, 0)
+        );
+        RecipeManager.addStokedCauldronRecipe(
+            new ItemStack(Item.slimeBall, 9, 0),
+            new ItemStack[] {
+                new ItemStack(ZeroTestBlocks.slime_block, 1, 0),
+            }
         );
         // Glue block
         RecipeManager.addPistonPackingRecipe(
             ZeroTestBlocks.glue_block,
-            new ItemStack(BTWItems.glue, 4)
+            new ItemStack(BTWItems.glue, 4, 0)
+        );
+        RecipeManager.addStokedCauldronRecipe(
+            new ItemStack(BTWItems.glue, 4, 0),
+            new ItemStack[] {
+                new ItemStack(ZeroTestBlocks.glue_block, 1, 0)
+            }
         );
         RecipeManager.addSawRecipe(
             new ItemStack[] {

@@ -36,10 +36,6 @@ public class ObserverBlock extends BuddyBlock {
         return true;
     }
     
-    //public boolean caresAboutUpdateDirection() {
-        //return true;
-    //}
-    
     @Override
     public void onBlockAdded(World world, int X, int Y, int Z) {
         // HACK: 

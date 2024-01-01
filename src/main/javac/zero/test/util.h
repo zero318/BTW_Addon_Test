@@ -1,9 +1,12 @@
 #ifndef UTIL_H
 #define UTIL_H 1
 
-/// Utility Macro Defs
-
 #define MACRO_VOID(...)
+
+MACRO_VOID(
+/// Utility Macro Defs
+)
+
 
 #define MACRO_CAT_RAW(arg1, arg2) arg1 ## arg2
 #define MACRO_CAT(arg1, arg2) MACRO_CAT_RAW(arg1, arg2)
@@ -173,7 +176,9 @@ MACRO_SECOND_EVAL(cond(1),0)
 
 #define MACRO_ARG_COUNT5(...) MACRO_SIXTH_EVAL(__VA_ARGS__ __VA_OPT__(,)5,4,3,2,1,0)
 
+MACRO_VOID(
 /// Mutable Pos Move X
+)
 
 #define mutable_pos_set_x_from_raw(pos, from, x) (pos)\
 .setX((from).getX()MACRO_SECOND_EVAL(MACROV_##x(),+(x)))
@@ -189,7 +194,9 @@ MACRO_SECOND_EVAL(cond(1),0)
 #define mutable_pos_move_x(pos, x) (pos)\
 MACRO_SECOND_EVAL(MACROV_##x(),.setX((pos).getX()+(x)))
 
+MACRO_VOID(
 /// Mutable Pos Move Y
+)
 
 #define mutable_pos_set_y_from_raw(pos, from, y) (pos)\
 .setY((from).getY()MACRO_SECOND_EVAL(MACROV_##y(),+(y)))
@@ -205,7 +212,9 @@ MACRO_SECOND_EVAL(MACROV_##x(),.setX((pos).getX()+(x)))
 #define mutable_pos_move_y(pos, y) (pos)\
 MACRO_SECOND_EVAL(MACROV_##y(),.setY((pos).getY()+(y)))
 
+MACRO_VOID(
 /// Mutable Pos Move Z
+)
 
 #define mutable_pos_move_z_from_raw(pos, from, z) (pos)\
 .setZ((from).getZ()MACRO_SECOND_EVAL(MACROV_##z(),+(z)))
@@ -221,7 +230,9 @@ MACRO_SECOND_EVAL(MACROV_##y(),.setY((pos).getY()+(y)))
 #define mutable_pos_move_z(pos, z) (pos)\
 MACRO_SECOND_EVAL(MACROV_##z(),.setZ((pos).getZ()+(z)))
 
+MACRO_VOID(
 /// Mutable Pos Move
+)
 
 #define mutable_pos_move_X(pos, val) (pos).setX((pos).getX() + (val))
 #define mutable_pos_move_Y(pos, val) (pos).setY((pos).getY() + (val))
@@ -255,7 +266,9 @@ MACRO_SECOND_EVAL(MACROV_##z(),.setZ((pos).getZ()+(z)))
 
 #define mutable_pos_move(...) MACRO_CAT(mutable_pos_move,MACRO_ARG_COUNT5(__VA_ARGS__))(__VA_ARGS__)
 
+MACRO_VOID(
 /// Mutable Pos Create
+)
 
 #define mutable_pos_create_from_raw(from, x, y, z) (new BlockPos.MutableBlockPos(\
 (from).getX()MACRO_SECOND_EVAL(MACROV_##x(),+(x)),\
@@ -286,7 +299,9 @@ MACRO_SECOND_EVAL(MACROV_##z(),.setZ((pos).getZ()+(z)))
 #define PositionIsConductive(level, pos) ((level).getBlockState(pos).isRedstoneConductor((level), (pos)))
 #define PositionIsConductive2(level, posA, posB) ((level).getBlockState(posA).isRedstoneConductor((level), (posB)))
 
+MACRO_VOID(
 /// C-esque stuff
+)
 
 #define loop for(;;)
 
@@ -331,7 +346,9 @@ MACRO_SECOND_EVAL(MACROV_##z(),.setZ((pos).getZ()+(z)))
 #define goto(label) break label
 #define goto_target(label) while(false)
 	
+MACRO_VOID(
 //#define printf(...) System.out.printf(__VA_ARGS__)
+)
 
 #define UseBothUnsafes 1
 
@@ -570,14 +587,18 @@ MACRO_SECOND_EVAL(MACROV_##z(),.setZ((pos).getZ()+(z)))
 
 #define lsb_type(type) MACRO_CAT(lsb_,type)
 
+MACRO_VOID(
 /// x86-esque stuff
+)
 
 #define fill_sign_bit(int_value) ((int_value) >> 31)
 #define sign_bit(int_value) ((int_value) >>> 31)
 
+MACRO_VOID(
 /// Some operations are available
-/// as and @IntrinsicCandidate, in
+/// as an @IntrinsicCandidate, in
 /// which case that form is preferred
+)
 
 #define UCMP8(A,B) (TRUNCB(A)-TRUNCB(B))
 #define UEQU8(A,B) (SIGNXB(A)==SIGNXB(B))
@@ -702,8 +723,10 @@ MACRO_SECOND_EVAL(MACROV_##z(),.setZ((pos).getZ()+(z)))
 #define BSR_TYPE(type,A) (SUFFIXED_OP(BSR,type)(A))
 #define BSF_TYPE(type,A) (SUFFIXED_OP(BSF,type)(A))
 
+MACRO_VOID(
 //#define MOVSX(A) ((int)(A))
 //#define MOVSXD(A) ((long)(A))
+)
 
 #define CASTQ(A) ((long)(A))
 #define CASTL(A) ((int)(A))
@@ -734,14 +757,20 @@ MACRO_SECOND_EVAL(MACROV_##z(),.setZ((pos).getZ()+(z)))
 #define pack_long(A,B) (MOVSXLQ(A)<<32| MOVZXLQ(B))
 #define unpack_long(outA, outB, in) { (outA) = (int)((in) >> 32); (outB) = (int)(in); }
 
+MACRO_VOID(
 // Efficiently tests if [value] is within the range [min, max)
+)
 #define IN_RANGE_EXCLUSIVE32(value, min, max) (ULSS((value)-(min),(max)-(min)))
 
+MACRO_VOID(
 // Efficiently tests if [value] is within the range [min, max]
 // Valid for both signed and unsigned integers
+)
 #define IN_RANGE_INCLUSIVE32(value, min, max) (ULEQ((value)-(min),(max)-(min)))
 
+MACRO_VOID(
 /// Random direction crap
+)
 
 #define DOWN_ORDINAL	(0)
 #define UP_ORDINAL		(1)
@@ -868,6 +897,7 @@ MACRO_SECOND_EVAL(MACROV_##z(),.setZ((pos).getZ()+(z)))
 #define EAST_TO_SOUTH_DELTA_VEC SOUTH_WEST_OFFSETS_VEC
 #define EAST_TO_MID_DELTA_VEC WEST_OFFSETS_VEC
 
+MACRO_VOID(
 /*
 case NEIGHBOR_WEST:
 case NEIGHBOR_EAST:
@@ -884,6 +914,7 @@ case NEIGHBOR_SOUTH:
 case NEIGHBOR_DOWN_SOUTH:
 case NEIGHBOR_UP_SOUTH:
 */
+)
 
 #define NEIGHBOR_SAME		(0x00)
 #define NEIGHBOR_DOWN		(0x04)
@@ -915,7 +946,9 @@ case NEIGHBOR_UP_SOUTH:
 #define neighbor_has_west(neighbor) ((neighbor & NEIGHBOR_WEST_MASK) != 0)
 #define neighbor_has_east(neighbor) ((neighbor & NEIGHBOR_EAST_MASK) != 0)
 
+MACRO_VOID(
 /// Expression Crap
+)
 
 #define PVT_NONE		(0)
 #define PVT_UNKNOWN		PVT_NONE
@@ -942,7 +975,9 @@ case NEIGHBOR_UP_SOUTH:
 #define PVT_CODE		(15)
 #define PVT_ADDRRET		(16)
 
+MACRO_VOID(
 /// Metadata stuff
+)
 
 #define DIRECTION_META_BITS 3
 #define FLAT_DIRECTION_META_BITS 2
@@ -959,9 +994,9 @@ case NEIGHBOR_UP_SOUTH:
 #define DIRECTION_META_EAST 5
 
 #define FLAT_DIRECTION_META_NORTH 0
-#define FLAT_DIRECTION_META_SOUTH 1
-#define FLAT_DIRECTION_META_WEST 2
-#define FLAT_DIRECTION_META_EAST 3
+#define FLAT_DIRECTION_META_EAST 1
+#define FLAT_DIRECTION_META_SOUTH 2
+#define FLAT_DIRECTION_META_WEST 3
 
 #define POWERED_META_FALSE 0
 #define POWERED_META_TRUE 1
@@ -987,7 +1022,9 @@ case NEIGHBOR_UP_SOUTH:
 #define META_IS_BOOL(m) m##_META_IS_BOOL
 #define META_OFFSET(m) m##_META_OFFSET
 
+MACRO_VOID(
 // Meta write mask OFFSET, BITS
+)
 #define METAWM_01 14
 #define METAWM_11 13
 #define METAWM_21 11
@@ -1001,7 +1038,9 @@ case NEIGHBOR_UP_SOUTH:
 #define META_WRITE_MASK(f)\
 MACRO_CATW(METAWM_,META_OFFSET(f),META_BITS(f))
 
+MACRO_VOID(
 // Meta mask values OFFSET/BITS
+)
 #define METAMV_0 0
 #define METAMV_1 1
 #define METAMV_2 3
@@ -1013,7 +1052,9 @@ MACRO_CAT(METAMV_,META_BITS(f))
 #define META_BOOL_CMP(f)\
 MACRO_CAT(METAMV_,META_OFFSET(f))
 
+MACRO_VOID(
 // Meta mask values before shifting OFFSET, BITS
+)
 #define METAMVU_01 1
 #define METAMVU_02 3
 #define METAMVU_03 7
@@ -1028,10 +1069,12 @@ MACRO_CAT(METAMV_,META_OFFSET(f))
 #define META_MASK_UNSHIFTED(f)\
 MACRO_CATW(METAMVU_,META_OFFSET(f),META_BITS(f))
 
+MACRO_VOID(
 // Meta high value data OFFSET, BITS
 // 0 = Needs != 0 if bool
 // 1 = Is last field
 // true = Is last field but uses != 0 anyway because it's 4 bits
+)
 #define METAHVD_01 0
 #define METAHVD_02 0
 #define METAHVD_03 0
@@ -1051,7 +1094,9 @@ MACRO_TERN_BOOL(MACRO_IS_1(MACRO_CATW(METAHVD_,META_OFFSET(f),META_BITS(f))))
 #define META_IS_ONLY_FIELD(f)\
 MACRO_TERN(MACRO_IS_4(META_BITS(f)),1,MACRO_TERN(MACRO_IS_0(META_OFFSET(f)),META_IS_LAST(f),0))
 
+MACRO_VOID(
 // Meta const lookup OFFSET, VALUE
+)
 #define METACL_00 0
 #define METACL_01 1
 #define METACL_02 2
@@ -1089,7 +1134,9 @@ MACRO_CATW(METACL_,META_OFFSET(f),v)
 #define META_VALID_CONST(f,v)\
 MACRO_IS_N_BIT(META_BITS(f),v)
 
+MACRO_VOID(
 // Meta full write BITS, VALUE
+)
 #define METAFW_11(val) ,val
 #define METAFW_23(val) ,val
 #define METAFW_37(val) ,val
@@ -1098,6 +1145,7 @@ MACRO_IS_N_BIT(META_BITS(f),v)
 MACRO_CATW(METAFW_,META_BITS(f),v)
 
 
+MACRO_VOID(
 //#define READ_META_FIELD_RAW(m,f)(\
     /*TEXT*/(m)\
     MACRO_IF_NOT(MACRO_IS_4(META_BITS(f)),\
@@ -1109,10 +1157,12 @@ MACRO_CATW(METAFW_,META_BITS(f),v)
         )\
     )\
 )
+)
 
 #define READ_META_FIELD_RAW(m,f)\
 ((m)MACRO_IF_NOT(MACRO_IS_4(META_BITS(f)),MACRO_IF_NOT(MACRO_IS_0(META_OFFSET(f)),>>>META_OFFSET(f))MACRO_IF_NOT(MACRO_IS_TRUTHY(META_IS_LAST(f)),&META_MASK(f))))
 
+MACRO_VOID(
 //#define READ_META_FIELD_BOOL(m,f)(\
     /*TEXT*/((m)\
     MACRO_IF_NOT(MACRO_IS_TRUTHY(META_IS_ONLY_FIELD(f)),\
@@ -1127,10 +1177,12 @@ MACRO_CATW(METAFW_,META_BITS(f),v)
         /*TEXT*/!=0\
     )\
 )
+)
 
 #define READ_META_FIELD_BOOL(m,f)\
 (((m)MACRO_IF_NOT(MACRO_IS_TRUTHY(META_IS_ONLY_FIELD(f)),MACRO_TERN(MACRO_IS_TRUTHY(META_IS_LAST(f)),>META_BOOL_CMP(f),&META_MASK_UNSHIFTED(f))))MACRO_IF_NOT(MACRO_IS_TRUTHY(META_BOOL_SKIPS_NEQ(f)),!=0))
 
+MACRO_VOID(
 //#define READ_META_FIELD(m,f)(\
     MACRO_TERN(MACRO_IS_TRUTHY(META_IS_BOOL(f)),\
         READ_META_FIELD_BOOL(m,f)\
@@ -1138,10 +1190,12 @@ MACRO_CATW(METAFW_,META_BITS(f),v)
         READ_META_FIELD_RAW(m,f)\
     )\
 )
+)
 
 #define READ_META_FIELD(m,f)\
 (MACRO_TERN(MACRO_IS_TRUTHY(META_IS_BOOL(f)),READ_META_FIELD_BOOL(m,f),READ_META_FIELD_RAW(m,f)))
 
+MACRO_VOID(
 //#define MERGE_META_FIELD_RAW(m,f,v)(\
     MACRO_TERN(MACRO_IS_TRUTHY(META_IS_ONLY_FIELD(f)),\
         /*TEXT*/(v)\
@@ -1165,10 +1219,12 @@ MACRO_CATW(METAFW_,META_BITS(f),v)
         )\
     )\
 )
+)
 
 #define MERGE_META_FIELD_RAW(m,f,v)\
 (MACRO_TERN(MACRO_IS_TRUTHY(META_IS_ONLY_FIELD(f)),(v)MACRO_IF_NOT(META_VALID_CONST(f,v),&META_WRITE_MASK(f)),(m)MACRO_TERN(META_VALID_CONST(f,v),MACRO_IF_NOT(META_IS_FULL_WRITE(f,v),&META_WRITE_MASK(f))MACRO_IF_NOT(MACRO_IS_FALSY(v),|META_CONST_LOOKUP(f,v)),&META_WRITE_MASK(f)|(v)MACRO_IF_NOT(MACRO_IS_0(META_OFFSET(f)),<<META_OFFSET(f)))))
 
+MACRO_VOID(
 //#define MERGE_META_FIELD_BOOL(m,f,v)(\
     MACRO_TERN(MACRO_IS_BOOL_ANY(v),\
         MACRO_TERN(MACRO_IS_TRUTHY(META_IS_ONLY_FIELD(f)),\
@@ -1192,10 +1248,12 @@ MACRO_CATW(METAFW_,META_BITS(f),v)
         )\
     )\
 )
+)
 
 #define MERGE_META_FIELD_BOOL(m,f,v)\
 (MACRO_TERN(MACRO_IS_BOOL_ANY(v),MACRO_TERN(MACRO_IS_TRUTHY(META_IS_ONLY_FIELD(f)),MACRO_CAST_FROM_BOOL(v),(m)MACRO_TERN(MACRO_IS_TRUTHY(v),|META_CONST_LOOKUP(f,1),&META_WRITE_MASK(f))),MACRO_TERN(MACRO_IS_TRUTHY(META_IS_ONLY_FIELD(f)),(v)&1,(m)&META_WRITE_MASK(f)|((v)&1)MACRO_IF_NOT(MACRO_IS_0(META_OFFSET(f)),<<META_OFFSET(f)))))
 
+MACRO_VOID(
 //#define MERGE_META_FIELD(m,f,v)(\
     MACRO_TERN(MACRO_IS_TRUTHY(META_IS_BOOL(f)),\
         MERGE_META_FIELD_BOOL(m,f,v)\
@@ -1203,11 +1261,14 @@ MACRO_CATW(METAFW_,META_BITS(f),v)
         MERGE_META_FIELD_RAW(m,f,v)\
     )\
 )
+)
 
 #define MERGE_META_FIELD(m,f,v)\
 (MACRO_TERN(MACRO_IS_TRUTHY(META_IS_BOOL(f)),MERGE_META_FIELD_BOOL(m,f,v),MERGE_META_FIELD_RAW(m,f,v)))
 
+MACRO_VOID(
 /// Fake Direction Metadata
+)
 
 #define DIRECTION_DOWN 0
 #define DIRECTION_UP 1
@@ -1253,13 +1314,17 @@ _OFFSET_DIRECTION_ARGS(X, Y, Z, MACRO_CAT(direction,_OFFSETS))
 #define UPDATE_DIRECTION_EAST  0xB
 #define UPDATE_DIRECTION_FORCE 0xD
 
+MACRO_VOID(
 /// Misc. Flags
+)
 
 #define PISTON_CAN_PUSH 0
 #define PISTON_CAN_BREAK 1
 #define PISTON_CANNOT_PUSH 2
 #define PISTON_CAN_SHOVEL 3
+MACRO_VOID(
 // Glazed terracotta
+)
 #define PISTON_CAN_PUSH_ONLY 4
 
 #define PISTON_PUSH_LIMIT 12
@@ -1288,7 +1353,9 @@ _OFFSET_DIRECTION_ARGS(X, Y, Z, MACRO_CAT(direction,_OFFSETS))
 #define BLOCK_POS_HASH_PACK(X,Y,Z)\
 ((BLOCK_POS_PACK_TYPE)(Z)<<WORLD_HEIGHT_BITS+WORLD_WIDTH_BITS^(BLOCK_POS_PACK_TYPE)(X)<<WORLD_HEIGHT_BITS^(Y))
 
+MACRO_VOID(
 // Z doesn't need to be masked because it's in the top bits anyway
+)
 #define BLOCK_POS_PACK(X,Y,Z)\
 ((BLOCK_POS_PACK_TYPE)(Z)<<WORLD_HEIGHT_BITS+WORLD_WIDTH_BITS|(BLOCK_POS_PACK_TYPE)((X)&0x3FFFFFF)<<12|((Y)&0xFFF))
 

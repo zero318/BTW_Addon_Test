@@ -6,7 +6,7 @@
   "mixins": [
     "WorldMixins",
     "BlockMixins",
-    "ComparatorMixins",
+    "BlockComparatorMixins",
     "PistonMixins",
     "IPistonBaseAccessMixins",
     "BlockEntityPistonMixins",
@@ -24,7 +24,16 @@
     "IBlockBaseRailLogicAccessMixins",
     "BlockRailBaseMixins",
     "BlockDispenserBlockMixins",
-    "IBlockDispenserBlockAccessMixins"
+    "IBlockDispenserBlockAccessMixins",
+    "BuddyBlockMixins",
+    "BlockRedstoneRepeaterMixins",
+    "IBlockRedstoneLogicAccessMixins",
+    "IBlockComparatorAccessMixins",
+    "RedstoneClutchBlockMixins",
+    "HibachiBlockMixins",
+    "NetClientHandlerMixins",
+    "EntityPlayerSPMixins",
+    "EntityMixins"
   ],
   "client": [
     "ZeroTestMixin"

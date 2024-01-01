@@ -78,6 +78,12 @@ public class GlueBlock extends Block {
         entity.motionZ *= 0.4;
     }
     
+    @Override
+    public MapColor getMapColor(int meta) {
+        // Kinda orange? Don't feel like defining a custom material for this.
+        return MapColor.dirtColor;
+    }
+    
     @Environment(EnvType.CLIENT)
     @Override
     public int getRenderBlockPass() {

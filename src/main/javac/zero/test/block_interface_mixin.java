@@ -57,4 +57,10 @@ public interface IBlockMixins {
     }
 #endif
 #endif
+
+#if ENABLE_MODERN_REDSTONE_WIRE
+    default public boolean isRedstoneConductor(World world, int X, int Y, int Z) {
+        return ((Block)(Object)this).isNormalCube(world, X, Y, Z);
+    }
+#endif
 }

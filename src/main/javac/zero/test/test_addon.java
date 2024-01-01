@@ -10,6 +10,7 @@ import btw.crafting.recipe.RecipeManager;
 import btw.inventory.util.InventoryUtils;
 
 import zero.test.block.*;
+import zero.test.command.*;
 import zero.test.block.ZeroTestBlocks;
 
 #include "ids.h"
@@ -19,12 +20,16 @@ public class ZeroTestAddon extends BTWAddon {
     private static ZeroTestAddon instance;
 
     private ZeroTestAddon() {
-        super("Zero Test Addon", "0.0.3", "ZeroTest");
+        super("Zero Test Addon", "0.0.4", "ZeroTest");
     }
 
     @Override
     public void initialize() {
         //AddonHandler.logMessage(this.getName() + " Version " + this.getVersionString() + " Initializing...");
+        
+#if ENABLE_NOCLIP_COMMAND
+        this.registerAddonCommand(new ServerNoclipCommand());
+#endif
         
         ZeroTestBlocks.cud_block = new CUDBlock(CUD_BLOCK_ID);
         Item.itemsList[CUD_BLOCK_ID-256] = new ItemBlock(CUD_BLOCK_ID-256);
@@ -87,12 +92,24 @@ public class ZeroTestAddon extends BTWAddon {
         // Slime block
         RecipeManager.addPistonPackingRecipe(
             ZeroTestBlocks.slime_block,
-            new ItemStack(Item.slimeBall, 9)
+            new ItemStack(Item.slimeBall, 9, 0)
+        );
+        RecipeManager.addStokedCauldronRecipe(
+            new ItemStack(Item.slimeBall, 9, 0),
+            new ItemStack[] {
+                new ItemStack(ZeroTestBlocks.slime_block, 1, 0),
+            }
         );
         // Glue block
         RecipeManager.addPistonPackingRecipe(
             ZeroTestBlocks.glue_block,
-            new ItemStack(BTWItems.glue, 4)
+            new ItemStack(BTWItems.glue, 4, 0)
+        );
+        RecipeManager.addStokedCauldronRecipe(
+            new ItemStack(BTWItems.glue, 4, 0),
+            new ItemStack[] {
+                new ItemStack(ZeroTestBlocks.glue_block, 1, 0)
+            }
         );
 #endif
 
