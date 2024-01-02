@@ -13,4 +13,17 @@ import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(Entity.class)
 public class EntityMixins {
+    @Inject(
+        method = "pushOutOfBlocks(DDD)Z",
+        at = @At("HEAD"),
+        cancellable = true
+    )
+    protected void pushOutOfBlocks_cancel_if_noclip(double X, double Y, double Z, CallbackInfoReturnable callback_info) {
+        Entity self = (Entity)(Object)this;
+        if (self instanceof EntityPlayer && self.noClip) {
+            //AddonHandler.logMessage("Player noclip state C: "+self.noClip);
+            callback_info.setReturnValue(false);
+            callback_info.cancel();
+        }
+    }
 }

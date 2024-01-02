@@ -33,7 +33,9 @@
     "HibachiBlockMixins",
     "NetClientHandlerMixins",
     "EntityPlayerSPMixins",
-    "EntityMixins"
+    "EntityMixins",
+    "NetServerHandlerMixins",
+    "EntityPlayerMixins"
   ],
   "client": [
     "ZeroTestMixin"

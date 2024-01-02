@@ -18,7 +18,7 @@ import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(Entity.class)
 public class EntityMixins {
-#if ENABLE_NOCLIP_COMMAND && 0
+#if ENABLE_NOCLIP_COMMAND
     @Inject(
         method = "pushOutOfBlocks(DDD)Z",
         at = @At("HEAD"),

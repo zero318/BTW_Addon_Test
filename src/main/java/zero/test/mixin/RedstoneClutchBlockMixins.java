@@ -18,7 +18,7 @@ public class RedstoneClutchBlockMixins extends GearBoxBlock {
         );
     }
     @Overwrite
-    protected boolean isCurrentStateValid(World world, int X, int Y, int Z) {
+    public boolean isCurrentStateValid(World world, int X, int Y, int Z) {
         //RedstoneClutchBlock self = (RedstoneClutchBlock)(Object)this;
      return this.isGearBoxOn(world, X, Y, Z) == (
             this.isInputtingMechanicalPower(world, X, Y, Z) &&

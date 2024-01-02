@@ -129,15 +129,15 @@ public class ObserverBlock extends BuddyBlock {
     }
     
     @Environment(EnvType.CLIENT)
-    private Icon texture_back_off;
+    protected Icon texture_back_off;
     @Environment(EnvType.CLIENT)
-    private Icon texture_back_on;
+    protected Icon texture_back_on;
     @Environment(EnvType.CLIENT)
-    private Icon texture_front;
+    protected Icon texture_front;
     @Environment(EnvType.CLIENT)
-    private Icon texture_side;
+    protected Icon texture_side;
     @Environment(EnvType.CLIENT)
-    private Icon texture_top;
+    protected Icon texture_top;
     
     @Override
     @Environment(EnvType.CLIENT)

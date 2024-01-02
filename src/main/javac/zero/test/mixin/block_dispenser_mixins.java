@@ -18,9 +18,9 @@ import zero.test.IBlockMixins;
 
 @Mixin(BlockDispenserBlock.class)
 public class BlockDispenserBlockMixins {
-#if ENABLE_LESS_CRAP_BLOCK_DISPENSER
+#if ENABLE_LESS_CRAP_BLOCK_DISPENSER && 0
     @Overwrite
-    private boolean validateBlockDispenser(World world, int X, int Y, int Z) {
+    public boolean validateBlockDispenser(World world, int X, int Y, int Z) {
         return true;
     }
 #if 0

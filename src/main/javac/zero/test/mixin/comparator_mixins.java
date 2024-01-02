@@ -52,7 +52,7 @@ public abstract class BlockComparatorMixins extends BlockRedstoneLogic {
     // Fixes: MC-195351
     // calculateOutputSignal
     @Overwrite
-    private int func_94491_m(World world, int X, int Y, int Z, int meta) {
+    public int func_94491_m(World world, int X, int Y, int Z, int meta) {
         int input_power = this.getInputStrength(world, X, Y, Z, meta);
         if (input_power != 0) {
             int side_power = this.func_94482_f(world, X, Y, Z, meta);
@@ -84,7 +84,7 @@ public abstract class BlockComparatorMixins extends BlockRedstoneLogic {
     // Fixes: More of MC-195351?
     // refreshOutputState
     @Overwrite
-    private void func_96476_c(World world, int X, int Y, int Z, Random random) {
+    public void func_96476_c(World world, int X, int Y, int Z, Random random) {
         int meta = world.getBlockMetadata(X, Y, Z);
         int new_power = this.func_94491_m(world, X, Y, Z, meta);
         TileEntityComparator tile_entity = ((BlockComparator)(Object)this).getTileEntityComparator(world, X, Y, Z);

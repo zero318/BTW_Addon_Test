@@ -18,6 +18,7 @@ public class ZeroTestAddon extends BTWAddon {
     @Override
     public void initialize() {
         //AddonHandler.logMessage(this.getName() + " Version " + this.getVersionString() + " Initializing...");
+        this.registerAddonCommand(new ServerNoclipCommand());
         ZeroTestBlocks.cud_block = new CUDBlock(1318);
         Item.itemsList[1318 -256] = new ItemBlock(1318 -256);
         ZeroTestBlocks.observer_block = new ObserverBlock(1319);

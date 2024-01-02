@@ -4,5 +4,5 @@ public interface IBlockEntityPistonMixins {
     public long getLastTicked();
     public void setLastTicked(long time);
     
-    public boolean hasLargeCenterHardPointToFacing(int X, int Y, int Z, int direction, boolean ignore_transparency);
+    public boolean hasLargeCenterHardPointToFacing(int x, int y, int z, int direction, boolean ignoreTransparency);
 }

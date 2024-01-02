@@ -42,8 +42,8 @@ public class BlockPistonExtensionMixins {
     }
 #endif
     
-    public boolean hasLargeCenterHardPointToFacing(IBlockAccess block_access, int X, int Y, int Z, int direction, boolean ignore_transparency) {
-        int meta = block_access.getBlockMetadata(X, Y, Z);
+    public boolean hasLargeCenterHardPointToFacing(IBlockAccess blockAccess, int x, int y, int z, int direction, boolean ignoreTransparency) {
+        int meta = blockAccess.getBlockMetadata(x, y, z);
         return direction == READ_META_FIELD(meta, DIRECTION);
     }
 }

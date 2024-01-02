@@ -42,10 +42,10 @@ public class BlockPistonMovingMixins {
     }
 #endif
     
-    public boolean hasLargeCenterHardPointToFacing(IBlockAccess block_access, int X, int Y, int Z, int direction, boolean ignore_transparency) {
-        TileEntity tile_entity = block_access.getBlockTileEntity(X, Y, Z);
-        if (tile_entity instanceof TileEntityPiston) {
-            return ((IBlockEntityPistonMixins)(Object)tile_entity).hasLargeCenterHardPointToFacing(X, Y, Z, direction, ignore_transparency);
+    public boolean hasLargeCenterHardPointToFacing(IBlockAccess blockAccess, int x, int y, int z, int direction, boolean ignoreTransparency) {
+        TileEntity tileEntity = blockAccess.getBlockTileEntity(x, y, z);
+        if (tileEntity instanceof TileEntityPiston) {
+            return ((IBlockEntityPistonMixins)(Object)tileEntity).hasLargeCenterHardPointToFacing(x, y, z, direction, ignoreTransparency);
         }
         return false;
     }

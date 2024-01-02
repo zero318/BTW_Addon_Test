@@ -17,7 +17,7 @@ public class HibachiBlockMixins {
 #if ENABLE_LESS_CRAP_BTW_BLOCK_POWERING
     // Prevent hibachi getting quasi powered
     @Overwrite
-    private boolean isGettingPowered(World world, int X, int Y, int Z) {
+    public boolean isGettingPowered(World world, int X, int Y, int Z) {
         return world.isBlockGettingPowered(X, Y, Z);
     }
 #endif

@@ -3,6 +3,7 @@ Features
 ///
 Slime Blocks:
 - Crafted from 9 slime balls as a packing recipe
+- Uncrafted with a stoked cauldron
 - Interact with pistons the same way that they do in modern vanilla
 - Don't stick to glue blocks
 - Entities are slowed down when walking on top, bounces entities when pushed, prevents fall damage when not sneaking
@@ -10,6 +11,7 @@ Slime Blocks:
 
 Glue Blocks:
 - Crafted from 4 glue as a packing recipe
+- Uncrafted with a stoked cauldron
 - Interact with pistons similarly to honey blocks
 - Have a slightly smaller hitbox than most blocks
 - Don't stick to slime blocks
@@ -24,9 +26,28 @@ CUD Block:
 - Crafted via a shapeless recipe combining a comparator and a buddy block
 - A buddy block variant that detects comparator updates
 
+Block Breaker:
+- Obtained by cutting a block dispenser in half
+- Picks up blocks when receiving a pulse of power
+
+Block Placer:
+- Obtained by cutting a block dispenser in half
+- Places blocks when receiving a pulse of power
+
+/noclip Command:
+- Sort of like spectator mode, but more crap
+
 ///
 Changes
 ///
+Most BTW Blocks:
+- Follow standard redstone power rules
+- Block dispensers and pulleys can be quasi powered
+
+Buddy Blocks:
+- Detect block placement
+- Disabled detection of comparators and pistons
+
 Pistons:
 - Completely rewrote the implementation of block pushing
 
@@ -69,7 +90,6 @@ Planned Features
 - Giving slime/glue meaningful functionality with turntables
 - Finishing iron trapdoors to have a recipe and work properly
 - Adding an iron fence gate
-- Adding a /noclip command
 
 ///
 Known Issues
@@ -83,4 +103,4 @@ Known Issues
 - The CUD block recipe sucks
 - Observers are conductive
 - Sloped rails don't flatten out when the rail they're connected to is moved down by a piston
-- /noclip seems to not work on the serverside?
+- Block placers/breakers have lazy texturing

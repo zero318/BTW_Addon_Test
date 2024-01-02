@@ -25,45 +25,31 @@ import btw.AddonHandler;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-// func_96440_m = updateNeighbourForOutputSignal
-// func_94487_f = blockIdIsActiveOrInactive
-// func_94485_e = getActiveBlockID
-// func_94484_i = getInactiveBlockID
-// func_96470_c(metadata) = getRepeaterPoweredState(metadata)
-// func_94478_d = shouldTurnOn
-// func_94488_g = getAlternateSignal
-// func_94490_c = isSubtractMode
-// func_94491_m = calculateOutputSignal
-// func_94483_i_ = __notifyOpposite
-// func_94481_j_ = getComparatorDelay
-/// func_94482_f = getInputSignal
-// func_96476_c = refreshOutputState
 //#define getInputSignal(...) func_94482_f(__VA_ARGS__)
-
 
 @Mixin(TileEntityPiston.class)
 public class BlockEntityPistonMixins extends TileEntity implements IBlockEntityPistonMixins {
-    public long last_ticked;
-    public boolean hasLargeCenterHardPointToFacing(int X, int Y, int Z, int direction, boolean ignore_transparency) {
+    public long lastTicked;
+    public boolean hasLargeCenterHardPointToFacing(int x, int y, int z, int direction, boolean ignoreTransparency) {
         TileEntityPiston self = (TileEntityPiston)(Object)this;
-        if (((IBlockEntityPistonAccessMixins)self).getProgress() >= 1.0f) {
-            int stored_block_id = self.getStoredBlockID();
-            Block stored_block = Block.blocksList[stored_block_id];
-            if (!((stored_block)==null)) {
-                int stored_meta = self.getBlockMetadata();
-                int prev_meta = self.worldObj.getBlockMetadata(X, Y, Z);
+        if (((IBlockEntityPistonAccessMixins)self).getProgress() >= 1.0F) {
+            int storedBlockId = self.getStoredBlockID();
+            Block storedBlock = Block.blocksList[storedBlockId];
+            if (!((storedBlock)==null)) {
+                int storedMeta = self.getBlockMetadata();
+                int prevMeta = self.worldObj.getBlockMetadata(x, y, z);
                 // Since the block is likely to try getting its own metadata,
                 // silently swap out the metadata value during the face test
-                self.worldObj.setBlockMetadataWithNotify(X, Y, Z, stored_meta, 0x04 | 0x10 | 0x80);
-                boolean ret = stored_block.hasLargeCenterHardPointToFacing(self.worldObj, X, Y, Z, direction, ignore_transparency);
-                self.worldObj.setBlockMetadataWithNotify(X, Y, Z, prev_meta, 0x04 | 0x10 | 0x80);
-                if (!ret) {
-                    //AddonHandler.logMessage("SupportPoint FAIL BLOCK FALSE "+stored_block_id+"("+stored_meta+")");
-                }
+                self.worldObj.setBlockMetadataWithNotify(x, y, z, storedMeta, 0x04 | 0x10 | 0x80);
+                boolean ret = storedBlock.hasLargeCenterHardPointToFacing(self.worldObj, x, y, z, direction, ignoreTransparency);
+                self.worldObj.setBlockMetadataWithNotify(x, y, z, prevMeta, 0x04 | 0x10 | 0x80);
+                //if (!ret) {
+                    //AddonHandler.logMessage("SupportPoint FAIL BLOCK FALSE "+storedBlockId+"("+storedMeta+")");
+                //}
                 return ret;
             }
             //AddonHandler.logMessage("SupportPoint FAIL AIR");
-            return false;
+            //return false;
         }
         //AddonHandler.logMessage("SupportPoint FAIL PROGRESS "+((IBlockEntityPistonAccessMixins)self).getProgress());
         return false;
@@ -72,62 +58,42 @@ public class BlockEntityPistonMixins extends TileEntity implements IBlockEntityP
     public void restoreStoredBlock() {
         TileEntityPiston self = (TileEntityPiston)(Object)this;
         //if (!self.worldObj.isRemote) AddonHandler.logMessage("Restore block ("+self.xCoord+" "+self.yCoord+" "+self.zCoord+") at time "+last_ticked);
-        int stored_block_id = self.getStoredBlockID();
-        Block stored_block = Block.blocksList[stored_block_id];
-        int stored_meta = self.getBlockMetadata();
-        if (!((stored_block)==null)) {
-            ((IWorldMixins)self.worldObj).updateFromNeighborShapes(self.xCoord, self.yCoord, self.zCoord, stored_block_id, stored_meta);
+        int storedBlockId = self.getStoredBlockID();
+        Block storedBlock = Block.blocksList[storedBlockId];
+        int storedMeta = self.getBlockMetadata();
+        if (!((storedBlock)==null)) {
+            ((IWorldMixins)self.worldObj).updateFromNeighborShapes(self.xCoord, self.yCoord, self.zCoord, storedBlockId, storedMeta);
         }
         // Set scanningTileEntities to true
         // so that the tile entity is always
         // placed correctly
-        boolean scanning_tile_entities_temp = ((IWorldAccessMixins)self.worldObj).getScanningTileEntities();
+        boolean scanningTileEntitiesTemp = ((IWorldAccessMixins)self.worldObj).getScanningTileEntities();
         ((IWorldAccessMixins)self.worldObj).setScanningTileEntities(true);
-        self.worldObj.setBlock(self.xCoord, self.yCoord, self.zCoord, stored_block_id, stored_meta, 0x01 | 0x02);
-        //if (!self.worldObj.isRemote) AddonHandler.logMessage("PLACE BLOCK "+stored_block_id+"."+stored_meta);
-        NBTTagCompound prev_tile_entity_data = self.storedTileEntityData;
+        self.worldObj.setBlock(self.xCoord, self.yCoord, self.zCoord, storedBlockId, storedMeta, 0x01 | 0x02);
+        //if (!self.worldObj.isRemote) AddonHandler.logMessage("PLACE BLOCK "+storedBlockId+"."+storedMeta);
         if (self.storedTileEntityData != null) {
             // setBlockTileEntity updates the entity
             // coordinates itself when scanningTileEntities
             // is true
-            //if (!self.worldObj.isRemote) AddonHandler.logMessage()
             worldObj.setBlockTileEntity(self.xCoord, self.yCoord, self.zCoord, TileEntity.createAndLoadEntity(self.storedTileEntityData));
             self.cachedTileEntity = null;
         }
-        self.worldObj.notifyBlockOfNeighborChange(self.xCoord, self.yCoord, self.zCoord, stored_block_id);
-        NBTTagCompound new_tile_entity_data = null;
-        TileEntity new_tile_entity = self.worldObj.getBlockTileEntity(self.xCoord, self.yCoord, self.zCoord);
-        if (new_tile_entity != null) {
-            new_tile_entity_data = new NBTTagCompound();
-            new_tile_entity.writeToNBT(new_tile_entity_data);
-        }
-        if (
-            prev_tile_entity_data != null &&
-            prev_tile_entity_data != new_tile_entity_data
-        ) {
-            AddonHandler.logMessage("META FAIL");
-            AddonHandler.logMessage("Old: "+prev_tile_entity_data.toString());
-            if (new_tile_entity_data != null) {
-                AddonHandler.logMessage("New: "+new_tile_entity_data.toString());
-            } else {
-                AddonHandler.logMessage("New: null");
-            }
-        }
+        self.worldObj.notifyBlockOfNeighborChange(self.xCoord, self.yCoord, self.zCoord, storedBlockId);
         // Restore original value of scanningTileEntities
-        ((IWorldAccessMixins)self.worldObj).setScanningTileEntities(scanning_tile_entities_temp);
-        //if (stored_block_id != this.worldObj.getBlockId(self.xCoord, self.yCoord, self.zCoord)) {
-            //AddonHandler.logMessage("PLACE BLOCK BROKE DURING UPDATE "+stored_block_id+"."+stored_meta);
+        ((IWorldAccessMixins)self.worldObj).setScanningTileEntities(scanningTileEntitiesTemp);
+        //if (storedBlockId != this.worldObj.getBlockId(self.xCoord, self.yCoord, self.zCoord)) {
+            //AddonHandler.logMessage("PLACE BLOCK BROKE DURING UPDATE "+storedBlockId+"."+storedMeta);
         //}
     }
     @Overwrite
     public void clearPistonTileEntity() {
         TileEntityPiston self = (TileEntityPiston)(Object)this;
         if (
-            ((IBlockEntityPistonAccessMixins)self).getLastProgress() < 1.0f &&
+            ((IBlockEntityPistonAccessMixins)self).getLastProgress() < 1.0F &&
             self.worldObj != null
         ) {
-            ((IBlockEntityPistonAccessMixins)self).setProgress(1.0f);
-            ((IBlockEntityPistonAccessMixins)self).setLastProgress(1.0f);
+            ((IBlockEntityPistonAccessMixins)self).setProgress(1.0F);
+            ((IBlockEntityPistonAccessMixins)self).setLastProgress(1.0F);
             self.worldObj.removeBlockTileEntity(self.xCoord, self.yCoord, self.zCoord);
             self.invalidate();
             if (
@@ -144,106 +110,106 @@ public class BlockEntityPistonMixins extends TileEntity implements IBlockEntityP
         at = @At("HEAD")
     )
     public void track_update_tick(CallbackInfo info) {
-        this.last_ticked = this.worldObj.getTotalWorldTime();
+        this.lastTicked = this.worldObj.getTotalWorldTime();
     }
     public long getLastTicked() {
-        return this.last_ticked;
+        return this.lastTicked;
     }
     public void setLastTicked(long time) {
-        this.last_ticked = time;
+        this.lastTicked = time;
     }
     @Overwrite
-    private void updatePushedObjects(float progress, float par2) {
+    public void updatePushedObjects(float progress, float par2) {
         TileEntityPiston self = (TileEntityPiston)(Object)this;
         boolean extending = self.isExtending();
         double d = par2;
-        int stored_direction = self.getPistonOrientation();
-        int stored_block_id = self.getStoredBlockID();
-        boolean is_bouncy = false;
-        boolean is_sticky = false;
-        Block block = Block.blocksList[stored_block_id];
+        int storedDirection = self.getPistonOrientation();
+        int storedBlockId = self.getStoredBlockID();
+        boolean isBouncy = false;
+        boolean isSticky = false;
+        Block block = Block.blocksList[storedBlockId];
         if (!((block)==null)) {
-            int stored_meta = self.getBlockMetadata();
+            int storedMeta = self.getBlockMetadata();
             if (extending) {
-                is_bouncy = ((IBlockMixins)(Object)block).isBouncyWhenMoved(stored_direction, stored_meta);
+                isBouncy = ((IBlockMixins)(Object)block).isBouncyWhenMoved(storedDirection, storedMeta);
             }
-            is_sticky = ((IBlockMixins)(Object)block).isStickyForEntitiesWhenMoved(stored_direction, stored_meta);
+            isSticky = ((IBlockMixins)(Object)block).isStickyForEntitiesWhenMoved(storedDirection, storedMeta);
         }
-        AxisAlignedBB bounding_box = Block.pistonMoving.getAxisAlignedBB(self.worldObj, self.xCoord, self.yCoord, self.zCoord, stored_block_id, extending ? 1.0f - progress : progress - 1.0f, stored_direction);
-        if (bounding_box != null) {
-            List var4 = self.worldObj.getEntitiesWithinAABBExcludingEntity((Entity)null, bounding_box);
-            if (!var4.isEmpty()) {
-                List pushed_objects = ((IBlockEntityPistonAccessMixins)self).getPushedObjects();
-                pushed_objects.addAll(var4);
-                Iterator var5 = pushed_objects.iterator();
+        AxisAlignedBB boundingBox = Block.pistonMoving.getAxisAlignedBB(self.worldObj, self.xCoord, self.yCoord, self.zCoord, storedBlockId, extending ? 1.0F - progress : progress - 1.0F, storedDirection);
+        if (boundingBox != null) {
+            List entityList = self.worldObj.getEntitiesWithinAABBExcludingEntity((Entity)null, boundingBox);
+            if (!entityList.isEmpty()) {
+                List pushedObjects = ((IBlockEntityPistonAccessMixins)self).getPushedObjects();
+                pushedObjects.addAll(entityList);
+                Iterator var5 = pushedObjects.iterator();
                 while (var5.hasNext()) {
                     Entity entity = (Entity)var5.next();
                     entity.moveEntity(
-                        d * (double)Facing.offsetsXForSide[stored_direction],
-                        d * (double)Facing.offsetsYForSide[stored_direction],
-                        d * (double)Facing.offsetsZForSide[stored_direction]
+                        d * (double)Facing.offsetsXForSide[storedDirection],
+                        d * (double)Facing.offsetsYForSide[storedDirection],
+                        d * (double)Facing.offsetsZForSide[storedDirection]
                     );
-                    if (is_bouncy) {
-                        entity.motionX += (double)Facing.offsetsXForSide[stored_direction];
-                        entity.motionY += (double)Facing.offsetsYForSide[stored_direction];
-                        entity.motionZ += (double)Facing.offsetsZForSide[stored_direction];
+                    if (isBouncy) {
+                        entity.motionX += (double)Facing.offsetsXForSide[storedDirection];
+                        entity.motionY += (double)Facing.offsetsYForSide[storedDirection];
+                        entity.motionZ += (double)Facing.offsetsZForSide[storedDirection];
                     }
                 }
-                pushed_objects.clear();
+                pushedObjects.clear();
             }
         }
-        float last_progress;
-        if (is_sticky && (last_progress = ((IBlockEntityPistonAccessMixins)self).getLastProgress()) < 1.0f) {
-            //bounding_box = Block.pistonMoving.getAxisAlignedBB(self.worldObj, self.xCoord, self.yCoord, self.zCoord, stored_block_id, extending ? 1.0f - progress : progress - 1.0f, stored_direction);
-            bounding_box = block.getAsPistonMovingBoundingBox(self.worldObj, self.xCoord - Facing.offsetsXForSide[stored_direction], self.yCoord - Facing.offsetsYForSide[stored_direction], self.zCoord - Facing.offsetsZForSide[stored_direction]);
-            double progress_offset = (stored_direction & 1) == 0 ? -last_progress : last_progress;
-            switch (stored_direction) {
+        float lastProgress;
+        if (isSticky && (lastProgress = ((IBlockEntityPistonAccessMixins)self).getLastProgress()) < 1.0F) {
+            //boundingBox = Block.pistonMoving.getAxisAlignedBB(self.worldObj, self.xCoord, self.yCoord, self.zCoord, storedBlockId, extending ? 1.0F - progress : progress - 1.0F, storedDirection);
+            boundingBox = block.getAsPistonMovingBoundingBox(self.worldObj, self.xCoord - Facing.offsetsXForSide[storedDirection], self.yCoord - Facing.offsetsYForSide[storedDirection], self.zCoord - Facing.offsetsZForSide[storedDirection]);
+            double progressOffset = (storedDirection & 1) == 0 ? -lastProgress : lastProgress;
+            switch (storedDirection) {
                 case 0: case 1:
-                    bounding_box.minX = Math.floor(bounding_box.minX);
-                    bounding_box.minY += progress_offset;
-                    bounding_box.minZ = Math.floor(bounding_box.minZ);
-                    bounding_box.maxX = Math.ceil(bounding_box.maxX);
-                    bounding_box.maxY += progress_offset;
-                    bounding_box.maxZ = Math.ceil(bounding_box.maxZ);
+                    boundingBox.minX = Math.floor(boundingBox.minX);
+                    boundingBox.minY += progressOffset;
+                    boundingBox.minZ = Math.floor(boundingBox.minZ);
+                    boundingBox.maxX = Math.ceil(boundingBox.maxX);
+                    boundingBox.maxY += progressOffset;
+                    boundingBox.maxZ = Math.ceil(boundingBox.maxZ);
                     break;
                 case 2: case 3:
-                    bounding_box.minX = Math.floor(bounding_box.minX);
-                    bounding_box.minY = Math.floor(bounding_box.minY);
-                    bounding_box.minZ += progress_offset;
-                    bounding_box.maxX = Math.ceil(bounding_box.maxX);
-                    bounding_box.maxY = Math.ceil(bounding_box.maxY);
-                    bounding_box.maxZ += progress_offset;
+                    boundingBox.minX = Math.floor(boundingBox.minX);
+                    boundingBox.minY = Math.floor(boundingBox.minY);
+                    boundingBox.minZ += progressOffset;
+                    boundingBox.maxX = Math.ceil(boundingBox.maxX);
+                    boundingBox.maxY = Math.ceil(boundingBox.maxY);
+                    boundingBox.maxZ += progressOffset;
                     break;
                 default:
-                    bounding_box.minX += progress_offset;
-                    bounding_box.minY = Math.floor(bounding_box.minY);
-                    bounding_box.minZ = Math.floor(bounding_box.minZ);
-                    bounding_box.maxX += progress_offset;
-                    bounding_box.maxY = Math.ceil(bounding_box.maxY);
-                    bounding_box.maxZ = Math.ceil(bounding_box.maxZ);
+                    boundingBox.minX += progressOffset;
+                    boundingBox.minY = Math.floor(boundingBox.minY);
+                    boundingBox.minZ = Math.floor(boundingBox.minZ);
+                    boundingBox.maxX += progressOffset;
+                    boundingBox.maxY = Math.ceil(boundingBox.maxY);
+                    boundingBox.maxZ = Math.ceil(boundingBox.maxZ);
                     break;
             }
-            List var4 = self.worldObj.getEntitiesWithinAABBExcludingEntity((Entity)null, bounding_box);
+            List entityList = self.worldObj.getEntitiesWithinAABBExcludingEntity((Entity)null, boundingBox);
             /*
             if (!self.worldObj.isRemote) {
-                AddonHandler.logMessage(""+self.worldObj.getTotalWorldTime()+" "+progress+" "+last_progress+" "+d);
-                AddonHandler.logMessage(" "+bounding_box.minX+" "+bounding_box.minY+" "+bounding_box.minZ);
-                AddonHandler.logMessage(" "+bounding_box.maxX+" "+bounding_box.maxY+" "+bounding_box.maxZ);
+                AddonHandler.logMessage(""+self.worldObj.getTotalWorldTime()+" "+progress+" "+lastProgress+" "+d);
+                AddonHandler.logMessage(" "+boundingBox.minX+" "+boundingBox.minY+" "+boundingBox.minZ);
+                AddonHandler.logMessage(" "+boundingBox.maxX+" "+boundingBox.maxY+" "+boundingBox.maxZ);
             }
             */
-            if (!var4.isEmpty()) {
-                List pushed_objects = ((IBlockEntityPistonAccessMixins)self).getPushedObjects();
-                pushed_objects.addAll(var4);
-                Iterator var5 = pushed_objects.iterator();
-                d = progress - last_progress;
+            if (!entityList.isEmpty()) {
+                List pushedObjects = ((IBlockEntityPistonAccessMixins)self).getPushedObjects();
+                pushedObjects.addAll(entityList);
+                Iterator var5 = pushedObjects.iterator();
+                d = progress - lastProgress;
                 while (var5.hasNext()) {
                     ((Entity)var5.next()).moveEntity(
-                        d * (double)Facing.offsetsXForSide[stored_direction],
-                        d * (double)Facing.offsetsYForSide[stored_direction],
-                        d * (double)Facing.offsetsZForSide[stored_direction]
+                        d * (double)Facing.offsetsXForSide[storedDirection],
+                        d * (double)Facing.offsetsYForSide[storedDirection],
+                        d * (double)Facing.offsetsZForSide[storedDirection]
                     );
                 }
-                pushed_objects.clear();
+                pushedObjects.clear();
             }
         }
     }

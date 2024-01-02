@@ -1,6 +1,9 @@
 #ifndef FUNC_ALIASES_H
 #define FUNC_ALIASES_H 1
 
+#include "util.h"
+
+MACRO_VOID(
 // func_96440_m = updateNeighbourForOutputSignal
 // func_94487_f = blockIdIsActiveOrInactive
 // func_94485_e = getActiveBlockID
@@ -14,6 +17,7 @@
 // func_94481_j_ = getComparatorDelay
 /// func_94482_f = getInputSignal
 // func_96476_c = refreshOutputState
+)
 
 #define updateNeighbourForOutputSignal(...) func_96440_m(__VA_ARGS__)
 #define blockIdIsActiveOrInactive(...) func_94487_f(__VA_ARGS__)

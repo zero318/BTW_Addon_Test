@@ -1359,10 +1359,19 @@ MACRO_VOID(
 #define BLOCK_POS_PACK(X,Y,Z)\
 ((BLOCK_POS_PACK_TYPE)(Z)<<WORLD_HEIGHT_BITS+WORLD_WIDTH_BITS|(BLOCK_POS_PACK_TYPE)((X)&0x3FFFFFF)<<12|((Y)&0xFFF))
 
+#define BLOCK_POS_EXTRACT_X(pos)\
+((BLOCK_COORD_TYPE)((pos)<<WORLD_WIDTH_BITS>>bitsof_type(BLOCK_POS_PACK_TYPE)-WORLD_WIDTH_BITS))
+
+#define BLOCK_POS_EXTRACT_Y(pos)\
+((BLOCK_COORD_TYPE)(pos)<<bitsof_type(BLOCK_COORD_TYPE)-WORLD_HEIGHT_BITS>>bitsof_type(BLOCK_COORD_TYPE)-WORLD_HEIGHT_BITS)
+
+#define BLOCK_POS_EXTRACT_Z(pos)\
+((BLOCK_COORD_TYPE)((pos)>>bitsof_type(BLOCK_POS_PACK_TYPE)-WORLD_WIDTH_BITS))
+
 #define BLOCK_POS_UNPACK_ARGS(pos)\
-(BLOCK_COORD_TYPE)((pos)<<WORLD_WIDTH_BITS>>bitsof_type(BLOCK_POS_PACK_TYPE)-WORLD_WIDTH_BITS),\
-(BLOCK_COORD_TYPE)(pos)<<bitsof_type(BLOCK_COORD_TYPE)-WORLD_HEIGHT_BITS>>bitsof_type(BLOCK_COORD_TYPE)-WORLD_HEIGHT_BITS,\
-(BLOCK_COORD_TYPE)((pos)>>bitsof_type(BLOCK_POS_PACK_TYPE)-WORLD_WIDTH_BITS)
+BLOCK_POS_EXTRACT_X(pos),\
+BLOCK_POS_EXTRACT_Y(pos),\
+BLOCK_POS_EXTRACT_Z(pos)
 
 #define __BLOCK_POS_UNPACK(X,Y,Z,XV,YV,ZV) {(X)=XV;(Z)=ZV;(Y)=YV;}
 
@@ -1398,24 +1407,45 @@ BLOCK_STATE_PACK_LONG_RAW((id)&0xFFFF,meta,extmeta)
 #define __BLOCK_STATE_UNPACK(id,meta,idV,metaV) {(id)=idV;(meta)=metaV;}
 #define _BLOCK_STATE_UNPACK(id,meta,...) __BLOCK_STATE_UNPACK(id,meta,__VA_ARGS__)
 
-#define BLOCK_STATE_UNPACK_SHORT_ARGS(state)\
-((state)&BLOCK_ID_MASK),\
+#define BLOCK_STATE_SHORT_EXTRACT_ID(state)\
+((state)&BLOCK_ID_MASK)
+
+#define BLOCK_STATE_SHORT_EXTRACT_META(state)\
 ((state)>>>BLOCK_ID_BITS)
+
+#define BLOCK_STATE_UNPACK_SHORT_ARGS(state)\
+BLOCK_STATE_SHORT_EXTRACT_ID(state),\
+BLOCK_STATE_SHORT_EXTRACT_META(state)
 
 #define BLOCK_STATE_UNPACK_SHORT(state,id,meta)\
 _BLOCK_STATE_UNPACK(id,meta,BLOCK_STATE_UNPACK_SHORT_ARGS(state))
 
-#define BLOCK_STATE_UNPACK_ARGS(state)\
-((state)&0xFFFF),\
+#define BLOCK_STATE_EXTRACT_ID(state)\
+((state)&0xFFFF)
+
+#define BLOCK_STATE_EXTRACT_META(state)\
 ((state)>>>16)
+
+#define BLOCK_STATE_UNPACK_ARGS(state)\
+BLOCK_STATE_EXTRACT_ID(state),\
+BLOCK_STATE_EXTRACT_META(state)
 
 #define BLOCK_STATE_UNPACK(state,id,meta)\
 _BLOCK_STATE_UNPACK(id,meta,BLOCK_STATE_UNPACK_ARGS(state))
 
-#define BLOCK_STATE_UNPACK_LONG_ARGS(state)\
-((int)(state)&0xFFFF),\
-((int)(state)>>>16),\
+#define BLOCK_STATE_LONG_EXTRACT_ID(state)\
+((int)(state)&0xFFFF)
+
+#define BLOCK_STATE_LONG_EXTRACT_META(state)\
+((int)(state)>>>16)
+
+#define BLOCK_STATE_LONG_EXTRACT_EXTMETA(state)\
 ((int)((state)>>>32))
+
+#define BLOCK_STATE_UNPACK_LONG_ARGS(state)\
+BLOCK_STATE_LONG_EXTRACT_ID(state),\
+BLOCK_STATE_LONG_EXTRACT_META(state),\
+BLOCK_STATE_LONG_EXTRACT_EXTMETA(state)
 
 #define __BLOCK_STATE_UNPACK_LONG(id,meta,extmeta,idV,metaV,extmetaV) {(id)=idV;(meta)=metaV;(extmeta)=extmetaV;}
 #define _BLOCK_STATE_UNPACK_LONG(id,meta,extmeta,...) __BLOCK_STATE_UNPACK_LONG(id,meta,extmeta,__VA_ARGS__)

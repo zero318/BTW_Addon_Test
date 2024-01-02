@@ -10,10 +10,12 @@ import org.spongepowered.asm.mixin.Overwrite;
 #include "..\feature_flags.h"
 #include "..\util.h"
 
+#define onNeighborBlockChange(...) method_408(__VA_ARGS__)
+
 @Mixin(BuddyBlock.class)
 public class BuddyBlockMixins {
 #if ENABLE_BETTER_BUDDY_DETECTION
-    @Overwrite
+    @Overwrite(remap=false)
     public void onNeighborBlockChange(World world, int X, int Y, int Z, int neighbor_id) {
         BuddyBlock self = (BuddyBlock)(Object)this;
         if (!self.isRedstoneOn(world, X, Y, Z)) {

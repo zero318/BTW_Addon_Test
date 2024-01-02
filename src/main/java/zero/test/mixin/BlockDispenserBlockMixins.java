@@ -9,8 +9,4 @@ import zero.test.IBlockMixins;
 
 @Mixin(BlockDispenserBlock.class)
 public class BlockDispenserBlockMixins {
-    @Overwrite
-    private boolean validateBlockDispenser(World world, int X, int Y, int Z) {
-        return true;
-    }
 }

@@ -11,17 +11,15 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(EntityPlayerSP.class)
-public class EntityPlayerSPMixins {
+@Mixin(EntityPlayer.class)
+public class EntityPlayerMixins {
     @Inject(
-        method = "pushOutOfBlocks(DDD)Z",
+        method = "isEntityInsideOpaqueBlock()Z",
         at = @At("HEAD"),
         cancellable = true
     )
-    protected void pushOutOfBlocks_cancel_if_noclip(double X, double Y, double Z, CallbackInfoReturnable callback_info) {
-        EntityPlayerSP self = (EntityPlayerSP)(Object)this;
-        if (self.noClip) {
-            //AddonHandler.logMessage("Player noclip state A: "+self.noClip);
+    protected void isEntityInsideOpaqueBlock_cancel_if_noclip(CallbackInfoReturnable callback_info) {
+        if (((EntityPlayer)(Object)this).noClip) {
             callback_info.setReturnValue(false);
         }
     }

@@ -12,4 +12,22 @@ import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(NetClientHandler.class)
 public class NetClientHandlerMixins {
+    @Inject(
+        method = "handleGameEvent(Lnet/minecraft/src/Packet70GameEvent;)V",
+        at = @At("TAIL"),
+        locals = LocalCapture.CAPTURE_FAILHARD
+    )
+    public void set_noclip_packet(Packet70GameEvent packet, CallbackInfo info, EntityClientPlayerMP player, int event_type, int event_arg) {
+        if (event_type == 318) {
+            switch (event_arg) {
+                case 0: // Disable noclip
+                    player.noClip = false;
+                    break;
+                case 1: // Enable noclip
+                    player.noClip = true;
+                    break;
+            }
+            //AddonHandler.logMessage("Player noclip state B: "+player.noClip);
+        }
+    }
 }

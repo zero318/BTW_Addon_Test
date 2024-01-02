@@ -5,8 +5,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 @Mixin(BuddyBlock.class)
 public class BuddyBlockMixins {
-    @Overwrite
-    public void onNeighborBlockChange(World world, int X, int Y, int Z, int neighbor_id) {
+    @Overwrite(remap=false)
+    public void method_408(World world, int X, int Y, int Z, int neighbor_id) {
         BuddyBlock self = (BuddyBlock)(Object)this;
         if (!self.isRedstoneOn(world, X, Y, Z)) {
             Block neighbor_block = Block.blocksList[neighbor_id];

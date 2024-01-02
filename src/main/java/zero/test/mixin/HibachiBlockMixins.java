@@ -8,7 +8,7 @@ import java.util.Random;
 public class HibachiBlockMixins {
     // Prevent hibachi getting quasi powered
     @Overwrite
-    private boolean isGettingPowered(World world, int X, int Y, int Z) {
+    public boolean isGettingPowered(World world, int X, int Y, int Z) {
         return world.isBlockGettingPowered(X, Y, Z);
     }
 }
