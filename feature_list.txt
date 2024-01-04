@@ -35,7 +35,7 @@ Block Placer:
 - Places blocks when receiving a pulse of power
 
 /noclip Command:
-- Sort of like spectator mode, but more crap
+- Sort of like spectator mode, but worse
 
 ///
 Changes
@@ -47,9 +47,14 @@ Most BTW Blocks:
 Buddy Blocks:
 - Detect block placement
 - Disabled detection of comparators and pistons
+- Redstone dust only connects to the output face
+
+Cistern:
+- Has a hollow hitbox
 
 Pistons:
 - Completely rewrote the implementation of block pushing
+- Attempted to make moving blocks match their normal collision
 
 Soap Blocks:
 - Given the properties of glazed terracotta
@@ -62,6 +67,9 @@ Tile Entities:
 
 Chests:
 - Can't form triple chests when quickly pushed by a piston
+
+Redstone dust:
+- Fixed MC-2255, MC-8645, and MC-9405
 
 Comparators:
 - Enabled rotation on turntables
@@ -94,13 +102,11 @@ Planned Features
 ///
 Known Issues
 ///
-- All new blocks are listed in the creative menu twice
 - Slime/glue have kinda broken rendering just because 1.5.2
 - Slime blocks don't bounce entities that fall on them despite having code for it
-- Glue blocks are conductive and allow placing blocks that require support on them (tempted to make this a feature though, since that sucks about honey)
+- Glue blocks are conductive
 - Players touching the south/bottom of a glue block have glitchy interactions with the "can't see when inside a solid block" mechanic
-- Entities standing near the edge of a glue block aren't moved properly. Works properly if standing between two glue blocks.
+- Entities standing near the edge of a glue block aren't moved properly when retracting. Works properly if standing between two glue blocks.
 - The CUD block recipe sucks
-- Observers are conductive
 - Sloped rails don't flatten out when the rail they're connected to is moved down by a piston
 - Block placers/breakers have lazy texturing

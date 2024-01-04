@@ -20,7 +20,7 @@ public class ZeroTestAddon extends BTWAddon {
     private static ZeroTestAddon instance;
 
     private ZeroTestAddon() {
-        super("Zero Test Addon", "0.0.4", "ZeroTest");
+        super("Zero Test Addon", "0.0.6", "ZeroTest");
     }
 
     @Override
@@ -32,30 +32,30 @@ public class ZeroTestAddon extends BTWAddon {
 #endif
         
         ZeroTestBlocks.cud_block = new CUDBlock(CUD_BLOCK_ID);
-        Item.itemsList[CUD_BLOCK_ID-256] = new ItemBlock(CUD_BLOCK_ID-256);
+        Item.itemsList[CUD_BLOCK_ID] = new ItemBlock(CUD_BLOCK_ID-256);
 #if ENABLE_DIRECTIONAL_UPDATES
         ZeroTestBlocks.observer_block = new ObserverBlock(OBSERVER_BLOCK_ID);
-        Item.itemsList[OBSERVER_BLOCK_ID-256] = new ItemBlock(OBSERVER_BLOCK_ID-256);
+        Item.itemsList[OBSERVER_BLOCK_ID] = new ItemBlock(OBSERVER_BLOCK_ID-256);
 #endif
 #if ENABLE_MOVING_BLOCK_CHAINING
         ZeroTestBlocks.slime_block = new SlimeBlock(SLIME_BLOCK_ID);
-        Item.itemsList[SLIME_BLOCK_ID-256] = new ItemBlock(SLIME_BLOCK_ID-256);
+        Item.itemsList[SLIME_BLOCK_ID] = new ItemBlock(SLIME_BLOCK_ID-256);
         ZeroTestBlocks.glue_block = new GlueBlock(GLUE_BLOCK_ID);
-        Item.itemsList[GLUE_BLOCK_ID-256] = new ItemBlock(GLUE_BLOCK_ID-256);
+        Item.itemsList[GLUE_BLOCK_ID] = new ItemBlock(GLUE_BLOCK_ID-256);
 #endif
         ZeroTestBlocks.iron_trapdoor = new IronTrapDoor(IRON_TRAPDOOR_ID);
-        Item.itemsList[IRON_TRAPDOOR_ID-256] = new ItemBlock(IRON_TRAPDOOR_ID-256);
+        Item.itemsList[IRON_TRAPDOOR_ID] = new ItemBlock(IRON_TRAPDOOR_ID-256);
 #if ENABLE_PISTON_TEST_BLOCKS
         ZeroTestBlocks.pull_only_test_block = new PullOnlyTestBlock(PULL_ONLY_TEST_BLOCK_ID);
-        Item.itemsList[PULL_ONLY_TEST_BLOCK_ID-256] = new ItemBlock(PULL_ONLY_TEST_BLOCK_ID-256);
+        Item.itemsList[PULL_ONLY_TEST_BLOCK_ID] = new ItemBlock(PULL_ONLY_TEST_BLOCK_ID-256);
         ZeroTestBlocks.dead_coral_fan = new DeadCoralFan(DEAD_CORAL_FAN_ID);
-        Item.itemsList[DEAD_CORAL_FAN_ID-256] = new ItemBlock(DEAD_CORAL_FAN_ID-256);
+        Item.itemsList[DEAD_CORAL_FAN_ID] = new ItemBlock(DEAD_CORAL_FAN_ID-256);
 #endif
 #if ENABLE_BLOCK_DISPENSER_VARIANTS
         ZeroTestBlocks.block_breaker = new BlockBreaker(BLOCK_BREAKER_ID);
-        Item.itemsList[BLOCK_BREAKER_ID-256] = new ItemBlock(BLOCK_BREAKER_ID-256);
+        Item.itemsList[BLOCK_BREAKER_ID] = new ItemBlock(BLOCK_BREAKER_ID-256);
         ZeroTestBlocks.block_placer = new BlockPlacer(BLOCK_PLACER_ID);
-        Item.itemsList[BLOCK_PLACER_ID-256] = new ItemBlock(BLOCK_PLACER_ID-256);
+        Item.itemsList[BLOCK_PLACER_ID] = new ItemBlock(BLOCK_PLACER_ID-256);
 #endif
     }
     

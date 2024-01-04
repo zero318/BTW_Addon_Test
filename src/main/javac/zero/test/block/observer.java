@@ -1,10 +1,10 @@
-
 package zero.test.block;
 
 import btw.client.fx.BTWEffectManager;
 import btw.util.MiscUtils;
 import btw.world.util.BlockPos;
 import btw.block.blocks.BuddyBlock;
+
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.src.*;
@@ -14,6 +14,7 @@ import btw.AddonHandler;
 import java.util.Random;
 
 #include "..\util.h"
+#include "..\feature_flags.h"
 #include "..\ids.h"
 
 #define POWERED_META_OFFSET 0
@@ -26,9 +27,11 @@ public class ObserverBlock extends BuddyBlock {
         this.setTickRandomly(false);
     }
     
+#define TICK_DELAY 2
+    
     @Override
     public int tickRate(World world) {
-        return 2;
+        return TICK_DELAY;
     }
     
     @Override
@@ -51,14 +54,12 @@ public class ObserverBlock extends BuddyBlock {
     }
     
     public int updateShape(World world, int X, int Y, int Z, int direction, int meta) {
-        int update_direction = READ_META_FIELD(meta, DIRECTION);
-        if (update_direction == OPPOSITE_DIRECTION(direction)) {
-            if (!world.isUpdateScheduledForBlock(X, Y, Z, this.blockID)) {
-                world.scheduleBlockUpdate(X, Y, Z, this.blockID, 2);
-            }
-        } //else {
-            //AddonHandler.logMessage("Observer fail "+OPPOSITE_DIRECTION(direction)+" != "+update_direction);
-        //}
+        if (
+            READ_META_FIELD(meta, DIRECTION) == OPPOSITE_DIRECTION(direction) &&
+            !world.isUpdateScheduledForBlock(X, Y, Z, this.blockID)
+        ) {
+            world.scheduleBlockUpdate(X, Y, Z, this.blockID, TICK_DELAY);
+        }
         return meta;
     }
     
@@ -73,23 +74,34 @@ public class ObserverBlock extends BuddyBlock {
             world.scheduleBlockUpdate(X, Y, Z, this.blockID, 2); 
         }
         
-        //notifyNeigborsToFacingOfPowerChange(world, X, Y, Z, READ_META_FIELD(meta, DIRECTION));
-        
         int direction = READ_META_FIELD(meta, DIRECTION);
         
         X += Facing.offsetsXForSide[direction];
         Y += Facing.offsetsYForSide[direction];
         Z += Facing.offsetsZForSide[direction];
         
-        int neighbor_id = world.getBlockId(X, Y, Z);
-        Block neighbor_block = Block.blocksList[neighbor_id];
+        Block neighbor_block = Block.blocksList[world.getBlockId(X, Y, Z)];
         if (!BLOCK_IS_AIR(neighbor_block)) {
             neighbor_block.onNeighborBlockChange(world, X, Y, Z, this.blockID);
         }
         world.notifyBlocksOfNeighborChange(X, Y, Z, this.blockID, OPPOSITE_DIRECTION(direction));
     }
     
+#if ENABLE_MODERN_REDSTONE_WIRE
+    public boolean isRedstoneConductor(IBlockAccess block_access, int X, int Y, int Z) {
+        return false;
+    }
+#endif
+
+#if ENABLE_BETTER_REDSTONE_WIRE_CONNECTIONS
+    public boolean canRedstoneConnectToSide(IBlockAccess block_access, int X, int Y, int Z, int flat_direction) {
+        return OPPOSITE_DIRECTION(READ_META_FIELD(block_access.getBlockMetadata(X, Y, Z), DIRECTION)) == Direction.directionToFacing[flat_direction];
+    }
+#endif
+    
     // This just gets rid of the clicking sound
+    // TODO: Remove override now that the code
+    // is being used directly in updateTick
     @Override
     public void setBlockRedstoneOn(World world, int X, int Y, int Z, boolean is_activated) {
         if (is_activated != isRedstoneOn(world, X, Y, Z)) {
@@ -117,11 +129,6 @@ public class ObserverBlock extends BuddyBlock {
         }
     }
     
-    /*@Override
-    public int onPreBlockPlacedByPiston(World world, int X, int Y, int Z, int meta, int direction) {
-        return meta;
-    }*/
-    
     // Maybe this will prevent it getting stuck on when moved?
     @Override
     public int adjustMetadataForPistonMove(int meta) {
@@ -134,8 +141,8 @@ public class ObserverBlock extends BuddyBlock {
     protected Icon texture_back_on;
     @Environment(EnvType.CLIENT)
     protected Icon texture_front;
-    @Environment(EnvType.CLIENT)
-    protected Icon texture_side;
+    //@Environment(EnvType.CLIENT)
+    //protected Icon texture_side;
     @Environment(EnvType.CLIENT)
     protected Icon texture_top;
     
@@ -147,7 +154,7 @@ public class ObserverBlock extends BuddyBlock {
         this.texture_back_off = register.registerIcon("observer_back");
         this.texture_back_on = register.registerIcon("observer_back_on");
         this.texture_front = register.registerIcon("observer_front");
-        this.texture_side = register.registerIcon("observer_side");
+        //this.texture_side = register.registerIcon("observer_side");
         this.texture_top = register.registerIcon("observer_top");
     }
     
@@ -164,7 +171,8 @@ public class ObserverBlock extends BuddyBlock {
             case DIRECTION_SOUTH:
                 return this.texture_front;
             default:
-                return this.texture_side;
+                return this.blockIcon;
+                //return this.texture_side;
         }
     }
 
@@ -184,10 +192,10 @@ public class ObserverBlock extends BuddyBlock {
         }
         
         if (DIRECTION_AXIS(facing) != AXIS_Y) {
-            return DIRECTION_AXIS(side) == AXIS_Y ? this.texture_top : this.texture_side;
+            return DIRECTION_AXIS(side) == AXIS_Y ? this.texture_top : this.blockIcon;
         }
         // When facing up, the non-arrow side should be on E/W
-        return DIRECTION_AXIS(side) == AXIS_X ? this.texture_top : this.texture_side;
+        return DIRECTION_AXIS(side) == AXIS_Z ? this.texture_top : this.blockIcon;
     }
     
     @Override

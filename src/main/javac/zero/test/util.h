@@ -768,6 +768,8 @@ MACRO_VOID(
 )
 #define IN_RANGE_INCLUSIVE32(value, min, max) (ULEQ((value)-(min),(max)-(min)))
 
+#define BOOL_INVERT(...) ((__VA_ARGS__)^true)
+
 MACRO_VOID(
 /// Random direction crap
 )
@@ -1288,9 +1290,25 @@ _OFFSET_DIRECTION_ARGS(X, Y, Z, MACRO_CAT(direction,_OFFSETS))
 
 #define DIRECTION_AXIS(dir) ((dir)&~1)
 
-#define AXIS_X 0x2
+#define DIRECTION_SIGN(dir) ((dir)&1)
+
+#define DIRECTION_POSITIVE 1
+#define DIRECTION_NEGATIVE 0
+
+#define AXIS_X 0x4
 #define AXIS_Y 0x0
-#define AXIS_Z 0x4
+#define AXIS_Z 0x2
+
+#define FLAT_DIRECTION_NORTH 0
+#define FLAT_DIRECTION_EAST 1
+#define FLAT_DIRECTION_SOUTH 2
+#define FLAT_DIRECTION_WEST 3
+
+#define FLAT_DIRECTION_AXIS(dir) ((dir)&1)
+#define FLAT_AXIS_X 0x1
+#define FLAT_AXIS_Z 0x0
+
+#define FLAT_DIRECTION_AXES_MATCH(dirA,dirB) ((((dirA)^(dirB))&1)==0)
 
 #define UPDATE_DIRECTION_OFFSET 28
 

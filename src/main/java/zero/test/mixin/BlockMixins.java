@@ -9,8 +9,12 @@ import zero.test.IWorldMixins;
 public class BlockMixins implements IBlockMixins {
     @Overwrite
     public boolean hasLargeCenterHardPointToFacing(IBlockAccess block_access, int X, int Y, int Z, int direction, boolean ignore_transparency) {
+        // Skip the extra block lookup from chaining through world
+        // since the block is already known.
   return ((Block)(Object)this).isNormalCube(block_access, X, Y, Z);
  }
+    // Extra variant of getMobilityFlag that allows
+    // changing the result based on metadata.
     @Override
     public int getMobilityFlag(World world, int X, int Y, int Z) {
         return ((Block)(Object)this).getMobilityFlag();

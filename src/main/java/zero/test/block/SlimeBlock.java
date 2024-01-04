@@ -30,6 +30,11 @@ public class SlimeBlock extends Block {
         return neighbor_id != 1321;
     }
     @Override
+    public boolean isOpaqueCube() {
+        return false;
+    }
+    // Force enable conductivity
+    @Override
     public boolean isNormalCube(IBlockAccess block_access, int X, int Y, int Z) {
         return true;
     }
@@ -75,6 +80,7 @@ public class SlimeBlock extends Block {
     public boolean shouldRenderNeighborFullFaceSide(IBlockAccess block_access, int neighborX, int neighborY, int neighborZ, int neighbor_side) {
         return true;
     }
+    // Treat as transparent for AO
     @Environment(EnvType.CLIENT)
     @Override
     public float getAmbientOcclusionLightValue(IBlockAccess block_access, int X, int Y, int Z) {

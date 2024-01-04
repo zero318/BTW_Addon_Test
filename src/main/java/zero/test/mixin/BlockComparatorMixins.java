@@ -56,6 +56,32 @@ public abstract class BlockComparatorMixins extends BlockRedstoneLogic {
         }
         return true;
     }
+//#if 0
+    // Fixes: More of MC-195351?
+    // refreshOutputState
+    @Overwrite
+    public void func_96476_c(World world, int X, int Y, int Z, Random random) {
+        int meta = world.getBlockMetadata(X, Y, Z);
+        int new_power = this.func_94491_m(world, X, Y, Z, meta);
+        TileEntityComparator tile_entity = ((BlockComparator)(Object)this).getTileEntityComparator(world, X, Y, Z);
+        int prev_power = tile_entity.func_96100_a();
+        if (new_power != prev_power) {
+            tile_entity.func_96099_a(new_power);
+            //boolean should_turn_on = this.func_94478_d(world, X, Y, Z, meta);
+            //boolean is_currently_on = READ_META_FIELD(meta, POWERED);
+            //if (is_currently_on && !should_turn_on) {
+                //world.setBlockMetadataWithNotify(X, Y, Z, MERGE_META_FIELD(meta, POWERED, false), UPDATE_CLIENTS);
+            //}
+            //else if (!is_currently_on && should_turn_on) {
+                //world.setBlockMetadataWithNotify(X, Y, Z, MERGE_META_FIELD(meta, POWERED, true), UPDATE_CLIENTS);
+            //}
+            if ((prev_power & new_power) == 0) {
+                world.setBlockMetadataWithNotify(X, Y, Z, meta ^ 8, 0x02);
+            }
+            this.func_94483_i_(world, X, Y, Z);
+        }
+    }
+//#endif
     @Override
     public boolean canRotateOnTurntable(IBlockAccess block_access, int X, int Y, int Z) {
         return true;
@@ -127,4 +153,5 @@ public abstract class BlockComparatorMixins extends BlockRedstoneLogic {
     public boolean getWeakChanges(World world, int X, int Y, int Z, int meta) {
         return true;
     }
+    // Deal with the conductivity change...
 }

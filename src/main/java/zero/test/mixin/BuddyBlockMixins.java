@@ -22,4 +22,7 @@ public class BuddyBlockMixins {
             }
         }
     }
+    public boolean canRedstoneConnectToSide(IBlockAccess block_access, int X, int Y, int Z, int flat_direction) {
+        return (((((block_access.getBlockMetadata(X, Y, Z))>>>1)))^1) == Direction.directionToFacing[flat_direction];
+    }
 }

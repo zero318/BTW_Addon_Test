@@ -1,0 +1,133 @@
+
+/// ====================
+/// Block Static Methods
+/// ====================
+
+// Static version is called by comparators,
+// animal spawning, and piston tile entities.
+boolean isNormalCube(int block_id) {
+    Block block = blocksList[block_id];
+    return block != null && block.blockMaterial.isOpaque() && block.renderAsNormalBlock();
+}
+
+// Returns a generic bounding box of a full block at X,Y,Z
+AxisAlignedBB getFullBlockBoundingBoxFromPool(World world, int X, int Y, int Z);
+
+/// ====================
+/// Block Instance Methods
+/// ====================
+
+// Appears to only be called for determining water flow?
+boolean isBlockSolid(IBlockAccess block_access, int X, int Y, int Z, int side);
+
+// Not related to opacity of the materials?
+// false: Sets full transparency
+// true: Sets full opacity
+// RESULTS ARE CACHED WHEN CREATING BLOCK
+// Cache isn't used for culling faces?
+boolean Block::isOpaqueCube();
+
+boolean World::isBlockOpaqueCube(int X, int Y, int Z);
+
+// Used for block supports, turntable rotation,
+// redstone conductivity, deciding if an entity
+// is inside an opaque block, AO calculation,
+// and some rendering crap
+boolean Block::isNormalCube(IBlockAccess block_access, int X, int Y, int Z) {
+    return blockMaterial.isOpaque() && renderAsNormalBlock();
+}
+boolean World::isBlockNormalCube(int X, int Y, int Z);
+boolean World::isBlockNormalCubeDefault(int X, int Y, int Z, boolean default);
+boolean ChunkCache::isBlockNormalCube(int X, int Y, int Z) {
+    return blockMaterial.blocksMovement() && renderAsNormalBlock();
+}
+
+// Used as part of isNormalCube, canSilkHarvest,
+// and block rendering.
+boolean renderAsNormalBlock();
+
+//
+boolean canProvidePower();
+
+//
+boolean World::isBlockIndirectlyGettingPowered(int X, int Y, int Z);
+
+//
+boolean Block::isProvidingWeakPower(IBlockAccess block_access, int X, int Y, int Z, int side);
+
+//
+int Block::isProvidingStrongPower(IBlockAccess block_access, int X, int Y, int Z, int side);
+int World::isBlockProvidingPowerTo(int X, int Y, int Z, int side);
+
+// Sets block bounds, usually based on getting metadata from coords.
+// DEPRECATED
+void setBlockBoundsBasedOnState(IBlockAccess block_access, int X, int Y, int Z);
+
+// Gets the default bounding box
+AxisAlignedBB getFixedBlockBoundsFromPool();
+// Default gets the generic fixed size block bounds with no X,Y,Z offset
+AxisAlignedBB getBlockBoundsFromPoolBasedOnState(IBlockAccess block_access, int X, int Y, int Z);
+// Default gets the generic fixed size block bounds with X,Y,Z offset
+AxisAlignedBB getCollisionBoundingBoxFromPool(World world, int X, int Y, int Z);
+
+// Gets the overall bounding box when moved by pistons
+AxisAlignedBB getAsPistonMovingBoundingBox(World world, int X, int Y, int Z);
+
+// Seems to be the main method for getting the hitbox of a block
+void addCollisionBoxesToList(World world, int X, int Y, int Z, AxisAlignedBB mask_box, List list, Entity entity);
+
+// Bit odd...
+boolean canSilkHarvest() {
+    return this.renderAsNormalBlock() && !this.hasTileEntity;
+}
+boolean canSilkHarvest(int meta) {
+    return canSilkHarvest();
+}
+
+// Pathfinding related
+boolean getBlocksMovement(IBlockAccess block_access, int X, int Y, int Z) {
+    return !this.blockMaterial.blocksMovement();
+}
+boolean canPathThroughBlock(IBlockAccess block_access, int X, int Y, int Z, Entity entity, PathFinder path_finder) {
+    return getBlocksMovement(block_access, X, Y, Z);
+}
+
+// Is this called anywhere?
+void onSetBlockIDWithMetaData(World world, int X, int Y, int Z, int par5);
+
+void clientNotificationOfMetadataChange(World world, int X, int Y, int Z, int old_meta, int new_meta);
+
+void onArrowImpact(World world, int X, int Y, int Z, EntityArrow arrow);
+void onArrowCollide(World world, int X, int Y, int Z, EntityArrow arrow);
+
+// Do hoppers throw crap on the floor?
+boolean doesBlockHopperEject(World world, int X, int Y, int Z) {
+    return blockMaterial.isSolid();
+}
+
+// Attachment checks that default to calling each other,
+// then ending at isBlockNormalCube
+boolean Block::hasSmallCenterHardPointToFacing(IBlockAccess block_access, int X, int Y, int Z, int side, boolean ignore_transparency);
+boolean Block::hasCenterHardPointToFacing(IBlockAccess block_access, int X, int Y, int Z, int side, boolean ignore_transparency);
+boolean Block::hasLargeCenterHardPointToFacing(IBlockAccess block_access, int X, int Y, int Z, int side, boolean ignore_transparency);
+boolean World::doesBlockHaveSolidTopSurface(int X, int Y, int Z);
+
+
+// Is the block sitting on the floor?
+// Doesn't call isBlockAttachedToFacing with down
+boolean isBlockRestingOnThatBelow(IBlockAccess block_access, int X, int Y, int Z);
+// Is the block attached to a side?
+boolean isBlockAttachedToFacing(IBlockAccess block_access, int X, int Y, int Z, int side);
+
+// Melts nearby snow/ice
+boolean getIsBlockWarm(IBlockAccess block_access, int X, int Y, int Z);
+
+// Maybe relevant for pistons?
+boolean shouldDeleteTileEntityOnBlockChange(int new_block_id);
+
+/// ====================
+/// World Instance Methods
+/// ====================
+int getIndirectPowerLevelTo(int X, int Y, int Z, int direction) {
+    if (is)
+}

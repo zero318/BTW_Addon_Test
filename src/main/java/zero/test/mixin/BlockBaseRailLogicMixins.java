@@ -9,7 +9,6 @@ import zero.test.mixin.IBlockBaseRailLogicAccessMixins;
 import java.util.List;
 @Mixin(BlockBaseRailLogic.class)
 public class BlockBaseRailLogicMixins {
-// func_94511_a
     @Overwrite
     public void func_94511_a(boolean is_powered, boolean par2) {
         IBlockBaseRailLogicAccessMixins self = (IBlockBaseRailLogicAccessMixins)(Object)this;
@@ -29,86 +28,86 @@ public class BlockBaseRailLogicMixins {
         boolean has_east_connect = self.hasNeighborRail(selfX + 1, selfY, selfZ);
         int rail_shape = -1;
         if (
-            (has_north_connect || has_south_connect) &&
-            !(has_west_connect || has_east_connect)
+            (has_north_connect | has_south_connect) &
+            ((has_west_connect | has_east_connect)^true)
         ) {
             rail_shape = 0;
         }
         if (
-            (has_west_connect || has_east_connect) &&
-            !(has_north_connect || has_south_connect)
+            (has_west_connect | has_east_connect) &
+            ((has_north_connect | has_south_connect)^true)
         ) {
             rail_shape = 1;
         }
         if (!is_straight_rail) {
             if (
-                has_south_connect &&
-                has_east_connect &&
-                !(has_north_connect || has_west_connect)
+                has_south_connect &
+                has_east_connect &
+                ((has_north_connect | has_west_connect)^true)
             ) {
                 rail_shape = 6;
             }
             if (
-                has_south_connect &&
-                has_west_connect &&
-                !(has_north_connect || has_east_connect)
+                has_south_connect &
+                has_west_connect &
+                ((has_north_connect | has_east_connect)^true)
             ) {
                 rail_shape = 7;
             }
             if (
-                has_north_connect &&
-                has_west_connect &&
-                !(has_south_connect || has_east_connect)
+                has_north_connect &
+                has_west_connect &
+                ((has_south_connect | has_east_connect)^true)
             ) {
                 rail_shape = 8;
             }
             if (
-                has_north_connect &&
-                has_east_connect &&
-                !(has_south_connect || has_west_connect)
+                has_north_connect &
+                has_east_connect &
+                ((has_south_connect | has_west_connect)^true)
             ) {
                 rail_shape = 9;
             }
         }
         if (rail_shape == -1) {
             if (
-                (has_north_connect || has_south_connect) &&
-                (has_west_connect || has_east_connect)
+                (has_north_connect | has_south_connect) &
+                (has_west_connect | has_east_connect)
             ) {
                 rail_shape = previous_shape;
             }
-            else if (has_north_connect || has_south_connect) {
+            else if (has_north_connect | has_south_connect) {
                 rail_shape = 0;
             }
-            else if (has_west_connect || has_east_connect) {
+            else if (has_west_connect | has_east_connect) {
                 rail_shape = 1;
             }
             if (!is_straight_rail) {
                 if (is_powered) {
-                    if (has_south_connect && has_east_connect) {
+                    if (has_south_connect & has_east_connect) {
                         rail_shape = 6;
                     }
-                    if (has_west_connect && has_south_connect) {
+                    if (has_west_connect & has_south_connect) {
                         rail_shape = 7;
                     }
-                    if (has_east_connect && has_north_connect) {
+                    if (has_east_connect & has_north_connect) {
                         rail_shape = 9;
                     }
-                    if (has_north_connect && has_west_connect) {
+                    if (has_north_connect & has_west_connect) {
                         rail_shape = 8;
                     }
                 }
                 else {
-                    if (has_north_connect && has_west_connect) {
+                    if (has_north_connect & has_west_connect) {
                         rail_shape = 8;
                     }
-                    if (has_east_connect && has_north_connect) {
+                    if (has_east_connect & has_north_connect) {
                         rail_shape = 9;
                     }
-                    if (has_west_connect && has_south_connect) {
+                    if (has_west_connect & has_south_connect) {
                         rail_shape = 7;
                     }
-                    if (has_south_connect && has_east_connect) {
+                    if (has_south_connect & has_east_connect) {
                         rail_shape = 6;
                     }
                 }

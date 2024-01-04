@@ -14,11 +14,29 @@ import zero.test.IWorldMixins;
 
 @Mixin(Block.class)
 public class BlockMixins implements IBlockMixins {
+
     @Overwrite
     public boolean hasLargeCenterHardPointToFacing(IBlockAccess block_access, int X, int Y, int Z, int direction, boolean ignore_transparency) {
+        // Skip the extra block lookup from chaining through world
+        // since the block is already known.
 		return ((Block)(Object)this).isNormalCube(block_access, X, Y, Z);
 	}
     
+#if ENABLE_MODERN_SUPPORT_LOGIC
+    @Overwrite
+    public boolean isNormalCube(IBlockAccess block_access, int X, int Y, int Z) {
+        return ((Block)(Object)this).renderAsNormalBlock();
+    }
+    
+    @Overwrite
+    public static boolean isNormalCube(int block_id) {
+		Block block = Block.blocksList[block_id];
+        return !BLOCK_IS_AIR(block) && block.renderAsNormalBlock();
+	}
+#endif
+    
+    // Extra variant of getMobilityFlag that allows
+    // changing the result based on metadata.
     @Override
     public int getMobilityFlag(World world, int X, int Y, int Z) {
         return ((Block)(Object)this).getMobilityFlag();

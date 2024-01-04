@@ -2,6 +2,7 @@ package zero.test;
 import btw.AddonHandler;
 import net.minecraft.src.Block;
 import net.minecraft.src.World;
+import net.minecraft.src.IBlockAccess;
 
 public interface IBlockMixins {
     // Whether or not the block should have onNeighborBlockChange
@@ -35,5 +36,14 @@ public interface IBlockMixins {
     }
     default public boolean permanentlySupportsMortarBlocks(World world, int X, int Y, int Z, int direction) {
         return false;
+    }
+    // Default to the old behavior for conductivity testing
+    default public boolean isRedstoneConductor(IBlockAccess block_access, int X, int Y, int Z) {
+        //return ((Block)(Object)this).isNormalCube(world, X, Y, Z);
+        return block_access.isBlockNormalCube(X, Y, Z);
+    }
+    // Default to the old behavior for dust connections
+    default public boolean canRedstoneConnectToSide(IBlockAccess block_access, int X, int Y, int Z, int flat_direction) {
+        return ((Block)(Object)this).canProvidePower();
     }
 }

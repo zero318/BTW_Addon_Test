@@ -3,7 +3,7 @@
 
 #include "util.h"
 
-MACRO_VOID(/* Vanilla observers */)
+MACRO_VOID(/* Vanilla observers and shape updates */)
 #define ENABLE_DIRECTIONAL_UPDATES 1
 
 MACRO_VOID(/* Slime blocks */)
@@ -91,8 +91,27 @@ MACRO_VOID(
 )
 #define ENABLE_COMPARATOR_CLIENT_SIDE_ENTITY_REMOVAL 1
 
-#define ENABLE_MODERN_REDSTONE_WIRE 0
+MACRO_VOID(/* Add a property for blocks to control where dust points */)
+#define ENABLE_BETTER_REDSTONE_WIRE_CONNECTIONS 1
+
+MACRO_VOID(
+// Fix MC-2255, MC-8645, and MC-9405
+// Generally make dust suck less
+)
+#define ENABLE_MODERN_REDSTONE_WIRE 1
+
+#define ENABLE_REDSTONE_WIRE_DOT_SHAPE 0
+
+#define ENABLE_MODERN_SUPPORT_LOGIC 0
 
 #define ENABLE_NOCLIP_COMMAND 1
+
+#define ENABLE_HOLLOW_COLLISION_BOXES 1
+
+MACRO_VOID(
+// Allow metal spikes to weakly conduct power to their bases
+// TODO: Think of a way to prevent feedback loops...
+)
+#define ENABLE_CONDUCTIVE_METAL_SPIKES 0
 
 #endif

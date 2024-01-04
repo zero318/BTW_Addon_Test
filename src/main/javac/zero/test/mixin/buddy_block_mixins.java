@@ -12,6 +12,9 @@ import org.spongepowered.asm.mixin.Overwrite;
 
 #define onNeighborBlockChange(...) method_408(__VA_ARGS__)
 
+#define POWERED_META_OFFSET 0
+#define DIRECTION_META_OFFSET 1
+
 @Mixin(BuddyBlock.class)
 public class BuddyBlockMixins {
 #if ENABLE_BETTER_BUDDY_DETECTION
@@ -33,6 +36,12 @@ public class BuddyBlockMixins {
                 world.scheduleBlockUpdate(X, Y, Z, self.blockID, 1); 
             }
         }
+    }
+#endif
+
+#if ENABLE_BETTER_REDSTONE_WIRE_CONNECTIONS
+    public boolean canRedstoneConnectToSide(IBlockAccess block_access, int X, int Y, int Z, int flat_direction) {
+        return OPPOSITE_DIRECTION(READ_META_FIELD(block_access.getBlockMetadata(X, Y, Z), DIRECTION)) == Direction.directionToFacing[flat_direction];
     }
 #endif
 }

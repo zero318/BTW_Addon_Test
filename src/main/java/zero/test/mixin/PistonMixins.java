@@ -618,7 +618,7 @@ public abstract class PistonMixins extends BlockPistonBase {
     }
     private static final int PISTON_EVENT_EXTENDING = 0;
     private static final int PISTON_EVENT_RETRACTING_NORMAL = 1;
-    private static final int PISTON_EVENT_RETRACTING_ZERO_TICK = 2;
+    private static final int PISTON_EVENT_RETRACTING_DROP_BLOCK = 2;
     //@Override
     public void updatePistonState(World world, int x, int y, int z) {
         if (!world.isRemote) {
@@ -658,7 +658,7 @@ public abstract class PistonMixins extends BlockPistonBase {
                                     world.getTotalWorldTime() == ((IBlockEntityPistonMixins)tileEntity).getLastTicked()
                                     // something about "handling tick"?
                                 )
-                            ) ? PISTON_EVENT_RETRACTING_ZERO_TICK : PISTON_EVENT_RETRACTING_NORMAL,
+                            ) ? PISTON_EVENT_RETRACTING_DROP_BLOCK : PISTON_EVENT_RETRACTING_NORMAL,
                             direction
                         );
                     }
@@ -674,7 +674,7 @@ public abstract class PistonMixins extends BlockPistonBase {
                 isPowered &&
                 (
                     eventType == PISTON_EVENT_RETRACTING_NORMAL ||
-                    eventType == PISTON_EVENT_RETRACTING_ZERO_TICK
+                    eventType == PISTON_EVENT_RETRACTING_DROP_BLOCK
                 )
             ) {
                 world.setBlockMetadataWithNotify(x, y, z, (((direction)|8)), 0x02);
@@ -695,7 +695,7 @@ public abstract class PistonMixins extends BlockPistonBase {
                 world.playSoundEffect((double)x + 0.5D, (double)y + 0.5D, (double)z + 0.5D, "tile.piston.out", 0.5F, world.rand.nextFloat() * 0.25F + 0.6F);
             default:
                 return true;
-            case PISTON_EVENT_RETRACTING_NORMAL: case PISTON_EVENT_RETRACTING_ZERO_TICK: // Retract
+            case PISTON_EVENT_RETRACTING_NORMAL: case PISTON_EVENT_RETRACTING_DROP_BLOCK: // Retract
                                                                        ;
                 int nextX = x + Facing.offsetsXForSide[direction];
                 int nextY = y + Facing.offsetsYForSide[direction];

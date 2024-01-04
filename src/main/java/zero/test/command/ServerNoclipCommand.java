@@ -29,6 +29,10 @@ public class ServerNoclipCommand extends CommandBase {
                     switch (args[0]) {
                         default:
                             throw new WrongUsageException("commands.noclip.usage", new Object[0]);
+                        case "toggle":
+                            send_packet = true;
+                            player.noClip = !player.noClip;
+                            break;
                         case "on": case "true":
                             send_packet = !player.noClip;
                             player.noClip = true;
@@ -54,8 +58,6 @@ public class ServerNoclipCommand extends CommandBase {
             if (command_sender != player) {
                 command_sender.sendChatToPlayer("\247e"+command_sender.translateString(translate_key, new Object[]{player.getEntityName()}));
             }
-            //command_sender.translateString("commands.noclip.usage", new Object[0])
-            //command_sender.sendChatToPlayer(player.noClip ? "\247eNoclip state: On" : "\247eNoclip state: Off");
         }
     }
     @Override
@@ -64,7 +66,7 @@ public class ServerNoclipCommand extends CommandBase {
             default:
                 return null;
             case 1:
-                return getListOfStringsMatchingLastWord(args, new String[] {"query", "on", "off", "true", "false"});
+                return getListOfStringsMatchingLastWord(args, new String[] {"query", "toggle", "on", "off", "true", "false"});
             case 2:
                 return getListOfStringsMatchingLastWord(args, MinecraftServer.getServer().getAllUsernames());
         }

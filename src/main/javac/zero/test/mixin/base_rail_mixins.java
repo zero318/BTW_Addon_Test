@@ -51,7 +51,7 @@ public class BlockRailBaseMixins {
     //@Override
     public int preBlockPlacedBy(World world, int X, int Y, int Z, int meta, EntityLiving entity_living) {
         return entity_living instanceof EntityPlayer &&
-               AXIS_X != DIRECTION_AXIS(Direction.directionToFacing[(int)Math.floor(entity_living.rotationYaw / 90.0 + 0.5) & 3])
+               AXIS_Z != DIRECTION_AXIS(Direction.directionToFacing[(int)Math.floor(entity_living.rotationYaw / 90.0 + 0.5) & 3])
                 ? RAIL_EAST_WEST
                 : RAIL_NORTH_SOUTH;
     }

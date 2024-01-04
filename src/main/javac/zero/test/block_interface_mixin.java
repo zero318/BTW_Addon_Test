@@ -4,6 +4,7 @@ import btw.AddonHandler;
 
 import net.minecraft.src.Block;
 import net.minecraft.src.World;
+import net.minecraft.src.IBlockAccess;
 
 #include "feature_flags.h"
 
@@ -59,8 +60,17 @@ public interface IBlockMixins {
 #endif
 
 #if ENABLE_MODERN_REDSTONE_WIRE
-    default public boolean isRedstoneConductor(World world, int X, int Y, int Z) {
-        return ((Block)(Object)this).isNormalCube(world, X, Y, Z);
+    // Default to the old behavior for conductivity testing
+    default public boolean isRedstoneConductor(IBlockAccess block_access, int X, int Y, int Z) {
+        //return ((Block)(Object)this).isNormalCube(world, X, Y, Z);
+        return block_access.isBlockNormalCube(X, Y, Z);
+    }
+#endif
+
+#if ENABLE_BETTER_REDSTONE_WIRE_CONNECTIONS
+    // Default to the old behavior for dust connections
+    default public boolean canRedstoneConnectToSide(IBlockAccess block_access, int X, int Y, int Z, int flat_direction) {
+        return ((Block)(Object)this).canProvidePower();
     }
 #endif
 }

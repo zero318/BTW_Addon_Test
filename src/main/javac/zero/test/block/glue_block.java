@@ -42,6 +42,13 @@ public class GlueBlock extends Block {
         return neighbor_id != SLIME_BLOCK_ID;
     }
     
+    
+    @Override
+    public boolean isOpaqueCube() {
+        return false;
+    }
+    
+    // Force enable conductivity
     @Override
     public boolean isNormalCube(IBlockAccess block_access, int X, int Y, int Z) {
         return true;
@@ -51,6 +58,12 @@ public class GlueBlock extends Block {
     public boolean hasMortar(IBlockAccess block_access, int X, int Y, int Z) {
         return true;
     }
+    
+#if ENABLE_MODERN_REDSTONE_WIRE
+    public boolean isRedstoneConductor(IBlockAccess block_access, int X, int Y, int Z) {
+        return false;
+    }
+#endif
     
 #if ENABLE_SLIME_SUPPORTING_MORTAR_BLOCKS
     public boolean permanentlySupportsMortarBlocks(World world, int X, int Y, int Z, int direction) {
@@ -104,6 +117,7 @@ public class GlueBlock extends Block {
         return true;
     }
     
+    // Treat as transparent for AO
     @Environment(EnvType.CLIENT)
     @Override
     public float getAmbientOcclusionLightValue(IBlockAccess block_access, int X, int Y, int Z) {

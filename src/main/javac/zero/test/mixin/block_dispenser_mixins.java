@@ -23,11 +23,9 @@ public class BlockDispenserBlockMixins {
     public boolean validateBlockDispenser(World world, int X, int Y, int Z) {
         return true;
     }
-#if 0
     @Overwrite
 	public boolean isCurrentStateValid(World world, int X, int Y, int Z) {
-        return false;
+        return true;
     }
-#endif
 #endif
 }

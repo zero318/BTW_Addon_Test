@@ -24,6 +24,8 @@ import zero.test.mixin.IPistonBaseAccessMixins;
 import zero.test.IWorldMixins;
 import zero.test.IBlockEntityPistonMixins;
 
+import java.util.List;
+
 #include "..\func_aliases.h"
 #include "..\feature_flags.h"
 #include "..\util.h"
@@ -41,6 +43,13 @@ public class BlockPistonMovingMixins {
         return false;
     }
 #endif
+    
+    public void addCollisionBoxesToList(World world, int x, int y, int z, AxisAlignedBB maskBox, List list, Entity entity) {
+        TileEntity tileEntity = world.getBlockTileEntity(x, y, z);
+        if (tileEntity instanceof TileEntityPiston) {
+            ((IBlockEntityPistonMixins)(Object)tileEntity).getCollisionList(maskBox, list);
+        }
+    }
     
     public boolean hasLargeCenterHardPointToFacing(IBlockAccess blockAccess, int x, int y, int z, int direction, boolean ignoreTransparency) {
         TileEntity tileEntity = blockAccess.getBlockTileEntity(x, y, z);

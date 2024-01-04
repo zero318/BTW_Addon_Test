@@ -29,12 +29,20 @@ public class GlueBlock extends Block {
         return neighbor_id != 1320;
     }
     @Override
+    public boolean isOpaqueCube() {
+        return false;
+    }
+    // Force enable conductivity
+    @Override
     public boolean isNormalCube(IBlockAccess block_access, int X, int Y, int Z) {
         return true;
     }
     @Override
     public boolean hasMortar(IBlockAccess block_access, int X, int Y, int Z) {
         return true;
+    }
+    public boolean isRedstoneConductor(IBlockAccess block_access, int X, int Y, int Z) {
+        return false;
     }
     public boolean permanentlySupportsMortarBlocks(World world, int X, int Y, int Z, int direction) {
         return true;
@@ -78,6 +86,7 @@ public class GlueBlock extends Block {
     public boolean shouldRenderNeighborFullFaceSide(IBlockAccess block_access, int neighborX, int neighborY, int neighborZ, int neighbor_side) {
         return true;
     }
+    // Treat as transparent for AO
     @Environment(EnvType.CLIENT)
     @Override
     public float getAmbientOcclusionLightValue(IBlockAccess block_access, int X, int Y, int Z) {

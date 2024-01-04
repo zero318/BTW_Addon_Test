@@ -34,7 +34,6 @@ import java.util.List;
 @Mixin(BlockBaseRailLogic.class)
 public class BlockBaseRailLogicMixins {
     
-// func_94511_a
     @Overwrite
     public void func_94511_a(boolean is_powered, boolean par2) {
         IBlockBaseRailLogicAccessMixins self = (IBlockBaseRailLogicAccessMixins)(Object)this;
@@ -58,48 +57,48 @@ public class BlockBaseRailLogicMixins {
         int rail_shape = RAIL_INVALID;
 
         if (
-            (has_north_connect || has_south_connect) &&
-            !(has_west_connect || has_east_connect)
+            (has_north_connect | has_south_connect) &
+            BOOL_INVERT(has_west_connect | has_east_connect)
         ) {
             rail_shape = RAIL_NORTH_SOUTH;
         }
 
         if (
-            (has_west_connect || has_east_connect) &&
-            !(has_north_connect || has_south_connect)
+            (has_west_connect | has_east_connect) &
+            BOOL_INVERT(has_north_connect | has_south_connect)
         ) {
             rail_shape = RAIL_EAST_WEST;
         }
 
         if (!is_straight_rail) {
             if (
-                has_south_connect &&
-                has_east_connect &&
-                !(has_north_connect || has_west_connect)
+                has_south_connect &
+                has_east_connect &
+                BOOL_INVERT(has_north_connect | has_west_connect)
             ) {
                 rail_shape = RAIL_SOUTH_EAST;
             }
 
             if (
-                has_south_connect &&
-                has_west_connect &&
-                !(has_north_connect || has_east_connect)
+                has_south_connect &
+                has_west_connect &
+                BOOL_INVERT(has_north_connect | has_east_connect)
             ) {
                 rail_shape = RAIL_SOUTH_WEST;
             }
 
             if (
-                has_north_connect &&
-                has_west_connect &&
-                !(has_south_connect || has_east_connect)
+                has_north_connect &
+                has_west_connect &
+                BOOL_INVERT(has_south_connect | has_east_connect)
             ) {
                 rail_shape = RAIL_NORTH_WEST;
             }
 
             if (
-                has_north_connect &&
-                has_east_connect &&
-                !(has_south_connect || has_west_connect)
+                has_north_connect &
+                has_east_connect &
+                BOOL_INVERT(has_south_connect | has_west_connect)
             ) {
                 rail_shape = RAIL_NORTH_EAST;
             }
@@ -107,50 +106,50 @@ public class BlockBaseRailLogicMixins {
 
         if (rail_shape == RAIL_INVALID) {
             if (
-                (has_north_connect || has_south_connect) &&
-                (has_west_connect || has_east_connect)
+                (has_north_connect | has_south_connect) &
+                (has_west_connect | has_east_connect)
             ) {
                 rail_shape = previous_shape;
             }
-            else if (has_north_connect || has_south_connect) {
+            else if (has_north_connect | has_south_connect) {
                 rail_shape = RAIL_NORTH_SOUTH;
             }
-            else if (has_west_connect || has_east_connect) {
+            else if (has_west_connect | has_east_connect) {
                 rail_shape = RAIL_EAST_WEST;
             }
 
             if (!is_straight_rail) {
                 if (is_powered) {
-                    if (has_south_connect && has_east_connect) {
+                    if (has_south_connect & has_east_connect) {
                         rail_shape = RAIL_SOUTH_EAST;
                     }
 
-                    if (has_west_connect && has_south_connect) {
+                    if (has_west_connect & has_south_connect) {
                         rail_shape = RAIL_SOUTH_WEST;
                     }
 
-                    if (has_east_connect && has_north_connect) {
+                    if (has_east_connect & has_north_connect) {
                         rail_shape = RAIL_NORTH_EAST;
                     }
 
-                    if (has_north_connect && has_west_connect) {
+                    if (has_north_connect & has_west_connect) {
                         rail_shape = RAIL_NORTH_WEST;
                     }
                 }
                 else {
-                    if (has_north_connect && has_west_connect) {
+                    if (has_north_connect & has_west_connect) {
                         rail_shape = RAIL_NORTH_WEST;
                     }
 
-                    if (has_east_connect && has_north_connect) {
+                    if (has_east_connect & has_north_connect) {
                         rail_shape = RAIL_NORTH_EAST;
                     }
 
-                    if (has_west_connect && has_south_connect) {
+                    if (has_west_connect & has_south_connect) {
                         rail_shape = RAIL_SOUTH_WEST;
                     }
 
-                    if (has_south_connect && has_east_connect) {
+                    if (has_south_connect & has_east_connect) {
                         rail_shape = RAIL_SOUTH_EAST;
                     }
                 }

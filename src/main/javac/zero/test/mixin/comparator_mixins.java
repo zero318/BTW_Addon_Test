@@ -80,7 +80,7 @@ public abstract class BlockComparatorMixins extends BlockRedstoneLogic {
         return true;
     }
     
-#if 0
+//#if 0
     // Fixes: More of MC-195351?
     // refreshOutputState
     @Overwrite
@@ -103,13 +103,13 @@ public abstract class BlockComparatorMixins extends BlockRedstoneLogic {
                 //world.setBlockMetadataWithNotify(X, Y, Z, MERGE_META_FIELD(meta, POWERED, true), UPDATE_CLIENTS);
             //}
             
-            if (prev_power == 0 || new_power == 0) {
+            if ((prev_power & new_power) == 0) {
                 world.setBlockMetadataWithNotify(X, Y, Z, meta ^ 8, UPDATE_CLIENTS);
             }
             this.func_94483_i_(world, X, Y, Z);
         }
     }
-#endif
+//#endif
 
     @Override
     public boolean canRotateOnTurntable(IBlockAccess block_access, int X, int Y, int Z) {
@@ -195,4 +195,8 @@ public abstract class BlockComparatorMixins extends BlockRedstoneLogic {
     public boolean getWeakChanges(World world, int X, int Y, int Z, int meta) {
         return true;
     }
+    
+#if ENABLE_MODERN_REDSTONE_WIRE
+    // Deal with the conductivity change...
+#endif
 }

@@ -737,7 +737,7 @@ public abstract class PistonMixins extends BlockPistonBase {
     
     private static final int PISTON_EVENT_EXTENDING = 0;
     private static final int PISTON_EVENT_RETRACTING_NORMAL = 1;
-    private static final int PISTON_EVENT_RETRACTING_ZERO_TICK = 2;
+    private static final int PISTON_EVENT_RETRACTING_DROP_BLOCK = 2;
     
     //@Override
     public void updatePistonState(World world, int x, int y, int z) {
@@ -779,7 +779,7 @@ public abstract class PistonMixins extends BlockPistonBase {
                                     world.getTotalWorldTime() == ((IBlockEntityPistonMixins)tileEntity).getLastTicked()
                                     // something about "handling tick"?
                                 )
-                            ) ? PISTON_EVENT_RETRACTING_ZERO_TICK : PISTON_EVENT_RETRACTING_NORMAL,
+                            ) ? PISTON_EVENT_RETRACTING_DROP_BLOCK : PISTON_EVENT_RETRACTING_NORMAL,
                             direction
                         );
                     }
@@ -796,7 +796,7 @@ public abstract class PistonMixins extends BlockPistonBase {
                 isPowered &&
                 (
                     eventType == PISTON_EVENT_RETRACTING_NORMAL ||
-                    eventType == PISTON_EVENT_RETRACTING_ZERO_TICK
+                    eventType == PISTON_EVENT_RETRACTING_DROP_BLOCK
                 )
             ) {
                 world.setBlockMetadataWithNotify(x, y, z, MERGE_META_FIELD(direction, EXTENDED, true), UPDATE_CLIENTS);
@@ -818,7 +818,7 @@ public abstract class PistonMixins extends BlockPistonBase {
             default:
                 return true;
                 
-            case PISTON_EVENT_RETRACTING_NORMAL: case PISTON_EVENT_RETRACTING_ZERO_TICK: // Retract
+            case PISTON_EVENT_RETRACTING_NORMAL: case PISTON_EVENT_RETRACTING_DROP_BLOCK: // Retract
                 PISTON_DEBUG("Case PISTON_EVENT_RETRACTING "+eventType);
                 int nextX = x + Facing.offsetsXForSide[direction];
                 int nextY = y + Facing.offsetsYForSide[direction];

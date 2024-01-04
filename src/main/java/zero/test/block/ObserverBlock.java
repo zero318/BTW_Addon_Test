@@ -1,4 +1,3 @@
-
 package zero.test.block;
 import btw.client.fx.BTWEffectManager;
 import btw.util.MiscUtils;
@@ -36,14 +35,12 @@ public class ObserverBlock extends BuddyBlock {
     public void onNeighborBlockChange(World world, int X, int Y, int Z, int neighbor_id) {
     }
     public int updateShape(World world, int X, int Y, int Z, int direction, int meta) {
-        int update_direction = (((meta)>>>1));
-        if (update_direction == ((direction)^1)) {
-            if (!world.isUpdateScheduledForBlock(X, Y, Z, this.blockID)) {
-                world.scheduleBlockUpdate(X, Y, Z, this.blockID, 2);
-            }
-        } //else {
-            //AddonHandler.logMessage("Observer fail "+OPPOSITE_DIRECTION(direction)+" != "+update_direction);
-        //}
+        if (
+            (((meta)>>>1)) == ((direction)^1) &&
+            !world.isUpdateScheduledForBlock(X, Y, Z, this.blockID)
+        ) {
+            world.scheduleBlockUpdate(X, Y, Z, this.blockID, 2);
+        }
         return meta;
     }
     @Override
@@ -55,19 +52,25 @@ public class ObserverBlock extends BuddyBlock {
             world.setBlockMetadataWithClient(X, Y, Z, (((meta)|1)));
             world.scheduleBlockUpdate(X, Y, Z, this.blockID, 2);
         }
-        //notifyNeigborsToFacingOfPowerChange(world, X, Y, Z, READ_META_FIELD(meta, DIRECTION));
         int direction = (((meta)>>>1));
         X += Facing.offsetsXForSide[direction];
         Y += Facing.offsetsYForSide[direction];
         Z += Facing.offsetsZForSide[direction];
-        int neighbor_id = world.getBlockId(X, Y, Z);
-        Block neighbor_block = Block.blocksList[neighbor_id];
+        Block neighbor_block = Block.blocksList[world.getBlockId(X, Y, Z)];
         if (!((neighbor_block)==null)) {
             neighbor_block.onNeighborBlockChange(world, X, Y, Z, this.blockID);
         }
         world.notifyBlocksOfNeighborChange(X, Y, Z, this.blockID, ((direction)^1));
     }
+    public boolean isRedstoneConductor(IBlockAccess block_access, int X, int Y, int Z) {
+        return false;
+    }
+    public boolean canRedstoneConnectToSide(IBlockAccess block_access, int X, int Y, int Z, int flat_direction) {
+        return (((((block_access.getBlockMetadata(X, Y, Z))>>>1)))^1) == Direction.directionToFacing[flat_direction];
+    }
     // This just gets rid of the clicking sound
+    // TODO: Remove override now that the code
+    // is being used directly in updateTick
     @Override
     public void setBlockRedstoneOn(World world, int X, int Y, int Z, boolean is_activated) {
         if (is_activated != isRedstoneOn(world, X, Y, Z)) {
@@ -87,10 +90,6 @@ public class ObserverBlock extends BuddyBlock {
             world.markBlockRangeForRenderUpdate(X, Y, Z, X, Y, Z);
         }
     }
-    /*@Override
-    public int onPreBlockPlacedByPiston(World world, int X, int Y, int Z, int meta, int direction) {
-        return meta;
-    }*/
     // Maybe this will prevent it getting stuck on when moved?
     @Override
     public int adjustMetadataForPistonMove(int meta) {
@@ -102,8 +101,8 @@ public class ObserverBlock extends BuddyBlock {
     protected Icon texture_back_on;
     @Environment(EnvType.CLIENT)
     protected Icon texture_front;
-    @Environment(EnvType.CLIENT)
-    protected Icon texture_side;
+    //@Environment(EnvType.CLIENT)
+    //protected Icon texture_side;
     @Environment(EnvType.CLIENT)
     protected Icon texture_top;
     @Override
@@ -113,7 +112,7 @@ public class ObserverBlock extends BuddyBlock {
         this.texture_back_off = register.registerIcon("observer_back");
         this.texture_back_on = register.registerIcon("observer_back_on");
         this.texture_front = register.registerIcon("observer_front");
-        this.texture_side = register.registerIcon("observer_side");
+        //this.texture_side = register.registerIcon("observer_side");
         this.texture_top = register.registerIcon("observer_top");
     }
     @Override
@@ -129,7 +128,8 @@ public class ObserverBlock extends BuddyBlock {
             case 3:
                 return this.texture_front;
             default:
-                return this.texture_side;
+                return this.blockIcon;
+                //return this.texture_side;
         }
     }
     @Override
@@ -146,10 +146,10 @@ public class ObserverBlock extends BuddyBlock {
             return this.texture_front;
         }
         if (((facing)&~1) != 0x0) {
-            return ((side)&~1) == 0x0 ? this.texture_top : this.texture_side;
+            return ((side)&~1) == 0x0 ? this.texture_top : this.blockIcon;
         }
         // When facing up, the non-arrow side should be on E/W
-        return ((side)&~1) == 0x2 ? this.texture_top : this.texture_side;
+        return ((side)&~1) == 0x2 ? this.texture_top : this.blockIcon;
     }
     @Override
     @Environment(EnvType.CLIENT)

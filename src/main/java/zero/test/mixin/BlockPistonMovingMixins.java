@@ -19,12 +19,19 @@ import zero.test.IBlockMixins;
 import zero.test.mixin.IPistonBaseAccessMixins;
 import zero.test.IWorldMixins;
 import zero.test.IBlockEntityPistonMixins;
+import java.util.List;
 //#define getInputSignal(...) func_94482_f(__VA_ARGS__)
 @Mixin(BlockPistonMoving.class)
 public class BlockPistonMovingMixins {
     //@Override
     public boolean triggersBuddy() {
         return false;
+    }
+    public void addCollisionBoxesToList(World world, int x, int y, int z, AxisAlignedBB maskBox, List list, Entity entity) {
+        TileEntity tileEntity = world.getBlockTileEntity(x, y, z);
+        if (tileEntity instanceof TileEntityPiston) {
+            ((IBlockEntityPistonMixins)(Object)tileEntity).getCollisionList(maskBox, list);
+        }
     }
     public boolean hasLargeCenterHardPointToFacing(IBlockAccess blockAccess, int x, int y, int z, int direction, boolean ignoreTransparency) {
         TileEntity tileEntity = blockAccess.getBlockTileEntity(x, y, z);

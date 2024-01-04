@@ -13,30 +13,30 @@ import zero.test.block.ZeroTestBlocks;
 public class ZeroTestAddon extends BTWAddon {
     private static ZeroTestAddon instance;
     private ZeroTestAddon() {
-        super("Zero Test Addon", "0.0.4", "ZeroTest");
+        super("Zero Test Addon", "0.0.6", "ZeroTest");
     }
     @Override
     public void initialize() {
         //AddonHandler.logMessage(this.getName() + " Version " + this.getVersionString() + " Initializing...");
         this.registerAddonCommand(new ServerNoclipCommand());
         ZeroTestBlocks.cud_block = new CUDBlock(1318);
-        Item.itemsList[1318 -256] = new ItemBlock(1318 -256);
+        Item.itemsList[1318] = new ItemBlock(1318 -256);
         ZeroTestBlocks.observer_block = new ObserverBlock(1319);
-        Item.itemsList[1319 -256] = new ItemBlock(1319 -256);
+        Item.itemsList[1319] = new ItemBlock(1319 -256);
         ZeroTestBlocks.slime_block = new SlimeBlock(1320);
-        Item.itemsList[1320 -256] = new ItemBlock(1320 -256);
+        Item.itemsList[1320] = new ItemBlock(1320 -256);
         ZeroTestBlocks.glue_block = new GlueBlock(1321);
-        Item.itemsList[1321 -256] = new ItemBlock(1321 -256);
+        Item.itemsList[1321] = new ItemBlock(1321 -256);
         ZeroTestBlocks.iron_trapdoor = new IronTrapDoor(1322);
-        Item.itemsList[1322 -256] = new ItemBlock(1322 -256);
+        Item.itemsList[1322] = new ItemBlock(1322 -256);
         ZeroTestBlocks.pull_only_test_block = new PullOnlyTestBlock(1323);
-        Item.itemsList[1323 -256] = new ItemBlock(1323 -256);
+        Item.itemsList[1323] = new ItemBlock(1323 -256);
         ZeroTestBlocks.dead_coral_fan = new DeadCoralFan(1324);
-        Item.itemsList[1324 -256] = new ItemBlock(1324 -256);
+        Item.itemsList[1324] = new ItemBlock(1324 -256);
         ZeroTestBlocks.block_breaker = new BlockBreaker(1325);
-        Item.itemsList[1325 -256] = new ItemBlock(1325 -256);
+        Item.itemsList[1325] = new ItemBlock(1325 -256);
         ZeroTestBlocks.block_placer = new BlockPlacer(1326);
-        Item.itemsList[1326 -256] = new ItemBlock(1326 -256);
+        Item.itemsList[1326] = new ItemBlock(1326 -256);
     }
     @Override
     public void postInitialize() {

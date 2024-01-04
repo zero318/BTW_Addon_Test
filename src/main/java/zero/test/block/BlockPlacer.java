@@ -4,6 +4,7 @@ import btw.block.BTWBlocks;
 import btw.block.blocks.BlockDispenserBlock;
 import btw.block.tileentity.dispenser.BlockDispenserTileEntity;
 import btw.AddonHandler;
+import btw.util.MiscUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import zero.test.mixin.IBlockDispenserBlockAccessMixins;
@@ -17,6 +18,10 @@ public class BlockPlacer extends BlockDispenserBlock {
     @Override
     public void onBlockAdded(World world, int X, int Y, int Z) {
     }
+    @Override
+ public void onBlockPlacedBy(World world, int X, int Y, int Z, EntityLiving entity, ItemStack stack) {
+  setFacing(world, X, Y, Z, MiscUtils.convertPlacingEntityOrientationToBlockFacingReversed(entity));
+ }
     @Override
     public int idDropped(int i, Random random, int fortune_modifier) {
         return this.blockID;

@@ -28,28 +28,30 @@ public class WorldMixins implements IWorldMixins {
     */
     @Overwrite
     public void func_96440_m(int X, int Y, int Z, int neighbor_id) {
-        World world = (World)(Object)this;
+        World self = (World)(Object)this;
         for (int i = 0; i < 4; ++i) {
             int nextX = X + Direction.offsetX[i];
             int nextZ = Z + Direction.offsetZ[i];
-            int block_id = world.getBlockId(nextX, Y, nextZ);
+            int block_id = self.getBlockId(nextX, Y, nextZ);
             if (block_id != 0) {
-                Block block_instance = Block.blocksList[block_id];
-                if (((IBlockMixins)block_instance).getWeakChanges(world, nextX, Y, nextZ, neighbor_id)) {
-                    block_instance.onNeighborBlockChange(world, nextX, Y, nextZ, neighbor_id);
+                Block block = Block.blocksList[block_id];
+                if (((IBlockMixins)block).getWeakChanges(self, nextX, Y, nextZ, neighbor_id)) {
+                    block.onNeighborBlockChange(self, nextX, Y, nextZ, neighbor_id);
                 }
                 // Crashes if this isn't an else? Why?
                 // TODO: See if the null check fixed this
-                else if (Block.isNormalCube(block_id)) {
+                else if (
+                    ((IBlockMixins)block).isRedstoneConductor(self, X, Y, Z)
+                ) {
                     nextX += Direction.offsetX[i];
                     nextZ += Direction.offsetZ[i];
-                    block_id = world.getBlockId(nextX, Y, nextZ);
-                    block_instance = Block.blocksList[block_id];
+                    block_id = self.getBlockId(nextX, Y, nextZ);
+                    block = Block.blocksList[block_id];
                     if (
-                        !((block_instance)==null) &&
-                        ((IBlockMixins)block_instance).getWeakChanges(world, nextX, Y, nextZ, neighbor_id)
+                        !((block)==null) &&
+                        ((IBlockMixins)block).getWeakChanges(self, nextX, Y, nextZ, neighbor_id)
                     ) {
-                        block_instance.onNeighborBlockChange(world, nextX, Y, nextZ, neighbor_id);
+                        block.onNeighborBlockChange(self, nextX, Y, nextZ, neighbor_id);
                     }
                 }
             }
@@ -154,11 +156,11 @@ public class WorldMixins implements IWorldMixins {
         if (!((block)==null)) {
             World world = (World)(Object)this;
             meta = block.updateShape(world, X, Y, Z, 4, meta);
-            meta = block.updateShape(world, X, Y, Z, 5, meta);
-            meta = block.updateShape(world, X, Y, Z, 2, meta);
-            meta = block.updateShape(world, X, Y, Z, 3, meta);
-            meta = block.updateShape(world, X, Y, Z, 0, meta);
-            meta = block.updateShape(world, X, Y, Z, 1, meta);
+            if (meta >= 0) meta = block.updateShape(world, X, Y, Z, 5, meta);
+            if (meta >= 0) meta = block.updateShape(world, X, Y, Z, 2, meta);
+            if (meta >= 0) meta = block.updateShape(world, X, Y, Z, 3, meta);
+            if (meta >= 0) meta = block.updateShape(world, X, Y, Z, 0, meta);
+            if (meta >= 0) meta = block.updateShape(world, X, Y, Z, 1, meta);
         }
         return meta;
     }
@@ -312,5 +314,15 @@ public class WorldMixins implements IWorldMixins {
     @Overwrite
     public boolean isBlockGettingPowered(int X, int Y, int Z) {
         return ((World)(Object)this).isBlockIndirectlyGettingPowered(X, Y, Z);
+    }
+    @Redirect(
+        method = "getIndirectPowerLevelTo",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/src/World;isBlockNormalCube(III)Z"
+        )
+    )
+    public boolean redirect_isBlockNormalCube(World world, int X, int Y, int Z) {
+        return ((IWorldMixins)world).isBlockRedstoneConductor(X, Y, Z);
     }
 }

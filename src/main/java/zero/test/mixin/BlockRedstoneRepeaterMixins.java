@@ -42,4 +42,7 @@ public abstract class BlockRedstoneRepeaterMixins extends BlockRedstoneLogic {
                 );
         }
     }
+    public boolean canRedstoneConnectToSide(IBlockAccess block_access, int X, int Y, int Z, int flat_direction) {
+        return ((((flat_direction)^((((block_access.getBlockMetadata(X, Y, Z))&3))))&1)==0);
+    }
 }

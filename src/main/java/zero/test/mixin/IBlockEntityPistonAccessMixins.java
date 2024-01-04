@@ -29,4 +29,8 @@ public interface IBlockEntityPistonAccessMixins {
     public abstract boolean callDestroyAndDropIfShoveled();
     @Invoker("preBlockPlaced")
     public abstract void callPreBlockPlaced();
+    @Invoker("attemptToPackItems")
+    public abstract void callAttemptToPackItems();
+    @Invoker("updatePushedObjects")
+    public abstract void callUpdatePushedObjects(float progress, float par2);
 }

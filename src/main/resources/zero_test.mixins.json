@@ -35,7 +35,12 @@
     "EntityPlayerSPMixins",
     "EntityMixins",
     "NetServerHandlerMixins",
-    "EntityPlayerMixins"
+    "EntityPlayerMixins",
+    "CisternBlockMixins",
+    "RedstoneWireMixins",
+    "IRedstoneWireAccessMixins",
+    "RenderBlocksMixins",
+    "BlockGlowStoneMixins"
   ],
   "client": [
     "ZeroTestMixin"

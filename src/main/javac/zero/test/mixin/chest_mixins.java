@@ -70,6 +70,8 @@ public class ChestMixins {
         return true;
     }
 
+    // This breaks the chest if it would
+    // form a triple chest
     public int updateShape(World world, int X, int Y, int Z, int direction, int meta) {
         return ((BlockChest)(Object)this).canPlaceBlockAt(world, X, Y, Z) ? meta : -1;
     }
