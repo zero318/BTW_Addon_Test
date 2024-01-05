@@ -13,6 +13,18 @@ public class BlockMixins implements IBlockMixins {
         // since the block is already known.
   return ((Block)(Object)this).isNormalCube(block_access, X, Y, Z);
  }
+/*
+    @Overwrite
+    public boolean isNormalCube(IBlockAccess block_access, int X, int Y, int Z) {
+        return ((Block)(Object)this).renderAsNormalBlock();
+    }
+    
+    @Overwrite
+    public static boolean isNormalCube(int block_id) {
+		Block block = Block.blocksList[block_id];
+        return !BLOCK_IS_AIR(block) && block.renderAsNormalBlock();
+	}
+*/
     // Extra variant of getMobilityFlag that allows
     // changing the result based on metadata.
     @Override

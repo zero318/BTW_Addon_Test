@@ -172,7 +172,7 @@ public abstract class BlockComparatorMixins extends BlockRedstoneLogic {
 
 #endif
     
-#if ENABLE_COMPARATOR_CLIENT_SIDE_ENTITY_REMOVAL
+#if ENABLE_COMPARATOR_CLIENT_SIDE_ENTITY_REMOVAL && 0
     @Overwrite
     public void onBlockAdded(World world, int X, int Y, int Z) {
         super.onBlockAdded(world, X, Y, Z);

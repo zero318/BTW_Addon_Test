@@ -36,6 +36,7 @@ Block Placer:
 
 /noclip Command:
 - Sort of like spectator mode, but worse
+- Make sure you're already flying in creative mode or you'll just fall into the void
 
 ///
 Changes
@@ -53,17 +54,28 @@ Cistern:
 - Has a hollow hitbox
 
 Pistons:
-- Completely rewrote the implementation of block pushing
+- Completely rewrote the implementation of block/entity pushing
 - Attempted to make moving blocks match their normal collision
 
 Soap Blocks:
 - Given the properties of glazed terracotta
+
+Metal Spikes:
+- Conduct power into the block they're attached to
+- (This uses the 4th metadata bit)
+
+Note Blocks:
+- Interact with oberservers like in modern versions
+- (This uses the 1st and 2nd metadata bits)
 
 Rails and other movable blocks that need support:
 - Should no longer break when pushed in most situations
 
 Tile Entities:
 - Mostly no longer get reinitialized when quickly pushed by a piston
+
+Blocks Requiring Support:
+- Mostly follow modern support rules
 
 Chests:
 - Can't form triple chests when quickly pushed by a piston
@@ -104,9 +116,9 @@ Known Issues
 ///
 - Slime/glue have kinda broken rendering just because 1.5.2
 - Slime blocks don't bounce entities that fall on them despite having code for it
-- Glue blocks are conductive
 - Players touching the south/bottom of a glue block have glitchy interactions with the "can't see when inside a solid block" mechanic
 - Entities standing near the edge of a glue block aren't moved properly when retracting. Works properly if standing between two glue blocks.
 - The CUD block recipe sucks
 - Sloped rails don't flatten out when the rail they're connected to is moved down by a piston
 - Block placers/breakers have lazy texturing
+- Metal spikes don't receive power from repeaters

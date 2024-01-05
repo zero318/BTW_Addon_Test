@@ -134,21 +134,6 @@ public abstract class BlockComparatorMixins extends BlockRedstoneLogic {
                 return 0;
         }
     }
-    @Overwrite
-    public void onBlockAdded(World world, int X, int Y, int Z) {
-        super.onBlockAdded(world, X, Y, Z);
-        if (!world.isRemote) {
-            world.setBlockTileEntity(X, Y, Z, ((BlockComparator)(Object)this).createNewTileEntity(world));
-        }
-    }
-    @Overwrite
-    public void breakBlock(World world, int X, int Y, int Z, int par5, int par6) {
-        super.breakBlock(world, X, Y, Z, par5, par6);
-        if (!world.isRemote) {
-            world.removeBlockTileEntity(X, Y, Z);
-        }
-        this.func_94483_i_(world, X, Y, Z);
-    }
     //@Override
     public boolean getWeakChanges(World world, int X, int Y, int Z, int meta) {
         return true;

@@ -325,4 +325,48 @@ public class WorldMixins implements IWorldMixins {
     public boolean redirect_isBlockNormalCube(World world, int X, int Y, int Z) {
         return ((IWorldMixins)world).isBlockRedstoneConductor(X, Y, Z);
     }
+    public int getBlockStrongPowerInputExceptFacing(int X, int Y, int Z, int facing) {
+        World self = (World)(Object)this;
+        int power = 0;
+        int i = 0;
+        do {
+            if (i != facing) {
+                power = Math.max(power, self.isBlockProvidingPowerTo(
+                    X + Facing.offsetsXForSide[i],
+                    Y + Facing.offsetsYForSide[i],
+                    Z + Facing.offsetsZForSide[i],
+                    ((i)^1)
+                ));
+                if (power >= 15) {
+                    break;
+                }
+            }
+        } while (++i < 6);
+        return power;
+    }
+    public int getBlockWeakPowerInputExceptFacing(int X, int Y, int Z, int facing) {
+        World self = (World)(Object)this;
+        int power = 0;
+        int i = 0;
+        do {
+            if (i != facing) {
+                power = Math.max(power, self.getIndirectPowerLevelTo(
+                    X + Facing.offsetsXForSide[i],
+                    Y + Facing.offsetsYForSide[i],
+                    Z + Facing.offsetsZForSide[i],
+                    ((i)^1)
+                ));
+                if (power >= 15) {
+                    break;
+                }
+            }
+        } while (++i < 6);
+        return power;
+    }
+    @Overwrite
+    public boolean doesBlockHaveSolidTopSurface(int X, int Y, int Z) {
+        World self = (World)(Object)this;
+        Block block = Block.blocksList[self.getBlockId(X, Y, Z)];
+        return !((block)==null) && block.hasLargeCenterHardPointToFacing(self, X, Y, Z, 1, true);
+    }
 }

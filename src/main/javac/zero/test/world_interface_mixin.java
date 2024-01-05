@@ -18,6 +18,9 @@ public interface IWorldMixins {
     public int updateFromNeighborShapes(int X, int Y, int Z, int block_id, int block_meta);
 #endif
 
+    public int getBlockStrongPowerInputExceptFacing(int X, int Y, int Z, int facing);
+    public int getBlockWeakPowerInputExceptFacing(int X, int Y, int Z, int facing);
+
 #if ENABLE_MODERN_REDSTONE_WIRE
     default public boolean isBlockRedstoneConductor(int X, int Y, int Z) {
         World self = (World)(Object)this;

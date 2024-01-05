@@ -60,7 +60,7 @@
 #define HAS_WEST_CONNECTION(connections)    (((connections)&WEST_MASK)!=0)
 #define HAS_ANY_NSE_CONNECTION(connections) (((connections)&~WEST_MASK)!=0)
 #define HAS_EAST_CONNECTION(connections)    (((connections)&EAST_MASK)!=0)
-#define HAS_ANY_NSW_CONNECTION(connections) ((connections)>EAST_BIT_MAX)
+#define HAS_ANY_NSW_CONNECTION(connections) ((connections)>EAST_MASK)
 
 #define HAS_ANY_NS_CONNECTION(connections)  ((connections)>=SOUTH_BIT_MIN)
 

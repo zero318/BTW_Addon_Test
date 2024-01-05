@@ -40,7 +40,9 @@
     "RedstoneWireMixins",
     "IRedstoneWireAccessMixins",
     "RenderBlocksMixins",
-    "BlockGlowStoneMixins"
+    "BlockGlowStoneMixins",
+    "MetalSpikeBlockMixins",
+    "NoteBlockMixins"
   ],
   "client": [
     "ZeroTestMixin"

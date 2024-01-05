@@ -88,8 +88,9 @@ MC-200887
 MACRO_VOID(
 // Remove the tile entity from comparators on the
 // client since it never worked right to begin with
+// TODO: Investigate whether this is necessary
 )
-#define ENABLE_COMPARATOR_CLIENT_SIDE_ENTITY_REMOVAL 1
+#define ENABLE_COMPARATOR_CLIENT_SIDE_ENTITY_REMOVAL 0
 
 MACRO_VOID(/* Add a property for blocks to control where dust points */)
 #define ENABLE_BETTER_REDSTONE_WIRE_CONNECTIONS 1
@@ -102,7 +103,11 @@ MACRO_VOID(
 
 #define ENABLE_REDSTONE_WIRE_DOT_SHAPE 0
 
-#define ENABLE_MODERN_SUPPORT_LOGIC 0
+MACRO_VOID(
+// Allow support requiring blocks to care less
+// about transparency
+)
+#define ENABLE_MODERN_SUPPORT_LOGIC 1
 
 #define ENABLE_NOCLIP_COMMAND 1
 
@@ -111,7 +116,9 @@ MACRO_VOID(
 MACRO_VOID(
 // Allow metal spikes to weakly conduct power to their bases
 // TODO: Think of a way to prevent feedback loops...
+// Maybe the spike can just read the inputs every time something
+// needs the output? That feels terrible though.
 )
-#define ENABLE_CONDUCTIVE_METAL_SPIKES 0
+#define ENABLE_CONDUCTIVE_METAL_SPIKES 1
 
 #endif

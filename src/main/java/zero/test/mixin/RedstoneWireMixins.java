@@ -93,14 +93,14 @@ public class RedstoneWireMixins implements IBlockRedstoneWireMixins {
                 if (
                     !for_rendering ||
                     neighbor_id == Block.glowStone.blockID || // TODO: Block property?
-                    block.hasLargeCenterHardPointToFacing(block_access, nextX, Y, nextZ, ((direction)^1))
+                    block.hasLargeCenterHardPointToFacing(block_access, nextX, Y, nextZ, ((direction)^1), true)
                 ) {
                     connections += 2;
                 }
-                ++connections;
+                connections += 1;
             }
             else if (isPowerProviderOrWire(block_access, nextX, Y, nextZ, Direction.facingToDirection[direction])) {
-                ++connections;
+                connections += 1;
             }
             if (
                 (
@@ -123,7 +123,7 @@ public class RedstoneWireMixins implements IBlockRedstoneWireMixins {
             if (!(((connections)&~0xE00)!=0)) {
                 connections_ret += 0x040;
             }
-            if (!((connections)>0x004)) {
+            if (!((connections)>0x007)) {
                 connections_ret += 0x008;
             }
             if (!(((connections)&~0x038)!=0)) {

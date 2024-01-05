@@ -23,6 +23,7 @@ public class BlockMixins implements IBlockMixins {
 	}
     
 #if ENABLE_MODERN_SUPPORT_LOGIC
+/*
     @Overwrite
     public boolean isNormalCube(IBlockAccess block_access, int X, int Y, int Z) {
         return ((Block)(Object)this).renderAsNormalBlock();
@@ -33,6 +34,7 @@ public class BlockMixins implements IBlockMixins {
 		Block block = Block.blocksList[block_id];
         return !BLOCK_IS_AIR(block) && block.renderAsNormalBlock();
 	}
+*/
 #endif
     
     // Extra variant of getMobilityFlag that allows
