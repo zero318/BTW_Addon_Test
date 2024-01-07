@@ -10,6 +10,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import zero.test.IWorldMixins;
 import zero.test.IBlockBaseRailLogicMixins;
 import zero.test.mixin.IBlockBaseRailLogicAccessMixins;
+// Block piston reactions
 @Mixin(BlockRailBase.class)
 public class BlockRailBaseMixins {
     /*
@@ -32,5 +33,11 @@ public class BlockRailBaseMixins {
                0x2 != ((Direction.directionToFacing[(int)Math.floor(entity_living.rotationYaw / 90.0 + 0.5) & 3])&~1)
                 ? 1
                 : 0;
+    }
+    public int getPlatformMobilityFlag(World world, int X, int Y, int Z) {
+        return 2;
+    }
+    public int adjustMetadataForPlatformMove(int meta) {
+        return ((BlockRailBase)(Object)this).isPowered() ? (((meta)&7)) : meta;
     }
 }

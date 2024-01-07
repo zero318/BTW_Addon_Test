@@ -4,6 +4,7 @@ import btw.block.blocks.AestheticOpaqueBlock;
 import btw.AddonHandler;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
+// Block piston reactions
 @Mixin(BlockChest.class)
 public class ChestMixins {
     @Overwrite

@@ -7,6 +7,7 @@ import org.spongepowered.asm.mixin.Overwrite;
 import zero.test.IBlockBaseRailLogicMixins;
 import zero.test.mixin.IBlockBaseRailLogicAccessMixins;
 import java.util.List;
+// Block piston reactions
 @Mixin(BlockBaseRailLogic.class)
 public class BlockBaseRailLogicMixins {
     @Overwrite

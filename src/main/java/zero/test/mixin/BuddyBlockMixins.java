@@ -3,6 +3,7 @@ import net.minecraft.src.*;
 import btw.block.blocks.BuddyBlock;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
+// Block piston reactions
 @Mixin(BuddyBlock.class)
 public class BuddyBlockMixins {
     @Overwrite(remap=false)

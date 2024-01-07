@@ -6,6 +6,7 @@ import btw.AddonHandler;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import zero.test.sound.ZeroTestSounds;
+// Block piston reactions
 
 public class SlimeBlock extends Block {
     public SlimeBlock(int block_id) {
@@ -62,6 +63,9 @@ public class SlimeBlock extends Block {
         } else {
             super.onFallenUpon(world, X, Y, Z, entity, par6);
         }
+    }
+    public int getPlatformMobilityFlag(World world, int X, int Y, int Z) {
+        return 1;
     }
     @Environment(EnvType.CLIENT)
     @Override

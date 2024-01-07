@@ -42,10 +42,23 @@
     "RenderBlocksMixins",
     "BlockGlowStoneMixins",
     "MetalSpikeBlockMixins",
-    "NoteBlockMixins"
+    "NoteBlockMixins",
+    "PlatformBlockMixins",
+    "CompanionCubeBlockMixins",
+    "LadderBlockBaseMixins",
+    "TorchBlockBaseMixins",
+    "BlockRedstoneLogicMixins",
+    "IRenderBlocksAccessMixins",
+    "BlockLiftedByPlatformEntityMixins",
+    "AnchorBlockMixins",
+    "MovingPlatformEntityMixins",
+    "IAnchorBlockAccessMixins"
   ],
   "client": [
-    "ZeroTestMixin"
+    "ZeroTestMixin",
+    "ComparatorBlockMixins",
+    "BlockLiftedByPlatformRendererMixins",
+    "MovingPlatformRendererMixins"
   ],
   "injectors": {
     "defaultRequire": 1

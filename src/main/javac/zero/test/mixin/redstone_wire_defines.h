@@ -39,6 +39,7 @@
 #define SIDE_CONNECTION 1
 #define UP_CONNECTION   2
 #define DOWN_CONNECTION 4
+#define UP_CONNECTION_RENDER_BACK 4
 
 #define EAST_SIDE  0x001
 #define EAST_UP    0x002
@@ -67,16 +68,19 @@
 #define HAS_NORTH_SIDE_CONNECTION(connections)  (((connections)&NORTH_SIDE)!=0)
 #define HAS_NORTH_UP_CONNECTION(connections)    (((connections)&NORTH_UP)!=0)
 #define HAS_NORTH_DOWN_CONNECTION(connections)  ((connections)>=NORTH_BIT_MAX)
+#define HAS_NORTH_UP_RENDER_BACK(connections)   HAS_NORTH_DOWN_CONNECTION(connections)
 #define HAS_SOUTH_SIDE_CONNECTION(connections)  (((connections)&SOUTH_SIDE)!=0)
 #define HAS_SOUTH_UP_CONNECTION(connections)    (((connections)&SOUTH_UP)!=0)
 #define HAS_SOUTH_DOWN_CONNECTION(connections)  (((connections)&SOUTH_DOWN)!=0)
+#define HAS_SOUTH_UP_RENDER_BACK(connections)   HAS_SOUTH_DOWN_CONNECTION(connections)
 #define HAS_WEST_SIDE_CONNECTION(connections)   (((connections)&WEST_SIDE)!=0)
 #define HAS_WEST_UP_CONNECTION(connections)     (((connections)&WEST_UP)!=0)
 #define HAS_WEST_DOWN_CONNECTION(connections)   (((connections)&WEST_DOWN)!=0)
+#define HAS_WEST_UP_RENDER_BACK(connections)    HAS_WEST_DOWN_CONNECTION(connections)
 #define HAS_EAST_SIDE_CONNECTION(connections)   (((connections)&EAST_SIDE)!=0)
 #define HAS_EAST_UP_CONNECTION(connections)     (((connections)&EAST_UP)!=0)
 #define HAS_EAST_DOWN_CONNECTION(connections)   (((connections)&EAST_DOWN)!=0)
-
+#define HAS_EAST_UP_RENDER_BACK(connections)    HAS_EAST_DOWN_CONNECTION(connections)
 
 #define HAS_UP_CONNECTION(connections)  (((connections)&(EAST_UP|WEST_UP|SOUTH_UP|NORTH_UP))!=0)
 

@@ -8,6 +8,7 @@ Slime Blocks:
 - Don't stick to glue blocks
 - Entities are slowed down when walking on top, bounces entities when pushed, prevents fall damage when not sneaking
 - Can indefinitely support adjacent blocks that would otherwise need mortar
+- Can be used with pulleys/platforms to move blocks
 
 Glue Blocks:
 - Crafted from 4 glue as a packing recipe
@@ -17,6 +18,7 @@ Glue Blocks:
 - Don't stick to slime blocks
 - Entities are slowed down when touching, prevents fall damage
 - Can indefinitely support adjacent blocks that would otherwise need mortar
+- Can be used with pulleys/platforms to move blocks
 
 Observers:
 - Crafted at a soul forge similar to buddy blocks, but replacing the redstone torches with quartz
@@ -64,6 +66,10 @@ Metal Spikes:
 - Conduct power into the block they're attached to
 - (This uses the 4th metadata bit)
 
+Platforms:
+- Connect to other platforms when moved by pistons
+- Fixed broken code that prevented lifting redstone/rails
+
 Note Blocks:
 - Interact with oberservers like in modern versions
 - (This uses the 1st and 2nd metadata bits)
@@ -81,14 +87,18 @@ Chests:
 - Can't form triple chests when quickly pushed by a piston
 
 Redstone dust:
+- Renders properly on top of transparent blocks
 - Fixed MC-2255, MC-8645, and MC-9405
 
 Comparators:
+- Renders properly on top of transparent blocks
+- Front torch in subtract mode lowered to match modern comparator
 - Enabled rotation on turntables
 - Fixed placement from block dispensers
 - Fixed MC-8911, MC-10653, MC-12211, MC-63669, and MC-195351
 
 Repeaters:
+- Renders properly on top of transparent blocks
 - Fixed MC-9194
 
 ///
@@ -122,3 +132,4 @@ Known Issues
 - Sloped rails don't flatten out when the rail they're connected to is moved down by a piston
 - Block placers/breakers have lazy texturing
 - Metal spikes don't receive power from repeaters
+- Exploit with platforms

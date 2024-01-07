@@ -6,6 +6,7 @@ import btw.AddonHandler;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import zero.test.sound.ZeroTestSounds;
+// Block piston reactions
 
 public class GlueBlock extends Block {
     public GlueBlock(int block_id) {
@@ -50,6 +51,9 @@ public class GlueBlock extends Block {
     @Override
     public void onFallenUpon(World world, int X, int Y, int Z, Entity entity, float par6) {
         entity.fallDistance = 0.0f;
+    }
+    public int getPlatformMobilityFlag(World world, int X, int Y, int Z) {
+        return 1;
     }
     @Override
     public AxisAlignedBB getCollisionBoundingBoxFromPool(World world, int X, int Y, int Z) {

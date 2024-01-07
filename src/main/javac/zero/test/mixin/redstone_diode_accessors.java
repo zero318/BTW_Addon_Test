@@ -17,10 +17,10 @@ import org.spongepowered.asm.mixin.gen.Invoker;
     
 @Mixin(BlockRedstoneLogic.class)
 public interface IBlockRedstoneLogicAccessMixins {
-#if ENABLE_REDSTONE_BUGFIXES
     @Accessor
     public boolean getIsRepeaterPowered();
     
+#if ENABLE_REDSTONE_BUGFIXES
     @Invoker
     public abstract boolean callFunc_96470_c(int meta);
 #endif

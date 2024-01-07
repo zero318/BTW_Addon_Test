@@ -73,4 +73,14 @@ public interface IBlockMixins {
         return ((Block)(Object)this).canProvidePower();
     }
 #endif
+
+#if ENABLE_PLATFORM_FIXES
+    default public int getPlatformMobilityFlag(World world, int X, int Y, int Z) {
+        return PLATFORM_CANNOT_MOVE;
+    }
+    
+    default public int adjustMetadataForPlatformMove(int meta) {
+        return meta;
+    }
+#endif
 }

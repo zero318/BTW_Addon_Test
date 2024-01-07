@@ -19,6 +19,7 @@ import zero.test.IBlockMixins;
 import zero.test.mixin.IPistonBaseAccessMixins;
 import zero.test.IWorldMixins;
 import zero.test.IBlockEntityPistonMixins;
+// Block piston reactions
 //#define getInputSignal(...) func_94482_f(__VA_ARGS__)
 @Mixin(PistonBlockBase.class)
 public abstract class PistonMixins extends BlockPistonBase {
@@ -625,7 +626,10 @@ public abstract class PistonMixins extends BlockPistonBase {
             int meta = world.getBlockMetadata(x, y, z);
             int direction = (((meta)&7));
             // Why does the 1.5 code check for 7?
-            if (direction != 7) {
+            // Apparently directions 6 and 7 have been well known
+            // to crash older versions. Extended this check to try
+            // and prevent that.
+            if (direction < 6) {
                 boolean isPowered = ((IPistonBaseAccessMixins)(Object)this).callIsIndirectlyPowered(world, x, y, z, direction);
                 if (isPowered != ((((meta)>7)))) {
                     if (isPowered) {

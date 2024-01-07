@@ -76,6 +76,12 @@ public class GlueBlock extends Block {
         entity.fallDistance = 0.0f;
     }
     
+#if ENABLE_PLATFORM_FIXES
+    public int getPlatformMobilityFlag(World world, int X, int Y, int Z) {
+        return PLATFORM_MAIN_SUPPORT;
+    }
+#endif
+    
     @Override
     public AxisAlignedBB getCollisionBoundingBoxFromPool(World world, int X, int Y, int Z) {
         double dX = X;

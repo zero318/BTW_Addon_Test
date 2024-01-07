@@ -1,4 +1,5 @@
 package zero.test.block;
+// Block piston reactions
 
 import net.minecraft.src.*;
 public class PullOnlyTestBlock extends Block {

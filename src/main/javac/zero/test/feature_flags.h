@@ -103,22 +103,35 @@ MACRO_VOID(
 
 #define ENABLE_REDSTONE_WIRE_DOT_SHAPE 0
 
+#define MODERN_SUPPORT_LOGIC_DISABLED 0
+#define MODERN_SUPPORT_LOGIC_PER_BLOCK 1
+#define MODERN_SUPPORT_LOGIC_GLOBAL 2
+#define MODERN_SUPPORT_LOGIC_GLOBAL_ALL 3
 MACRO_VOID(
 // Allow support requiring blocks to care less
-// about transparency
+// about transparency.
+// Tiers:
+// 0 Disabled
+// 1 Overrides on individual blocks
+// 2 Global override for solid tops
+// 3 Global override for all hardpoints
 )
-#define ENABLE_MODERN_SUPPORT_LOGIC 1
+#define ENABLE_MODERN_SUPPORT_LOGIC MODERN_SUPPORT_LOGIC_GLOBAL_ALL
 
 #define ENABLE_NOCLIP_COMMAND 1
 
+MACRO_VOID(/* Let things sit in cauldrons */)
 #define ENABLE_HOLLOW_COLLISION_BOXES 1
 
-MACRO_VOID(
-// Allow metal spikes to weakly conduct power to their bases
-// TODO: Think of a way to prevent feedback loops...
-// Maybe the spike can just read the inputs every time something
-// needs the output? That feels terrible though.
-)
+MACRO_VOID(/* Allow metal spikes to weakly conduct power to their bases */)
 #define ENABLE_CONDUCTIVE_METAL_SPIKES 1
+
+MACRO_VOID(/* Allow platforms to stick to other platforms when moved */)
+#define ENABLE_PLATFORMS_WITH_PISTONS 1
+
+MACRO_VOID(/* Rework the platform code to actually work */)
+#define ENABLE_PLATFORM_FIXES 1
+
+#define ENABLE_PLATFORM_EXTENSIONS 1
 
 #endif

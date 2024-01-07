@@ -11,6 +11,7 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import zero.test.IEntityMixins;
+// Block piston reactions
 
 @Mixin(Entity.class)
 public class EntityMixins implements IEntityMixins {

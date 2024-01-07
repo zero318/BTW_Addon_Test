@@ -406,7 +406,7 @@ public class WorldMixins implements IWorldMixins {
         return power;
     }
 
-#if ENABLE_MODERN_SUPPORT_LOGIC
+#if ENABLE_MODERN_SUPPORT_LOGIC == MODERN_SUPPORT_LOGIC_GLOBAL
     @Overwrite
     public boolean doesBlockHaveSolidTopSurface(int X, int Y, int Z) {
         World self = (World)(Object)this;

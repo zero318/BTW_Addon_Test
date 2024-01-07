@@ -26,6 +26,7 @@ import btw.AddonHandler;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+// Block piston reactions
 //#define getInputSignal(...) func_94482_f(__VA_ARGS__)
 
 @Mixin(TileEntityPiston.class)
@@ -82,7 +83,8 @@ public class BlockEntityPistonMixins extends TileEntity implements IBlockEntityP
             // setBlockTileEntity updates the entity
             // coordinates itself when scanningTileEntities
             // is true
-            worldObj.setBlockTileEntity(self.xCoord, self.yCoord, self.zCoord, TileEntity.createAndLoadEntity(self.storedTileEntityData));
+            TileEntity tile_entity = self.cachedTileEntity != null ? self.cachedTileEntity : TileEntity.createAndLoadEntity(self.storedTileEntityData);
+            worldObj.setBlockTileEntity(self.xCoord, self.yCoord, self.zCoord, tile_entity);
             self.cachedTileEntity = null;
         }
         if (newMeta >= 0) {
@@ -237,7 +239,6 @@ public class BlockEntityPistonMixins extends TileEntity implements IBlockEntityP
                         tempBox.maxX += dX * idkOffset;
                         break;
                 }
-                //boundingBox.expandToInclude(tempBox);
                 tempBox.expandToInclude(boundingBox);
                 int storedMeta = self.getBlockMetadata();
                 List<Entity> entityList = self.worldObj.getEntitiesWithinAABBExcludingEntity((Entity)null, tempBox);
@@ -250,6 +251,10 @@ public class BlockEntityPistonMixins extends TileEntity implements IBlockEntityP
                         //if (entity instanceof EntityPlayerMP) {
                             //continue;
                         //}
+                        int entityPushFlags = ((IEntityMixins)entity).getPistonMobilityFlags(direction);
+                        if (!(((entityPushFlags)&(1|2))!=0)) {
+                            continue;
+                        }
                         // This is so awful, why doesn't
                         // getBoundingBox do anything for 90%
                         // of entities but getVisualBoundingBox
@@ -258,10 +263,41 @@ public class BlockEntityPistonMixins extends TileEntity implements IBlockEntityP
                         if (entityBox == null) {
                             continue;
                         }
-                        if (isBouncy) {
-                            entity.motionX += dX;
-                            entity.motionY += dY;
-                            entity.motionZ += dZ;
+                        if (isBouncy && (((entityPushFlags)&2)!=0)) {
+                            //entity.motionX += dX;
+                            //entity.motionY += dY;
+                            //entity.motionZ += dZ;
+                            // RIP infinite bounce cannons?
+                            double entityBounceMultiplier = ((IEntityMixins)entity).getPistonBounceMultiplier(direction);
+                            switch (((direction)&~1)) {
+                                case 0x4: {
+                                    double tempMotion = entity.motionX;
+                                    if (Math.abs(tempMotion) < Math.abs(dX)) {
+                                        tempMotion = dX;
+                                    }
+                                    entity.motionX = tempMotion * entityBounceMultiplier;
+                                    break;
+                                }
+                                case 0x0: {
+                                    double tempMotion = entity.motionY;
+                                    if (Math.abs(tempMotion) < Math.abs(dY)) {
+                                        tempMotion = dY;
+                                    }
+                                    entity.motionY = tempMotion * entityBounceMultiplier;
+                                    break;
+                                }
+                                default: {
+                                    double tempMotion = entity.motionZ;
+                                    if (Math.abs(tempMotion) < Math.abs(dZ)) {
+                                        tempMotion = dZ;
+                                    }
+                                    entity.motionZ = tempMotion * entityBounceMultiplier;
+                                    break;
+                                }
+                            }
+                        }
+                        if (!(((entityPushFlags)&1)!=0)) {
+                            continue;
                         }
                         double pushDistance = 0.0D;
                         for (AxisAlignedBB collisionBox : collisionBoxes) {
@@ -342,8 +378,7 @@ public class BlockEntityPistonMixins extends TileEntity implements IBlockEntityP
                     }
                     //pushedObjects.clear();
                 }
-                boolean isSticky = ((IBlockMixins)(Object)block).isStickyForEntitiesWhenMoved(direction, storedMeta);
-                if (isSticky) {
+                if (((IBlockMixins)(Object)block).isStickyForEntitiesWhenMoved(direction, storedMeta)) {
                     /*
                     switch (storedDirection) {
                         case DIRECTION_DOWN: case DIRECTION_UP:
@@ -394,13 +429,15 @@ public class BlockEntityPistonMixins extends TileEntity implements IBlockEntityP
                     if (!entityList.isEmpty()) {
                         //NOCLIP_DIRECTION.set(direction);
                         for (Entity entity : entityList) {
-                             ;
-                            ((IEntityMixins)entity).moveEntityByPiston(
-                                idkOffset * dX,
-                                idkOffset * dY,
-                                idkOffset * dZ
-                            );
-                             ;
+                            if ((((((IEntityMixins)entity).getPistonMobilityFlags(direction))&4)!=0)) {
+                                 ;
+                                ((IEntityMixins)entity).moveEntityByPiston(
+                                    idkOffset * dX,
+                                    idkOffset * dY,
+                                    idkOffset * dZ
+                                );
+                                 ;
+                            }
                         }
                         //NOCLIP_DIRECTION.set(-1);
                     }

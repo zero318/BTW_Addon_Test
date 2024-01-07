@@ -121,7 +121,8 @@ public class BlockEntityPistonMixins extends TileEntity implements IBlockEntityP
             // setBlockTileEntity updates the entity
             // coordinates itself when scanningTileEntities
             // is true
-            worldObj.setBlockTileEntity(self.xCoord, self.yCoord, self.zCoord, TileEntity.createAndLoadEntity(self.storedTileEntityData));
+            TileEntity tile_entity = self.cachedTileEntity != null ? self.cachedTileEntity : TileEntity.createAndLoadEntity(self.storedTileEntityData);
+            worldObj.setBlockTileEntity(self.xCoord, self.yCoord, self.zCoord, tile_entity);
             self.cachedTileEntity = null;
         }
         
@@ -328,7 +329,6 @@ public class BlockEntityPistonMixins extends TileEntity implements IBlockEntityP
                         tempBox.maxX += dX * idkOffset;
                         break;
                 }
-                //boundingBox.expandToInclude(tempBox);
                 tempBox.expandToInclude(boundingBox);
                 int storedMeta = self.getBlockMetadata();
                 
@@ -344,6 +344,10 @@ public class BlockEntityPistonMixins extends TileEntity implements IBlockEntityP
                         //if (entity instanceof EntityPlayerMP) {
                             //continue;
                         //}
+                        int entityPushFlags = ((IEntityMixins)entity).getPistonMobilityFlags(direction);
+                        if (!PISTON_CAN_MOVE_OR_BOUNCE_ENTITY(entityPushFlags)) {
+                            continue;
+                        }
                         // This is so awful, why doesn't
                         // getBoundingBox do anything for 90%
                         // of entities but getVisualBoundingBox
@@ -352,10 +356,41 @@ public class BlockEntityPistonMixins extends TileEntity implements IBlockEntityP
                         if (entityBox == null) {
                             continue;
                         }
-                        if (isBouncy) {
-                            entity.motionX += dX;
-                            entity.motionY += dY;
-                            entity.motionZ += dZ;
+                        if (isBouncy && PISTON_CAN_BOUNCE_ENTITY(entityPushFlags)) {
+                            //entity.motionX += dX;
+                            //entity.motionY += dY;
+                            //entity.motionZ += dZ;
+                            // RIP infinite bounce cannons?
+                            double entityBounceMultiplier = ((IEntityMixins)entity).getPistonBounceMultiplier(direction);
+                            switch (DIRECTION_AXIS(direction)) {
+                                case AXIS_X: {
+                                    double tempMotion = entity.motionX;
+                                    if (Math.abs(tempMotion) < Math.abs(dX)) {
+                                        tempMotion = dX;
+                                    }
+                                    entity.motionX = tempMotion * entityBounceMultiplier;
+                                    break;
+                                }
+                                case AXIS_Y: {
+                                    double tempMotion = entity.motionY;
+                                    if (Math.abs(tempMotion) < Math.abs(dY)) {
+                                        tempMotion = dY;
+                                    }
+                                    entity.motionY = tempMotion * entityBounceMultiplier;
+                                    break;
+                                }
+                                default: {
+                                    double tempMotion = entity.motionZ;
+                                    if (Math.abs(tempMotion) < Math.abs(dZ)) {
+                                        tempMotion = dZ;
+                                    }
+                                    entity.motionZ = tempMotion * entityBounceMultiplier;
+                                    break;
+                                }
+                            }
+                        }
+                        if (!PISTON_CAN_MOVE_ENTITY(entityPushFlags)) {
+                            continue;
                         }
                         double pushDistance = 0.0D;
                         for (AxisAlignedBB collisionBox : collisionBoxes) {
@@ -452,8 +487,7 @@ public class BlockEntityPistonMixins extends TileEntity implements IBlockEntityP
                     //pushedObjects.clear();
                 }
                 
-                boolean isSticky = ((IBlockMixins)(Object)block).isStickyForEntitiesWhenMoved(direction, storedMeta);
-                if (isSticky) {
+                if (((IBlockMixins)(Object)block).isStickyForEntitiesWhenMoved(direction, storedMeta)) {
                     /*
                     switch (storedDirection) {
                         case DIRECTION_DOWN: case DIRECTION_UP:
@@ -505,23 +539,25 @@ public class BlockEntityPistonMixins extends TileEntity implements IBlockEntityP
                     if (!entityList.isEmpty()) {
                         //NOCLIP_DIRECTION.set(direction);
                         for (Entity entity : entityList) {
-                            PISTON_ENTITY_PUSH_DEBUG(
-                                "Pre-Entity moving sticky("+storedBlockId+"):"+
-                                "\nX: "+entity.posX+" + "+(idkOffset * dX)+
-                                "\nY: "+entity.posY+" + "+(idkOffset * dY)+
-                                "\nZ: "+entity.posZ+" + "+(idkOffset * dZ)
-                            );
-                            ((IEntityMixins)entity).moveEntityByPiston(
-                                idkOffset * dX,
-                                idkOffset * dY,
-                                idkOffset * dZ
-                            );
-                            PISTON_ENTITY_PUSH_DEBUG(
-                                "Post-Entity moving sticky("+storedBlockId+"):"+
-                                "\nX: "+entity.posX+
-                                "\nY: "+entity.posY+
-                                "\nZ: "+entity.posZ
-                            );
+                            if (PISTON_CAN_STICK_ENTITY(((IEntityMixins)entity).getPistonMobilityFlags(direction))) {
+                                PISTON_ENTITY_PUSH_DEBUG(
+                                    "Pre-Entity moving sticky("+storedBlockId+"):"+
+                                    "\nX: "+entity.posX+" + "+(idkOffset * dX)+
+                                    "\nY: "+entity.posY+" + "+(idkOffset * dY)+
+                                    "\nZ: "+entity.posZ+" + "+(idkOffset * dZ)
+                                );
+                                ((IEntityMixins)entity).moveEntityByPiston(
+                                    idkOffset * dX,
+                                    idkOffset * dY,
+                                    idkOffset * dZ
+                                );
+                                PISTON_ENTITY_PUSH_DEBUG(
+                                    "Post-Entity moving sticky("+storedBlockId+"):"+
+                                    "\nX: "+entity.posX+
+                                    "\nY: "+entity.posY+
+                                    "\nZ: "+entity.posZ
+                                );
+                            }
                         }
                         //NOCLIP_DIRECTION.set(-1);
                     }

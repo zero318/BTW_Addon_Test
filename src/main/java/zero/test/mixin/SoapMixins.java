@@ -3,6 +3,7 @@ import net.minecraft.src.*;
 import btw.block.blocks.AestheticOpaqueBlock;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+// Block piston reactions
 @Mixin(AestheticOpaqueBlock.class)
 public class SoapMixins {
     public int getMobilityFlag(World world, int X, int Y, int Z) {

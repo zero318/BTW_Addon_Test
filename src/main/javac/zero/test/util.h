@@ -1336,6 +1336,7 @@ MACRO_VOID(
 /// Misc. Flags
 )
 
+// Block piston reactions
 #define PISTON_CAN_PUSH 0
 #define PISTON_CAN_BREAK 1
 #define PISTON_CANNOT_PUSH 2
@@ -1345,7 +1346,33 @@ MACRO_VOID(
 )
 #define PISTON_CAN_PUSH_ONLY 4
 
+MACRO_VOID(
+// Entity piston reaction flags
+)
+#define PISTON_CAN_MOVE     1
+#define PISTON_CAN_BOUNCE   2 
+#define PISTON_CAN_STICK    4
+MACRO_VOID(/*#define PISTON_CAN_HURT     8*/)
+
+#define PISTON_CAN_MOVE_OR_BOUNCE_ENTITY(flags) (((flags)&(PISTON_CAN_MOVE|PISTON_CAN_BOUNCE))!=0)
+#define PISTON_CAN_MOVE_ENTITY(flags) (((flags)&PISTON_CAN_MOVE)!=0)
+#define PISTON_CAN_BOUNCE_ENTITY(flags) (((flags)&PISTON_CAN_BOUNCE)!=0)
+#define PISTON_CAN_STICK_ENTITY(flags) (((flags)&PISTON_CAN_STICK)!=0)
+
 #define PISTON_PUSH_LIMIT 12
+
+MACRO_VOID(
+// Platform flags
+// Main supports: Platforms, slime, glue
+// Can lift: Redstone dust, rails
+//
+// Sticky blocks use the standard piston functions
+)
+#define PLATFORM_CANNOT_MOVE 0
+#define PLATFORM_MAIN_SUPPORT 1
+#define PLATFORM_CAN_LIFT 2
+
+#define PLATFORM_LIFT_LIMIT 25
 
 #define WORLD_HEIGHT_MIN 0
 #define WORLD_HEIGHT_MAX 255

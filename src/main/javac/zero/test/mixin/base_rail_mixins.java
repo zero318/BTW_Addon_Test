@@ -30,6 +30,8 @@ import zero.test.mixin.IBlockBaseRailLogicAccessMixins;
 #define RAIL_NORTH_WEST 8
 #define RAIL_NORTH_EAST 9
 
+#define POWERED_META_OFFSET 3
+
 @Mixin(BlockRailBase.class)
 public class BlockRailBaseMixins {
     
@@ -55,4 +57,14 @@ public class BlockRailBaseMixins {
                 ? RAIL_EAST_WEST
                 : RAIL_NORTH_SOUTH;
     }
+    
+#if ENABLE_PLATFORM_FIXES
+    public int getPlatformMobilityFlag(World world, int X, int Y, int Z) {
+        return PLATFORM_CAN_LIFT;
+    }
+    
+    public int adjustMetadataForPlatformMove(int meta) {
+        return ((BlockRailBase)(Object)this).isPowered() ? MERGE_META_FIELD(meta, POWERED, false) : meta;
+    }
+#endif
 }

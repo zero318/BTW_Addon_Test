@@ -603,7 +603,6 @@ public abstract class PistonMixins extends BlockPistonBase {
         }
         
         PISTON_DEBUG("PushIndex "+push_index_global);
-        
         for (int i = push_index_global; --i >= PUSH_LIST_START_INDEX;) {
             // Set x,y,z to position of block in push list
             packedPos = pushed_blocks[i];
@@ -746,7 +745,10 @@ public abstract class PistonMixins extends BlockPistonBase {
             int direction = READ_META_FIELD(meta, DIRECTION);
             
             // Why does the 1.5 code check for 7?
-            if (direction != 7) {
+            // Apparently directions 6 and 7 have been well known
+            // to crash older versions. Extended this check to try
+            // and prevent that.
+            if (direction < 6) {
                 boolean isPowered = ((IPistonBaseAccessMixins)(Object)this).callIsIndirectlyPowered(world, x, y, z, direction);
                 if (isPowered != READ_META_FIELD(meta, EXTENDED)) {
                     if (isPowered) {

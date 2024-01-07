@@ -7,6 +7,7 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import java.util.Random;
 import zero.test.IBlockMixins;
+// Block piston reactions
 
 @Mixin(LavaReceiverBlock.class)
 public abstract class LavaReceiverBlockMixins extends MortarReceiverBlock {

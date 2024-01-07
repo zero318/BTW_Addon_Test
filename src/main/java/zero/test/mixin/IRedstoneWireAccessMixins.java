@@ -11,6 +11,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import zero.test.IBlockMixins;
+// Block piston reactions
 //#define getInputSignal(...) func_94482_f(__VA_ARGS__)
 @Mixin(BlockRedstoneWire.class)
 public interface IRedstoneWireAccessMixins {

@@ -12,6 +12,7 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import java.util.List;
 import java.util.ArrayList;
+// Block piston reactions
 
 @Mixin(NetServerHandler.class)
 public class NetServerHandlerMixins {

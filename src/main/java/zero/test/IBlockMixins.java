@@ -3,6 +3,7 @@ import btw.AddonHandler;
 import net.minecraft.src.Block;
 import net.minecraft.src.World;
 import net.minecraft.src.IBlockAccess;
+// Block piston reactions
 
 public interface IBlockMixins {
     // Whether or not the block should have onNeighborBlockChange
@@ -45,5 +46,11 @@ public interface IBlockMixins {
     // Default to the old behavior for dust connections
     default public boolean canRedstoneConnectToSide(IBlockAccess block_access, int X, int Y, int Z, int flat_direction) {
         return ((Block)(Object)this).canProvidePower();
+    }
+    default public int getPlatformMobilityFlag(World world, int X, int Y, int Z) {
+        return 0;
+    }
+    default public int adjustMetadataForPlatformMove(int meta) {
+        return meta;
     }
 }

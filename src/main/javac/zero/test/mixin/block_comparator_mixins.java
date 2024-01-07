@@ -2,11 +2,17 @@ package zero.test.mixin;
 
 import net.minecraft.src.*;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.Implements;
 
 import zero.test.mixin.IBlockComparatorAccessMixins;
+import zero.test.mixin.IBlockRedstoneLogicAccessMixins;
+import zero.test.IBlockRedstoneLogicMixins;
 
 import java.util.Random;
 
@@ -103,7 +109,7 @@ public abstract class BlockComparatorMixins extends BlockRedstoneLogic {
                 //world.setBlockMetadataWithNotify(X, Y, Z, MERGE_META_FIELD(meta, POWERED, true), UPDATE_CLIENTS);
             //}
             
-            if ((prev_power & new_power) == 0) {
+            if (prev_power == 0 || new_power == 0) {
                 world.setBlockMetadataWithNotify(X, Y, Z, meta ^ 8, UPDATE_CLIENTS);
             }
             this.func_94483_i_(world, X, Y, Z);
@@ -199,4 +205,25 @@ public abstract class BlockComparatorMixins extends BlockRedstoneLogic {
 #if ENABLE_MODERN_REDSTONE_WIRE
     // Deal with the conductivity change...
 #endif
+
+    //@Shadow
+    //public abstract boolean getRenderingBaseTextures();
+
+    // Hacky fix for rendering a bottom texture
+    @Environment(EnvType.CLIENT)
+    @Overwrite
+    public Icon getIcon(int side, int meta) {
+        /*
+        BlockComparator self = (BlockComparator)(Object)this;
+        return side == DIRECTION_UP ? ((READ_META_FIELD(meta, POWERED) || ((IBlockRedstoneLogicAccessMixins)self).getIsRepeaterPowered()) ? Block.redstoneComparatorActive : self).blockIcon : super.getIcon(side, meta);
+        */
+        
+        BlockComparator self = (BlockComparator)(Object)this;
+        boolean is_powered = READ_META_FIELD(meta, POWERED) || ((IBlockRedstoneLogicAccessMixins)self).getIsRepeaterPowered();
+        if (side == DIRECTION_DOWN && !((IBlockRedstoneLogicMixins)self).getRenderingBaseTextures()) {
+            return (is_powered ? Block.torchRedstoneActive : Block.torchRedstoneIdle).getBlockTextureFromSide(side);
+        }
+        return side == DIRECTION_UP ? (is_powered ? Block.redstoneComparatorActive : self).blockIcon : Block.stoneDoubleSlab.getBlockTextureFromSide(1);
+        
+    }
 }

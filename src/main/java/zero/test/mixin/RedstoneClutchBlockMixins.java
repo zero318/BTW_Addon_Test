@@ -4,6 +4,7 @@ import btw.block.blocks.*;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import java.util.Random;
+// Block piston reactions
 @Mixin(RedstoneClutchBlock.class)
 public class RedstoneClutchBlockMixins extends GearBoxBlock {
     public RedstoneClutchBlockMixins(int block_id) {

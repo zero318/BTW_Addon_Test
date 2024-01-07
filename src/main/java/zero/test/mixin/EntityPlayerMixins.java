@@ -10,6 +10,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+// Block piston reactions
 
 @Mixin(EntityPlayer.class)
 public class EntityPlayerMixins {

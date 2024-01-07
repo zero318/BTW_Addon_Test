@@ -82,6 +82,14 @@ public class RedstoneWireMixins implements IBlockRedstoneWireMixins {
     }
 #endif
 
+#if ENABLE_MODERN_SUPPORT_LOGIC == MODERN_SUPPORT_LOGIC_PER_BLOCK
+    @Overwrite
+    public boolean canPlaceBlockAt(World world, int X, int Y, int Z) {
+        Block block = Block.blocksList[world.getBlockId(X, --Y, Z)];
+        return !BLOCK_IS_AIR(block) && block.hasLargeCenterHardPointToFacing(world, X, Y, Z, DIRECTION_UP, true);
+    }
+#endif
+
 #include "redstone_wire_defines.h"
 
     @Redirect(
@@ -105,7 +113,11 @@ public class RedstoneWireMixins implements IBlockRedstoneWireMixins {
         boolean above_is_solid = !BLOCK_IS_AIR(block) && ((IBlockMixins)block).isRedstoneConductor(block_access, X, Y, Z);
         Y -= 2;
         block = Block.blocksList[block_access.getBlockId(X, Y, Z)];
-        boolean below_is_solid = !BLOCK_IS_AIR(block) && ((IBlockMixins)block).isRedstoneConductor(block_access, X, Y, Z);
+        boolean below_is_solid =
+#if ENABLE_MODERN_SUPPORT_LOGIC != MODERN_SUPPORT_LOGIC_DISABLED
+            !for_rendering &&
+#endif
+            !BLOCK_IS_AIR(block) && ((IBlockMixins)block).isRedstoneConductor(block_access, X, Y, Z);
         ++Y;
         
         int direction = 2;
@@ -113,8 +125,7 @@ public class RedstoneWireMixins implements IBlockRedstoneWireMixins {
             connections <<= BITS_PER_DIRECTION;
             int nextX = X + Facing.offsetsXForSide[direction];
             int nextZ = Z + Facing.offsetsZForSide[direction];
-            int neighbor_id = block_access.getBlockId(nextX, Y, nextZ);
-            block = Block.blocksList[neighbor_id];
+            block = Block.blocksList[block_access.getBlockId(nextX, Y, nextZ)];
             if (
                 !above_is_solid &&
                 /*
@@ -125,14 +136,20 @@ public class RedstoneWireMixins implements IBlockRedstoneWireMixins {
             ) {
                 if (
                     !for_rendering ||
-                    neighbor_id == Block.glowStone.blockID || // TODO: Block property?
-#if ENABLE_MODERN_SUPPORT_LOGIC
-                    block.hasLargeCenterHardPointToFacing(block_access, nextX, Y, nextZ, OPPOSITE_DIRECTION(direction), true)
-#else
-                    block.hasLargeCenterHardPointToFacing(block_access, nextX, Y, nextZ, OPPOSITE_DIRECTION(direction))
-#endif
+                    // These conditions only affect rendering of vertical
+                    // connections, primarily to prevent floating dust.
+                    block.hasCenterHardPointToFacing(block_access, nextX, Y, nextZ, OPPOSITE_DIRECTION(direction), true) ||
+                    block.isNormalCube(block_access, nextX, Y, nextZ) // dangerous stinky hack to make more things show up
                 ) {
                     connections += UP_CONNECTION;
+#if ENABLE_MODERN_SUPPORT_LOGIC != MODERN_SUPPORT_LOGIC_DISABLED
+                    if (
+                        for_rendering &&
+                        block.shouldRenderNeighborFullFaceSide(block_access, nextX, Y, nextZ, OPPOSITE_DIRECTION(direction))
+                    ) {
+                        connections += UP_CONNECTION_RENDER_BACK;
+                    }
+#endif
                 }
                 connections += SIDE_CONNECTION;
             }
@@ -272,6 +289,16 @@ public class RedstoneWireMixins implements IBlockRedstoneWireMixins {
                 // Cross Overlay
                 return self.getField_94411_cP();
         }
+    }
+#endif
+
+#if ENABLE_PLATFORM_FIXES
+    public int getPlatformMobilityFlag(World world, int X, int Y, int Z) {
+        return PLATFORM_CAN_LIFT;
+    }
+    
+    public int adjustMetadataForPlatformMove(int meta) {
+        return 0;
     }
 #endif
 }

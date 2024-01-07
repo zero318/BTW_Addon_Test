@@ -22,19 +22,69 @@ public class BlockMixins implements IBlockMixins {
 		return ((Block)(Object)this).isNormalCube(block_access, X, Y, Z);
 	}
     
-#if ENABLE_MODERN_SUPPORT_LOGIC
-/*
+#if ENABLE_MODERN_SUPPORT_LOGIC == MODERN_SUPPORT_LOGIC_GLOBAL_ALL
+    /*
+        THESE IGNORE THE WorldUtils VERSIONS OF HARDPOINT CHECKS
+        
+        This was done deliberately because calls to the WorldUtils functions
+        only seem to happen in cases where checking for transparency makes sense
+        or an explicit true value is passed.
+    */
+
+    /*
+        Effects:
+    */
     @Overwrite
-    public boolean isNormalCube(IBlockAccess block_access, int X, int Y, int Z) {
-        return ((Block)(Object)this).renderAsNormalBlock();
+    public boolean hasSmallCenterHardPointToFacing(IBlockAccess blockAccess, int i, int j, int k, int iFacing) {
+        return ((Block)(Object)this).hasSmallCenterHardPointToFacing(blockAccess, i, j, k, iFacing, true);
     }
     
+    /*
+        Effects:
+    */
     @Overwrite
-    public static boolean isNormalCube(int block_id) {
-		Block block = Block.blocksList[block_id];
-        return !BLOCK_IS_AIR(block) && block.renderAsNormalBlock();
+    public boolean hasCenterHardPointToFacing(IBlockAccess blockAccess, int i, int j, int k, int iFacing) {
+		return ((Block)(Object)this).hasCenterHardPointToFacing(blockAccess, i, j, k, iFacing, true);
 	}
-*/
+    
+    /*
+        Effects:
+        - Most block placement works on transparent blocks (maybe including fire? Might disable that)
+        - Wall logic doesn't ignore transparent blocks
+        - doesBlockHaveSolidTopSurface allows transparent blocks
+         - Water makes drip particles when above transparent blocks
+         - Leaves don't make drip particles in the rain when above transparent blocks
+         - Dismounting an entity considers transparent blocks as valid
+         - Entities following the player can teleport onto transparent blocks
+         - Players can respawn from beacons on transparent blocks
+         - Iron Golems can spawn on transparent blocks (assuming BTW didn't screw with the code elsewhere)
+         - World bonus chests can spawn on transparent blocks
+         - Ash can be deposited on transparent blocks
+         
+        Rendering bugs to fix:
+        - Redstone dust
+        - Repeaters
+        - Comparators
+    */
+    @Overwrite
+    public boolean hasLargeCenterHardPointToFacing(IBlockAccess blockAccess, int i, int j, int k, int iFacing) {
+		return ((Block)(Object)this).hasLargeCenterHardPointToFacing(blockAccess, i, j, k, iFacing, true);
+	}
+    
+    /*
+        Effects:
+        - Prevent above changes from impacting grass
+    */
+    @Overwrite
+    public boolean getCanGrassGrowUnderBlock(World world, int i, int j, int k, boolean bGrassOnHalfSlab) {
+		return bGrassOnHalfSlab || !((Block)(Object)this).hasLargeCenterHardPointToFacing(world, i, j, k, 0, false);
+	}
+    
+    /*
+        Check for effects:
+        - isSnowCoveringTopSurface
+        - hasFallingBlockRestingOn
+    */
 #endif
     
     // Extra variant of getMobilityFlag that allows
