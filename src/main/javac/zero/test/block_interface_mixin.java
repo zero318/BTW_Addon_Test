@@ -6,6 +6,8 @@ import net.minecraft.src.Block;
 import net.minecraft.src.World;
 import net.minecraft.src.IBlockAccess;
 
+import java.util.List;
+
 #include "feature_flags.h"
 
 public interface IBlockMixins {
@@ -83,4 +85,6 @@ public interface IBlockMixins {
         return meta;
     }
 #endif
+
+    //public void addCollisionBoxesToListForPiston(World world, int x, int y, int z, int meta, List list);
 }

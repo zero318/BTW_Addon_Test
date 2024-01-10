@@ -38,46 +38,4 @@ import zero.test.IRenderBlocksMixins;
 //#define getInputSignal(...) func_94482_f(__VA_ARGS__)
 @Mixin(BlockLiftedByPlatformRenderer.class)
 public abstract class BlockLiftedByPlatformRendererMixins extends Render {
-    private RenderBlocks platformRenderBlocks = new RenderBlocks();
-    //@Overwrite
-    @Inject(
-        method = "doRender(Lnet/minecraft/src/Entity;DDDFF)V",
-        at = @At("TAIL")
-    )
-    public void doRender_inject(Entity entity, double x, double y, double z, float fYaw, float renderPartialTicks, CallbackInfo info) {
-        BlockLiftedByPlatformEntity liftedBlockEntity = (BlockLiftedByPlatformEntity)entity;
-        int iBlockID = liftedBlockEntity.getBlockID();
-     Block block = Block.blocksList[iBlockID];
-        if (
-            !((block)==null) &&
-            !(block instanceof BlockRailBase) &&
-            !(block instanceof BlockRedstoneWire)
-        ) {
-            // This is just ripped from falling sand
-            GL11.glPushMatrix();
-            GL11.glTranslatef((float)x, (float)y, (float)z);
-            this.loadTexture("/terrain.png");
-            GL11.glDisable(GL11.GL_LIGHTING);
-            platformRenderBlocks.blockAccess = entity.worldObj;
-            Tessellator tessellator = Tessellator.instance;
-            tessellator.startDrawingQuads();
-            tessellator.setTranslation(
-                -MathHelper.floor_double(liftedBlockEntity.posX) - 0.5D,
-                -MathHelper.floor_double(liftedBlockEntity.posY) - 0.5D,
-                -MathHelper.floor_double(liftedBlockEntity.posZ) - 0.5D
-            );
-            block.currentBlockRenderer = platformRenderBlocks;
-            block.renderFallingBlock(
-                platformRenderBlocks,
-                MathHelper.floor_double(liftedBlockEntity.posX),
-                MathHelper.floor_double(liftedBlockEntity.posY),
-                MathHelper.floor_double(liftedBlockEntity.posZ),
-                liftedBlockEntity.getBlockMetadata()
-            );
-            tessellator.setTranslation(0.0D, 0.0D, 0.0D);
-            tessellator.draw();
-            GL11.glEnable(GL11.GL_LIGHTING);
-            GL11.glPopMatrix();
-        }
-    }
 }

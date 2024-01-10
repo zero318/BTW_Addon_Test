@@ -25,6 +25,7 @@ import zero.test.IWorldMixins;
 import zero.test.IBlockEntityPistonMixins;
 
 import java.util.List;
+import java.util.ArrayList;
 
 #include "..\func_aliases.h"
 #include "..\feature_flags.h"
@@ -35,7 +36,7 @@ import java.util.List;
 #define STICKY_META_BITS 1
 #define STICKY_IS_BOOL true
 
-@Mixin(BlockPistonMoving.class)
+@Mixin(PistonBlockMoving.class)
 public class BlockPistonMovingMixins {
 #if ENABLE_BETTER_BUDDY_DETECTION
     //@Override
@@ -43,7 +44,7 @@ public class BlockPistonMovingMixins {
         return false;
     }
 #endif
-    
+    //@Overwrite
     public void addCollisionBoxesToList(World world, int x, int y, int z, AxisAlignedBB maskBox, List list, Entity entity) {
         TileEntity tileEntity = world.getBlockTileEntity(x, y, z);
         if (tileEntity instanceof TileEntityPiston) {
@@ -51,11 +52,65 @@ public class BlockPistonMovingMixins {
         }
     }
     
+#if ENABLE_MORE_MOVING_BLOCK_HARDPOINTS
+    public boolean hasSmallCenterHardPointToFacing(IBlockAccess blockAccess, int x, int y, int z, int direction, boolean ignoreTransparency) {
+        TileEntity tileEntity = blockAccess.getBlockTileEntity(x, y, z);
+        if (tileEntity instanceof TileEntityPiston) {
+            return ((IBlockEntityPistonMixins)(Object)tileEntity).hasSmallCenterHardPointToFacing(x, y, z, direction, ignoreTransparency);
+        }
+        return false;
+    }
+
+    public boolean hasCenterHardPointToFacing(IBlockAccess blockAccess, int x, int y, int z, int direction, boolean ignoreTransparency) {
+        TileEntity tileEntity = blockAccess.getBlockTileEntity(x, y, z);
+        if (tileEntity instanceof TileEntityPiston) {
+            return ((IBlockEntityPistonMixins)(Object)tileEntity).hasCenterHardPointToFacing(x, y, z, direction, ignoreTransparency);
+        }
+        return false;
+    }
+#endif
+    
     public boolean hasLargeCenterHardPointToFacing(IBlockAccess blockAccess, int x, int y, int z, int direction, boolean ignoreTransparency) {
         TileEntity tileEntity = blockAccess.getBlockTileEntity(x, y, z);
         if (tileEntity instanceof TileEntityPiston) {
             return ((IBlockEntityPistonMixins)(Object)tileEntity).hasLargeCenterHardPointToFacing(x, y, z, direction, ignoreTransparency);
         }
         return false;
+    }
+    
+    // If the whole point of this is to test the block bounds,
+    // maybe overriding to use raw collision isn't a good idea?
+    /*
+    public MovingObjectPosition collisionRayTraceVsBlockBounds(World world, int x, int y, int z, Vec3 startRay, Vec3 endRay) {
+        TileEntity tileEntity = world.getBlockTileEntity(x, y, z);
+        if (tileEntity instanceof TileEntityPiston) {
+            List<AxisAlignedBB> collisionList = new ArrayList();
+            
+            AxisAlignedBB fakeMask = AxisAlignedBB.getAABBPool().getAABB(x - 1.0D, y - 1.0D, z - 1.0D, x + 2.0D, y + 2.0D, z + 2.0D);
+            ((IBlockEntityPistonMixins)(Object)tileEntity).getCollisionList(fakeMask, collisionList);
+            
+            for (AxisAlignedBB collisionBox : collisionList) {
+                MovingObjectPosition collisionPoint = collisionBox.calculateIntercept(startRay, endRay);
+                if (collisionPoint != null) {
+                    collisionPoint.blockX = x;
+                    collisionPoint.blockY = y;
+                    collisionPoint.blockZ = z;
+                    return collisionPoint;
+                }
+            }
+        }
+        return null;
+    }
+    */
+    
+    // This fixes the selection box of retracting pistons
+    // to not derp out and extend behind the base.
+    @Overwrite
+    public AxisAlignedBB getBlockBoundsFromPoolBasedOnState(IBlockAccess blockAccess, int x, int y, int z) {
+        TileEntity tileEntity = blockAccess.getBlockTileEntity(x, y, z);
+        if (tileEntity instanceof TileEntityPiston) {
+            return ((IBlockEntityPistonMixins)(Object)tileEntity).getBlockBoundsFromPoolBasedOnState();
+        }
+        return null;
     }
 }

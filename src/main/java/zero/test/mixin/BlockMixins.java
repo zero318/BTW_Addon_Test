@@ -5,6 +5,7 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import zero.test.IBlockMixins;
 import zero.test.IWorldMixins;
+import java.util.List;
 // Block piston reactions
 @Mixin(Block.class)
 public class BlockMixins implements IBlockMixins {
@@ -77,6 +78,20 @@ public class BlockMixins implements IBlockMixins {
     public int getMobilityFlag(World world, int X, int Y, int Z) {
         return ((Block)(Object)this).getMobilityFlag();
     }
+    /*
+    public void addCollisionBoxesToListForPiston(TileEntityPiston pistonEntity, List list) {
+        double x = (double)pistonEntity.xCoord;
+        double y = (double)pistonEntity.yCoord;
+        double z = (double)pistonEntity.zCoord;
+        
+        AxisAlignedBB fakeMask = AxisAlignedBB.getAABBPool().getAABB(x - 1.0D, y - 1.0D, z - 1.0D, x + 2.0D, y + 2.0D, z + 2.0D);
+        
+        int prevMeta = pistonEntity.worldObj.getBlockMetadata(pistonEntity.xCoord, pistonEntity.yCoord, pistonEntity.zCoord);
+        pistonEntity.worldObj.setBlockMetadataWithNotify(x, y, z, pistonEntity.getBlockMetadata(), UPDATE_INVISIBLE | UPDATE_KNOWN_SHAPE | UPDATE_SUPPRESS_LIGHT);
+        ((Block)(Object)this).addCollisionBoxesToList(pistonEntity.worldObj, x, y, z, fakeMask, list, (Entity)null);
+        pistonEntity.worldObj.setBlockMetadataWithNotify(x, y, z, prevMeta, UPDATE_INVISIBLE | UPDATE_KNOWN_SHAPE | UPDATE_SUPPRESS_LIGHT);
+    }
+    */
     @Overwrite
     public boolean rotateAroundJAxis(World world, int X, int Y, int Z, boolean reverse) {
         int prev_meta = world.getBlockMetadata(X, Y, Z);
@@ -89,4 +104,18 @@ public class BlockMixins implements IBlockMixins {
         }
         return false;
     }
+    // Reduced hardpoint requirement from large to medium.
+    // This allows fences to stay connected to extended piston sides.
+    @Overwrite
+    public boolean shouldFenceConnectToThisBlockToFacing(IBlockAccess blockAccess, int x, int y, int z, int facing) {
+        Block self = (Block)(Object)this;
+  return self.isNormalCube(blockAccess, x, y, z) || self.isFence(blockAccess.getBlockMetadata(x, y, z)) || self.hasCenterHardPointToFacing(blockAccess, x, y, z, facing, true);
+ }
+ // Reduced hardpoint requirement from large to small.
+    // This allows panes to stay connected to extended piston sides.
+    @Overwrite
+ public boolean shouldPaneConnectToThisBlockToFacing(IBlockAccess blockAccess, int x, int y, int z, int facing) {
+        Block self = (Block)(Object)this;
+  return self.isNormalCube(blockAccess, x, y, z) || self.hasSmallCenterHardPointToFacing(blockAccess, x, y, z, facing, true);
+ }
 }

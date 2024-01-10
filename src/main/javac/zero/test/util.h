@@ -770,6 +770,9 @@ MACRO_VOID(
 
 #define BOOL_INVERT(...) ((__VA_ARGS__)^true)
 
+MACRO_VOID(/* Java 8 is dumb and doesn't have clamp */)
+#define MATH_CLAMP(value, _min, _max) (Math.max(Math.min((value),(_max)),(_min)))
+
 MACRO_VOID(
 /// Random direction crap
 )

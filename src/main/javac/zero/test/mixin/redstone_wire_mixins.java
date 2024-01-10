@@ -110,10 +110,10 @@ public class RedstoneWireMixins implements IBlockRedstoneWireMixins {
         
         ++Y;
         Block block = Block.blocksList[block_access.getBlockId(X, Y, Z)];
-        boolean above_is_solid = !BLOCK_IS_AIR(block) && ((IBlockMixins)block).isRedstoneConductor(block_access, X, Y, Z);
+        boolean above_is_conductive = !BLOCK_IS_AIR(block) && ((IBlockMixins)block).isRedstoneConductor(block_access, X, Y, Z);
         Y -= 2;
         block = Block.blocksList[block_access.getBlockId(X, Y, Z)];
-        boolean below_is_solid =
+        boolean below_is_conductive =
 #if ENABLE_MODERN_SUPPORT_LOGIC != MODERN_SUPPORT_LOGIC_DISABLED
             !for_rendering &&
 #endif
@@ -127,7 +127,7 @@ public class RedstoneWireMixins implements IBlockRedstoneWireMixins {
             int nextZ = Z + Facing.offsetsZForSide[direction];
             block = Block.blocksList[block_access.getBlockId(nextX, Y, nextZ)];
             if (
-                !above_is_solid &&
+                !above_is_conductive &&
                 /*
                 self.canPlaceBlockAt(nextX, Y, nextZ) &&
                 isPowerProviderOrWire(block_access, nextX, Y + 1, nextZ, Direction.facingToDirection[direction])
@@ -164,7 +164,7 @@ public class RedstoneWireMixins implements IBlockRedstoneWireMixins {
                 block_access.getBlockId(nextX, Y - 1, nextZ) == Block.redstoneWire.blockID
             ) {
                 connections |= SIDE_CONNECTION;
-                if (below_is_solid) {
+                if (below_is_conductive) {
                     connections += DOWN_CONNECTION;
                 }
             }

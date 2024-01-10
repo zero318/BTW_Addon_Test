@@ -18,8 +18,9 @@ import zero.test.sound.ZeroTestSounds;
 public class SlimeBlock extends Block {
     public SlimeBlock(int block_id) {
         super(block_id, Material.grass);
-        this.slipperiness = 0.8f;
-        this.setHardness(0.0f);
+        this.slipperiness = 0.8F;
+        this.setHardness(0.0F);
+        this.setShovelsEffectiveOn(true);
         this.setLightOpacity(1);
         this.setUnlocalizedName("slime_block");
         this.stepSound = ZeroTestSounds.slime_step_sound;
@@ -29,6 +30,12 @@ public class SlimeBlock extends Block {
     public int getMobilityFlag() {
         return PISTON_CAN_PUSH;
     }
+    
+#if DISABLE_SLIME_AND_GLUE_PISTON_SHOVEL
+    public boolean canBePistonShoveled(World world, int X, int Y, int Z) {
+		return false;
+	}
+#endif
     
     public boolean isStickyForBlocks(World world, int X, int Y, int Z, int direction) {
         return true;
@@ -67,14 +74,14 @@ public class SlimeBlock extends Block {
     @Override
     public void onFallenUpon(World world, int X, int Y, int Z, Entity entity, float par6) {
         if (!entity.isSneaking()) {
-            entity.fallDistance = 0.0f;
+            entity.fallDistance = 0.0F;
             double newY = entity.motionY;
             //AddonHandler.logMessage("Landed on slime "+newY);
-            if (newY < 0.0) {
+            if (newY < 0.0D) {
                 //entity.isAirBorne = true;
                 // This doesn't work...?
                 if (entity instanceof EntityLiving) {
-                    newY *= 0.8;
+                    newY *= 0.8D;
                 }
                 entity.motionY = -newY;
             }
@@ -98,9 +105,10 @@ public class SlimeBlock extends Block {
     @Environment(EnvType.CLIENT)
     @Override
     public boolean shouldSideBeRendered(IBlockAccess block_access, int neighborX, int neighborY, int neighborZ, int neighbor_side) {
-        return block_access.getBlockId(neighborX, neighborY, neighborZ) != SLIME_BLOCK_ID
-                ? super.shouldSideBeRendered(block_access, neighborX, neighborY, neighborZ, neighbor_side)
-                : false;
+        if (block_access.getBlockId(neighborX, neighborY, neighborZ) != this.blockID) {
+            return super.shouldSideBeRendered(block_access, neighborX, neighborY, neighborZ, neighbor_side);
+        }
+        return false;
     }
     
     @Environment(EnvType.CLIENT)
@@ -113,6 +121,6 @@ public class SlimeBlock extends Block {
     @Environment(EnvType.CLIENT)
     @Override
     public float getAmbientOcclusionLightValue(IBlockAccess block_access, int X, int Y, int Z) {
-        return 1.0f;
+        return 1.0F;
     }
 }

@@ -9,12 +9,13 @@ import btw.inventory.util.InventoryUtils;
 import zero.test.block.*;
 import zero.test.command.*;
 import zero.test.block.ZeroTestBlocks;
+import zero.test.item.SlimeBlockItem;
 // Block piston reactions
 
 public class ZeroTestAddon extends BTWAddon {
     private static ZeroTestAddon instance;
     private ZeroTestAddon() {
-        super("Zero Test Addon", "0.0.8", "ZeroTest");
+        super("Zero Test Addon", "0.0.9", "ZeroTest");
     }
     @Override
     public void initialize() {
@@ -25,7 +26,7 @@ public class ZeroTestAddon extends BTWAddon {
         ZeroTestBlocks.observer_block = new ObserverBlock(1319);
         Item.itemsList[1319] = new ItemBlock(1319 -256);
         ZeroTestBlocks.slime_block = new SlimeBlock(1320);
-        Item.itemsList[1320] = new ItemBlock(1320 -256);
+        Item.itemsList[1320] = new SlimeBlockItem(1320 -256);
         ZeroTestBlocks.glue_block = new GlueBlock(1321);
         Item.itemsList[1321] = new ItemBlock(1321 -256);
         ZeroTestBlocks.iron_trapdoor = new IronTrapDoor(1322);

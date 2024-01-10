@@ -3,6 +3,7 @@ import btw.AddonHandler;
 import net.minecraft.src.Block;
 import net.minecraft.src.World;
 import net.minecraft.src.IBlockAccess;
+import java.util.List;
 // Block piston reactions
 
 public interface IBlockMixins {
@@ -53,4 +54,5 @@ public interface IBlockMixins {
     default public int adjustMetadataForPlatformMove(int meta) {
         return meta;
     }
+    //public void addCollisionBoxesToListForPiston(World world, int x, int y, int z, int meta, List list);
 }

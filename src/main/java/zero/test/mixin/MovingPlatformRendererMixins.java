@@ -40,16 +40,4 @@ import zero.test.IMovingPlatformEntityMixins;
 //#define getInputSignal(...) func_94482_f(__VA_ARGS__)
 @Mixin(MovingPlatformRenderer.class)
 public abstract class MovingPlatformRendererMixins {
-    @Redirect(
-        method = "doRender",
-        at = @At(
-            value = "FIELD",
-            target = "Lbtw/block/BTWBlocks;platform:Lnet/minecraft/src/Block;",
-            opcode = Opcodes.GETSTATIC
-        )
-    )
-    private Block redirect_block_get(Entity entity, double x, double y, double z, float fYaw, float renderPartialTicks) {
-        Block block = Block.blocksList[((IMovingPlatformEntityMixins)(MovingPlatformEntity)entity).getBlockId()];
-        return !((block)==null) ? block : BTWBlocks.platform;
-    }
 }

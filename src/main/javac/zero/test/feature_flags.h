@@ -44,12 +44,12 @@ MC-10653
 MC-12211
 MC-63669
 MC-195351
-
-TODO:
 MC-2255
-MC-5951
 MC-8645
 MC-9405
+
+TODO:
+MC-5951
 MC-11109 (Specific to BTW blocks)
 MC-11434
 MC-94566
@@ -129,9 +129,27 @@ MACRO_VOID(/* Allow metal spikes to weakly conduct power to their bases */)
 MACRO_VOID(/* Allow platforms to stick to other platforms when moved */)
 #define ENABLE_PLATFORMS_WITH_PISTONS 1
 
-MACRO_VOID(/* Rework the platform code to actually work */)
+MACRO_VOID(/* Tweak the platform code to work properly with lifting blocks */)
 #define ENABLE_PLATFORM_FIXES 1
 
-#define ENABLE_PLATFORM_EXTENSIONS 1
+MACRO_VOID(/* Rework the platform code to entirely to integrate slime */)
+#define ENABLE_PLATFORM_EXTENSIONS 0
+
+MACRO_VOID(
+// Try to fix platforms by using entity UUIDs
+// to record neighbor connections
+)
+#define ENABLE_PLATFORM_UUID_REWORK 0
+
+MACRO_VOID(/* Relax the hardpoint requirements for fences/panes */)
+#define ENABLE_CONNECTED_BLOCK_TWEAKS 1
+
+MACRO_VOID(/* Prevent shoveling slime/glue despite regular shovels being effective */)
+#define DISABLE_SLIME_AND_GLUE_PISTON_SHOVEL 0
+
+#define ENABLE_MORE_MOVING_BLOCK_HARDPOINTS 1
+
+MACRO_VOID(/* */)
+#define ENABLE_REDSTONE_DUST_ROUTING 0
 
 #endif

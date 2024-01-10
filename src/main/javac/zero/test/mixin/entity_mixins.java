@@ -41,8 +41,7 @@ public class EntityMixins implements IEntityMixins {
     public double pistonY;
     public double pistonZ;
     
-#define CHEAT_WITH_NOCLIP 0
-#define CHEAT_WITH_Y_HACK 0
+#define HYPER_OPTIMIZE_MATH_CODE 1
     
     public void moveEntityByPiston(double X, double Y, double Z) {
         Entity self = (Entity)(Object)this;
@@ -54,45 +53,26 @@ public class EntityMixins implements IEntityMixins {
                 pistonX = pistonY = pistonZ = 0.0D;
             }
             if (X != 0.0D) {
-                temp = Math.max(Math.min(X + this.pistonX, 0.51D), -0.51D);
-                X = temp - this.pistonX;
+                X = (temp = MATH_CLAMP(X + this.pistonX, -0.51D, 0.51D)) - this.pistonX;
                 this.pistonX = temp;
                 temp = X;
                 Y = Z = 0.0D;
             }
             else if (Y != 0.0D) {
-                temp = Math.max(Math.min(Y + this.pistonY, 0.51D), -0.51D);
-                Y = temp - this.pistonY;
+                Y = (temp = MATH_CLAMP(Y + this.pistonY, -0.51D, 0.51D)) - this.pistonY;
                 this.pistonY = temp;
                 temp = Y;
                 Z = 0.0D;
             }
-            else /*if (Z != 0.0D)*/ {
-                temp = Math.max(Math.min(Z + this.pistonZ, 0.51D), -0.51D);
-                Z = temp - this.pistonZ;
+            else {
+                Z = (temp = MATH_CLAMP(Z + this.pistonZ, -0.51D, 0.51D)) - this.pistonZ;
                 this.pistonZ = temp;
                 temp = Z;
             }
-            /*else {
-                return;
-            }*/
             if (Math.abs(temp) <= 1.0E-5D) {
                 return;
             }
         }
-#if CHEAT_WITH_NOCLIP
-        boolean prev_noclip = self.noClip;
-        self.noClip = true;
-#elif CHEAT_WITH_Y_HACK
-        double prevY = self.posY;
-#endif
         self.moveEntity(X, Y, Z);
-#if CHEAT_WITH_NOCLIP
-        self.noClip = prev_noclip;
-#elif CHEAT_WITH_Y_HACK
-        if (Y == 0.0D) {
-            self.posY = prevY;
-        }
-#endif
     }
 }

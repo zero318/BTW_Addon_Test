@@ -5,6 +5,9 @@ import net.minecraft.src.World;
 import net.minecraft.src.BlockPistonBase;
 import net.minecraft.src.*;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+
 import btw.block.blocks.PistonBlockBase;
 import btw.block.blocks.PistonBlockMoving;
 import btw.item.util.ItemUtils;
@@ -43,7 +46,11 @@ public class BlockPistonExtensionMixins {
 #endif
     
     public boolean hasLargeCenterHardPointToFacing(IBlockAccess blockAccess, int x, int y, int z, int direction, boolean ignoreTransparency) {
-        int meta = blockAccess.getBlockMetadata(x, y, z);
-        return direction == READ_META_FIELD(meta, DIRECTION);
+        return direction == READ_META_FIELD(blockAccess.getBlockMetadata(x, y, z), DIRECTION);
+    }
+    
+    @Environment(EnvType.CLIENT)
+    public boolean shouldRenderNeighborFullFaceSide(IBlockAccess blockAccess, int x, int y, int z, int direction) {
+        return direction != READ_META_FIELD(blockAccess.getBlockMetadata(x, y, z), DIRECTION);
     }
 }

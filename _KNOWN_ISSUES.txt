@@ -1,4 +1,0 @@
--All blocks appear twice in the creative menu
--Textures are slightly broken
--Slime/glue blocks have broken transparency
--The CUD recipe is lazy AF

@@ -42,28 +42,22 @@ public class EntityMixins implements IEntityMixins {
                 pistonX = pistonY = pistonZ = 0.0D;
             }
             if (X != 0.0D) {
-                temp = Math.max(Math.min(X + this.pistonX, 0.51D), -0.51D);
-                X = temp - this.pistonX;
+                X = (temp = (Math.max(Math.min((X + this.pistonX),(0.51D)),(-0.51D)))) - this.pistonX;
                 this.pistonX = temp;
                 temp = X;
                 Y = Z = 0.0D;
             }
             else if (Y != 0.0D) {
-                temp = Math.max(Math.min(Y + this.pistonY, 0.51D), -0.51D);
-                Y = temp - this.pistonY;
+                Y = (temp = (Math.max(Math.min((Y + this.pistonY),(0.51D)),(-0.51D)))) - this.pistonY;
                 this.pistonY = temp;
                 temp = Y;
                 Z = 0.0D;
             }
-            else /*if (Z != 0.0D)*/ {
-                temp = Math.max(Math.min(Z + this.pistonZ, 0.51D), -0.51D);
-                Z = temp - this.pistonZ;
+            else {
+                Z = (temp = (Math.max(Math.min((Z + this.pistonZ),(0.51D)),(-0.51D)))) - this.pistonZ;
                 this.pistonZ = temp;
                 temp = Z;
             }
-            /*else {
-                return;
-            }*/
             if (Math.abs(temp) <= 1.0E-5D) {
                 return;
             }

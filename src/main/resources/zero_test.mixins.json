@@ -52,7 +52,8 @@
     "BlockLiftedByPlatformEntityMixins",
     "AnchorBlockMixins",
     "MovingPlatformEntityMixins",
-    "IAnchorBlockAccessMixins"
+    "IAnchorBlockAccessMixins",
+    "PaneBlockMixins"
   ],
   "client": [
     "ZeroTestMixin",

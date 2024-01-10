@@ -173,3 +173,5 @@ clean.doFirst {
     delete "$buildDir/dev_run"
     delete "$buildDir/BTW_dev"
 }
+
+downloadAssets.enabled = false

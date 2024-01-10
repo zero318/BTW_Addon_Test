@@ -5,6 +5,9 @@ import net.minecraft.src.World;
 import net.minecraft.src.BlockPistonBase;
 import net.minecraft.src.*;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+
 import btw.block.blocks.PistonBlockBase;
 import btw.block.blocks.PistonBlockMoving;
 import btw.item.util.ItemUtils;
@@ -54,10 +57,37 @@ public abstract class PistonMixins extends BlockPistonBase {
         return false;
     }
 #endif
+
+#if ENABLE_MODERN_REDSTONE_WIRE
+    // Don't conduct redstone despite being "normal"
+    public boolean isRedstoneConductor(IBlockAccess blockAccess, int x, int y, int z) {
+        return false;
+    }
+
+    // Suffocate entities inside a retracted piston
+    public boolean isNormalCube(IBlockAccess blockAccess, int x, int y, int z) {
+        return !READ_META_FIELD(blockAccess.getBlockMetadata(x, y, z), EXTENDED);
+    }
+#endif
     
-    public boolean hasLargeCenterHardPointToFacing(IBlockAccess blockAccess, int x, int y, int z, int direction, boolean ignoreTransparency) {
+    public boolean hasCenterHardPointToFacing(IBlockAccess blockAccess, int x, int y, int z, int facing, boolean ignoreTransparency) {
         int meta = blockAccess.getBlockMetadata(x, y, z);
-        return !READ_META_FIELD(meta, EXTENDED) || OPPOSITE_DIRECTION(direction) == READ_META_FIELD(meta, DIRECTION);
+        if (READ_META_FIELD(meta, EXTENDED)) {
+            int direction = READ_META_FIELD(meta, DIRECTION);
+            if (
+                direction == facing ||
+                (direction < 2 && facing >= 2)
+            ) {
+                return false;
+            }
+        }
+        return true;
+    }
+    
+    // The back of a piston is still a large hardpoint when extended
+    public boolean hasLargeCenterHardPointToFacing(IBlockAccess blockAccess, int x, int y, int z, int facing, boolean ignoreTransparency) {
+        int meta = blockAccess.getBlockMetadata(x, y, z);
+        return !READ_META_FIELD(meta, EXTENDED) || OPPOSITE_DIRECTION(facing) == READ_META_FIELD(meta, DIRECTION);
     }
     
 #if ENABLE_MOVING_BLOCK_CHAINING
@@ -273,7 +303,7 @@ public abstract class PistonMixins extends BlockPistonBase {
             }
             ++pushWriteIndex;
             
-            if (!((IBlockMixins)nextBlock).isStickyForBlocks(world, nextX, nextY, nextZ, direction)) {
+            if (!((IBlockMixins)nextBlock).isStickyForBlocks(world, nextX, nextY, nextZ, OPPOSITE_DIRECTION(direction))) {
                 PISTON_DEBUG("IsSticky false");
                 break;
             }
@@ -648,7 +678,7 @@ public abstract class PistonMixins extends BlockPistonBase {
             blockMeta = direction | (this.isSticky ? 8 : 0);
             PISTON_DEBUG("PistonHead "+Block.pistonMoving.blockID+"."+blockMeta+"("+headX+" "+headY+" "+headZ+")");
             world.setBlock(headX, headY, headZ, Block.pistonMoving.blockID, blockMeta, UPDATE_IMMEDIATE | UPDATE_SUPPRESS_DROPS | UPDATE_MOVE_BY_PISTON);
-			world.setBlockTileEntity(headX, headY, headZ, BlockPistonMoving.getTileEntity(Block.pistonExtension.blockID, blockMeta, direction, true, false));
+			world.setBlockTileEntity(headX, headY, headZ, BlockPistonMoving.getTileEntity(Block.pistonExtension.blockID, blockMeta, direction, true, true));
         }
         
         // START SHOVEL CODE
@@ -831,8 +861,10 @@ public abstract class PistonMixins extends BlockPistonBase {
                     ((TileEntityPiston)tileEntity).clearPistonTileEntity();
                 }
                 
-                world.setBlock(x, y, z, Block.pistonMoving.blockID, direction, UPDATE_SUPPRESS_DROPS);
+                world.setBlock(x, y, z, Block.pistonMoving.blockID, MERGE_META_FIELD(direction, EXTENDED, true), UPDATE_SUPPRESS_DROPS);
                 world.setBlockTileEntity(x, y, z, BlockPistonMoving.getTileEntity(this.blockID, direction, direction, false, true));
+                world.notifyBlockChange(x, y, z, Block.pistonMoving.blockID);
+                ((IWorldMixins)world).updateNeighbourShapes(x, y, z, UPDATE_CLIENTS);
                 
                 if (this.isSticky) {
                     int currentX = nextX + Facing.offsetsXForSide[direction];
@@ -881,4 +913,14 @@ public abstract class PistonMixins extends BlockPistonBase {
         return true;
     }
 #endif
+    
+    //@Environment(EnvType.CLIENT)
+    //public boolean shouldRenderNeighborHalfSlabSide(IBlockAccess blockAccess, int x, int y, int z, int iNeighborSlabSide, boolean bNeighborUpsideDown) {
+        //return !isOpaqueCube();
+    //}
+
+    @Environment(EnvType.CLIENT)
+    public boolean shouldRenderNeighborFullFaceSide(IBlockAccess blockAccess, int x, int y, int z, int direction) {
+        return !this.hasLargeCenterHardPointToFacing(blockAccess, x, y, z, direction, true);
+    }
 }

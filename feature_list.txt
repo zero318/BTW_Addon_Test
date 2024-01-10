@@ -4,15 +4,18 @@ Features
 Slime Blocks:
 - Crafted from 9 slime balls as a packing recipe
 - Uncrafted with a stoked cauldron
+- Mined with a shovel
 - Interact with pistons the same way that they do in modern vanilla
 - Don't stick to glue blocks
 - Entities are slowed down when walking on top, bounces entities when pushed, prevents fall damage when not sneaking
 - Can indefinitely support adjacent blocks that would otherwise need mortar
 - Can be used with pulleys/platforms to move blocks
+- Bounce entities when placed by a block dispenser
 
 Glue Blocks:
 - Crafted from 4 glue as a packing recipe
 - Uncrafted with a stoked cauldron
+- Mined with a shovel
 - Interact with pistons similarly to honey blocks
 - Have a slightly smaller hitbox than most blocks
 - Don't stick to slime blocks
@@ -55,10 +58,6 @@ Buddy Blocks:
 Cistern:
 - Has a hollow hitbox
 
-Pistons:
-- Completely rewrote the implementation of block/entity pushing
-- Attempted to make moving blocks match their normal collision
-
 Soap Blocks:
 - Given the properties of glazed terracotta
 
@@ -69,6 +68,11 @@ Metal Spikes:
 Platforms:
 - Connect to other platforms when moved by pistons
 - Fixed broken code that prevented lifting redstone/rails
+
+Pistons:
+- Completely rewrote the implementation of block/entity pushing
+- Attempted to make moving blocks match their normal collision
+- Suffocate entities that're clipped inside
 
 Note Blocks:
 - Interact with oberservers like in modern versions
@@ -85,6 +89,7 @@ Blocks Requiring Support:
 
 Chests:
 - Can't form triple chests when quickly pushed by a piston
+- Double chests stick together when pushed (admittedly to fix a rendering bug)
 
 Redstone dust:
 - Renders properly on top of transparent blocks
@@ -124,6 +129,7 @@ Planned Features
 ///
 Known Issues
 ///
+- Block dispensers placing slime blocks doesn't bounce players
 - Slime/glue have kinda broken rendering just because 1.5.2
 - Slime blocks don't bounce entities that fall on them despite having code for it
 - Players touching the south/bottom of a glue block have glitchy interactions with the "can't see when inside a solid block" mechanic

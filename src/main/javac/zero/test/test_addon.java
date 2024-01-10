@@ -12,6 +12,7 @@ import btw.inventory.util.InventoryUtils;
 import zero.test.block.*;
 import zero.test.command.*;
 import zero.test.block.ZeroTestBlocks;
+import zero.test.item.SlimeBlockItem;
 
 #include "ids.h"
 #include "feature_flags.h"
@@ -20,7 +21,7 @@ public class ZeroTestAddon extends BTWAddon {
     private static ZeroTestAddon instance;
 
     private ZeroTestAddon() {
-        super("Zero Test Addon", "0.0.8", "ZeroTest");
+        super("Zero Test Addon", "0.0.9", "ZeroTest");
     }
 
     @Override
@@ -39,7 +40,7 @@ public class ZeroTestAddon extends BTWAddon {
 #endif
 #if ENABLE_MOVING_BLOCK_CHAINING
         ZeroTestBlocks.slime_block = new SlimeBlock(SLIME_BLOCK_ID);
-        Item.itemsList[SLIME_BLOCK_ID] = new ItemBlock(SLIME_BLOCK_ID-256);
+        Item.itemsList[SLIME_BLOCK_ID] = new SlimeBlockItem(SLIME_BLOCK_ID-256);
         ZeroTestBlocks.glue_block = new GlueBlock(GLUE_BLOCK_ID);
         Item.itemsList[GLUE_BLOCK_ID] = new ItemBlock(GLUE_BLOCK_ID-256);
 #endif

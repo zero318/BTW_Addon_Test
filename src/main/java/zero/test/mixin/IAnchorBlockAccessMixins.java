@@ -16,6 +16,4 @@ import zero.test.IBlockMixins;
 //#define getInputSignal(...) func_94482_f(__VA_ARGS__)
 @Mixin(AnchorBlock.class)
 public interface IAnchorBlockAccessMixins {
-    @Invoker("convertAnchorToEntity")
-    public abstract void callConvertAnchorToEntity(World world, int i, int j, int k, PulleyTileEntity attachedTileEntityPulley, int iMovementDirection);
 }

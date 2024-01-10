@@ -29,31 +29,54 @@ import java.util.List;
 // Block piston reactions
 //#define getInputSignal(...) func_94482_f(__VA_ARGS__)
 
+// Enabling the cache creates rendering
+// bugs when pushing double chests.
 @Mixin(TileEntityPiston.class)
 public class BlockEntityPistonMixins extends TileEntity implements IBlockEntityPistonMixins {
     public long lastTicked;
+    public boolean hasSmallCenterHardPointToFacing(int x, int y, int z, int direction, boolean ignoreTransparency) {
+        TileEntityPiston self = (TileEntityPiston)(Object)this;
+        if (
+            // Treat retracting bases as a stationary block
+            this.isRetractingBase() ||
+            // Treat blocks that're about to stop moving as stationary
+            ((IBlockEntityPistonAccessMixins)self).getProgress() >= 1.0F
+        ) {
+            Block storedBlock = Block.blocksList[self.getStoredBlockID()];
+            if (!((storedBlock)==null)) {
+                return storedBlock.hasSmallCenterHardPointToFacing(self.worldObj, x, y, z, direction, ignoreTransparency);
+            }
+        }
+        return false;
+    }
+    public boolean hasCenterHardPointToFacing(int x, int y, int z, int direction, boolean ignoreTransparency) {
+        TileEntityPiston self = (TileEntityPiston)(Object)this;
+        if (
+            // Treat retracting bases as a stationary block
+            this.isRetractingBase() ||
+            // Treat blocks that're about to stop moving as stationary
+            ((IBlockEntityPistonAccessMixins)self).getProgress() >= 1.0F
+        ) {
+            Block storedBlock = Block.blocksList[self.getStoredBlockID()];
+            if (!((storedBlock)==null)) {
+                return storedBlock.hasCenterHardPointToFacing(self.worldObj, x, y, z, direction, ignoreTransparency);
+            }
+        }
+        return false;
+    }
     public boolean hasLargeCenterHardPointToFacing(int x, int y, int z, int direction, boolean ignoreTransparency) {
         TileEntityPiston self = (TileEntityPiston)(Object)this;
-        if (((IBlockEntityPistonAccessMixins)self).getProgress() >= 1.0F) {
-            int storedBlockId = self.getStoredBlockID();
-            Block storedBlock = Block.blocksList[storedBlockId];
+        if (
+            // Treat retracting bases as a stationary block
+            this.isRetractingBase() ||
+            // Treat blocks that're about to stop moving as stationary
+            ((IBlockEntityPistonAccessMixins)self).getProgress() >= 1.0F
+        ) {
+            Block storedBlock = Block.blocksList[self.getStoredBlockID()];
             if (!((storedBlock)==null)) {
-                int storedMeta = self.getBlockMetadata();
-                int prevMeta = self.worldObj.getBlockMetadata(x, y, z);
-                // Since the block is likely to try getting its own metadata,
-                // silently swap out the metadata value during the face test
-                self.worldObj.setBlockMetadataWithNotify(x, y, z, storedMeta, 0x04 | 0x10 | 0x80);
-                boolean ret = storedBlock.hasLargeCenterHardPointToFacing(self.worldObj, x, y, z, direction, ignoreTransparency);
-                self.worldObj.setBlockMetadataWithNotify(x, y, z, prevMeta, 0x04 | 0x10 | 0x80);
-                //if (!ret) {
-                    //AddonHandler.logMessage("SupportPoint FAIL BLOCK FALSE "+storedBlockId+"("+storedMeta+")");
-                //}
-                return ret;
+                return storedBlock.hasLargeCenterHardPointToFacing(self.worldObj, x, y, z, direction, ignoreTransparency);
             }
-            //AddonHandler.logMessage("SupportPoint FAIL AIR");
-            //return false;
         }
-        //AddonHandler.logMessage("SupportPoint FAIL PROGRESS "+((IBlockEntityPistonAccessMixins)self).getProgress());
         return false;
     }
     @Overwrite
@@ -72,18 +95,18 @@ public class BlockEntityPistonMixins extends TileEntity implements IBlockEntityP
         // placed correctly
         boolean scanningTileEntitiesTemp = ((IWorldAccessMixins)self.worldObj).getScanningTileEntities();
         ((IWorldAccessMixins)self.worldObj).setScanningTileEntities(true);
-        //self.worldObj.setBlock(self.xCoord, self.yCoord, self.zCoord, storedBlockId, storedMeta, UPDATE_NEIGHBORS | UPDATE_CLIENTS);
         if (newMeta >= 0) {
             self.worldObj.setBlock(self.xCoord, self.yCoord, self.zCoord, storedBlockId, newMeta, 0x01 | 0x02 | 0x40);
         } else {
+            // The block is going to be destroyed, 
+            // so no need to render it on the client.
             self.worldObj.setBlock(self.xCoord, self.yCoord, self.zCoord, storedBlockId, storedMeta, 0x04 | 0x10 | 0x40 | 0x80);
         }
-        //if (!self.worldObj.isRemote) AddonHandler.logMessage("PLACE BLOCK "+storedBlockId+"."+newMeta);
         if (self.storedTileEntityData != null) {
             // setBlockTileEntity updates the entity
             // coordinates itself when scanningTileEntities
             // is true
-            TileEntity tile_entity = self.cachedTileEntity != null ? self.cachedTileEntity : TileEntity.createAndLoadEntity(self.storedTileEntityData);
+            TileEntity tile_entity = TileEntity.createAndLoadEntity(self.storedTileEntityData);
             worldObj.setBlockTileEntity(self.xCoord, self.yCoord, self.zCoord, tile_entity);
             self.cachedTileEntity = null;
         }
@@ -94,9 +117,6 @@ public class BlockEntityPistonMixins extends TileEntity implements IBlockEntityP
         }
         // Restore original value of scanningTileEntities
         ((IWorldAccessMixins)self.worldObj).setScanningTileEntities(scanningTileEntitiesTemp);
-        //if (storedBlockId != this.worldObj.getBlockId(self.xCoord, self.yCoord, self.zCoord)) {
-            //AddonHandler.logMessage("PLACE BLOCK BROKE DURING UPDATE "+storedBlockId+"."+storedMeta);
-        //}
     }
     @Overwrite
     public void clearPistonTileEntity() {
@@ -118,55 +138,113 @@ public class BlockEntityPistonMixins extends TileEntity implements IBlockEntityP
             }
         }
     }
-    /*
-    @Inject(
-        method = "updateEntity()V",
-        at = @At("HEAD")
-    )
-    public void track_update_tick(CallbackInfo info) {
-        this.lastTicked = this.worldObj.getTotalWorldTime();
-    }
-    */
     public long getLastTicked() {
         return this.lastTicked;
     }
     public void setLastTicked(long time) {
         this.lastTicked = time;
     }
-    public boolean noclip;
-    //protected static final ThreadLocal<Integer> NOCLIP_DIRECTION = ThreadLocal.withInitial(() -> -1);
+    public boolean isRetractingBase() {
+        TileEntityPiston self = (TileEntityPiston)(Object)this;
+        return !self.isExtending() && ((IBlockEntityPistonAccessMixins)self).getShouldHeadBeRendered();
+    }
+    public AxisAlignedBB getBlockBoundsFromPoolBasedOnState() {
+        TileEntityPiston self = (TileEntityPiston)(Object)this;
+        AxisAlignedBB boundingBox = Block.blocksList[self.getStoredBlockID()].getAsPistonMovingBoundingBox(self.worldObj, self.xCoord, self.yCoord, self.zCoord);
+        if (!this.isRetractingBase()) {
+            double progress = (double)((IBlockEntityPistonAccessMixins)self).getProgress();
+            double directionOffset = self.isExtending() ? progress - 1.0D : 1.0D - progress;
+            int direction = self.getPistonOrientation();
+            double dX = (double)Facing.offsetsXForSide[direction] * directionOffset;
+            double dY = (double)Facing.offsetsYForSide[direction] * directionOffset;
+            double dZ = (double)Facing.offsetsZForSide[direction] * directionOffset;
+            boundingBox.minX += dX;
+            boundingBox.minY += dY;
+            boundingBox.minZ += dZ;
+            boundingBox.maxX += dX;
+            boundingBox.maxY += dY;
+            boundingBox.maxZ += dZ;
+        }
+        return boundingBox;
+    }
+    // This handles collisions that aren't directly triggered by
+    // the piston moving, like players standing on top of a
+    // horizontally moving block.
     public void getCollisionList(AxisAlignedBB maskBox, List list) {
-        if (!this.noclip) {
-            TileEntityPiston self = (TileEntityPiston)(Object)this;
+        TileEntityPiston self = (TileEntityPiston)(Object)this;
+        int direction = self.getPistonOrientation();
+        int storedBlockId = self.getStoredBlockID();
+        int x = self.xCoord;
+        int y = self.yCoord;
+        int z = self.zCoord;
+        if (this.isRetractingBase()) {
+            // Retracting piston bases are *technically* moving an
+            // un-extended piston base in order to place the correct
+            // block, so this has to exist in order to add the collision
+            // for the base.
+            // Future versions with block states should just query the
+            // collision of the extended state directly rather than
+            // making hardcoding this.
+            AxisAlignedBB tempBox = AxisAlignedBB.getAABBPool().getAABB(
+                x, y, z,
+                x + 1.0D, y + 1.0D, z + 1.0D
+            );
+            switch (direction) {
+                case 0:
+                    tempBox.minY += 0.25D;
+                    --y;
+                    break;
+                case 1:
+                    tempBox.maxY -= 0.25D;
+                    ++y;
+                    break;
+                case 2:
+                    tempBox.minZ += 0.25D;
+                    --z;
+                    break;
+                case 3:
+                    tempBox.maxZ -= 0.25D;
+                    ++z;
+                    break;
+                case 4:
+                    tempBox.minX += 0.25D;
+                    --x;
+                    break;
+                default:
+                    tempBox.maxX -= 0.25D;
+                    ++x;
+                    break;
+            }
+            if (tempBox.intersectsWith(maskBox)) {
+                list.add(tempBox);
+            }
+            storedBlockId = Block.pistonExtension.blockID;
+        }
+        Block block = Block.blocksList[storedBlockId];
+        if (!((block)==null)) {
+            // Hopefully no blocks are big enough to go outside this?
+            AxisAlignedBB fakeMask = AxisAlignedBB.getAABBPool().getAABB(x - 1.0D, y - 1.0D, z - 1.0D, x + 2.0D, y + 2.0D, z + 2.0D);
             List<AxisAlignedBB> collisionBoxes = new ArrayList();
-            int storedBlockId = self.getStoredBlockID();
-            Block block = Block.blocksList[storedBlockId];
-            if (!((block)==null)) {
-                // Hopefully no blocks are big enough to go outside this?
-                // TODO: Check whether these are corner aligned...
-                AxisAlignedBB fakeMask = AxisAlignedBB.getAABBPool().getAABB(self.xCoord - 1.0D, self.yCoord - 1.0D, self.zCoord - 1.0D, self.xCoord + 2.0D, self.yCoord + 2.0D, self.zCoord + 2.0D);
-                block.addCollisionBoxesToList(self.worldObj, self.xCoord, self.yCoord, self.zCoord, fakeMask, collisionBoxes, (Entity)null);
-                if (!collisionBoxes.isEmpty()) {
-                    boolean isExtending = self.isExtending();
-                    int direction = self.getPistonOrientation();
-                    if (!isExtending) {
-                        direction = ((direction)^1);
-                    }
-                    double dX = (double)Facing.offsetsXForSide[direction];
-                    double dY = (double)Facing.offsetsYForSide[direction];
-                    double dZ = (double)Facing.offsetsZForSide[direction];
-                    double progress = (double)((IBlockEntityPistonAccessMixins)self).getProgress();
-                    double directionOffset = isExtending ? progress - 1.0D : 1.0D - progress;
-                    for (AxisAlignedBB collisionBox : collisionBoxes) {
-                        collisionBox.minX += directionOffset * dX;
-                        collisionBox.minY += directionOffset * dY;
-                        collisionBox.minZ += directionOffset * dZ;
-                        collisionBox.maxX += directionOffset * dX;
-                        collisionBox.maxY += directionOffset * dY;
-                        collisionBox.maxZ += directionOffset * dZ;
-                        if (collisionBox.intersectsWith(maskBox)) {
-                            list.add(collisionBox);
-                        }
+            block.addCollisionBoxesToList(self.worldObj, x, y, z, fakeMask, collisionBoxes, (Entity)null);
+            if (!collisionBoxes.isEmpty()) {
+                boolean isExtending = self.isExtending();
+                if (!isExtending) {
+                    direction = ((direction)^1);
+                }
+                double progress = (double)((IBlockEntityPistonAccessMixins)self).getProgress();
+                double directionOffset = isExtending ? progress - 1.0D : 1.0D - progress;
+                double dX = (double)Facing.offsetsXForSide[direction] * directionOffset;
+                double dY = (double)Facing.offsetsYForSide[direction] * directionOffset;
+                double dZ = (double)Facing.offsetsZForSide[direction] * directionOffset;
+                for (AxisAlignedBB collisionBox : collisionBoxes) {
+                    collisionBox.minX += dX;
+                    collisionBox.minY += dY;
+                    collisionBox.minZ += dZ;
+                    collisionBox.maxX += dX;
+                    collisionBox.maxY += dY;
+                    collisionBox.maxZ += dZ;
+                    if (collisionBox.intersectsWith(maskBox)) {
+                        list.add(collisionBox);
                     }
                 }
             }
@@ -176,35 +254,57 @@ public class BlockEntityPistonMixins extends TileEntity implements IBlockEntityP
     @Overwrite
     public void updatePushedObjects(float progress, float lastProgress) {
         TileEntityPiston self = (TileEntityPiston)(Object)this;
-        /// NEW CODE START
         int storedBlockId = self.getStoredBlockID();
         Block block = Block.blocksList[storedBlockId];
         if (!((block)==null)) {
             List<AxisAlignedBB> collisionBoxes = new ArrayList();
+            int direction = self.getPistonOrientation();
+            double dX = (double)Facing.offsetsXForSide[direction];
+            double dY = (double)Facing.offsetsYForSide[direction];
+            double dZ = (double)Facing.offsetsZForSide[direction];
             // Hopefully no blocks are big enough to go outside this?
-            // TODO: Check whether these are corner aligned...
-            AxisAlignedBB fakeMask = AxisAlignedBB.getAABBPool().getAABB(self.xCoord - 1.0D, self.yCoord - 1.0D, self.zCoord - 1.0D, self.xCoord + 2.0D, self.yCoord + 2.0D, self.zCoord + 2.0D);
-            block.addCollisionBoxesToList(self.worldObj, self.xCoord, self.yCoord, self.zCoord, fakeMask, collisionBoxes, (Entity)null);
-            if (!collisionBoxes.isEmpty()) {
-                //if (!self.worldObj.isRemote) AddonHandler.logMessage("Collision boxes added to list");
-                boolean isExtending = self.isExtending();
-                int direction = self.getPistonOrientation();
-                if (!isExtending) {
-                    direction = ((direction)^1);
+            AxisAlignedBB tempBox = AxisAlignedBB.getAABBPool().getAABB(self.xCoord - 1.0D, self.yCoord - 1.0D, self.zCoord - 1.0D, self.xCoord + 2.0D, self.yCoord + 2.0D, self.zCoord + 2.0D);
+            // When extending the piston base isn't changed to
+            // a moving block, so nothing weird needs to be done.
+            if (!this.isRetractingBase()) {
+                // Get the list of collision boxes for the block being moved
+                block.addCollisionBoxesToList(self.worldObj, self.xCoord, self.yCoord, self.zCoord, tempBox, collisionBoxes, (Entity)null);
+            }
+            else {
+                // This is the base, so use the collision for the piston
+                // head instead of the base block.
+                Block.pistonExtension.addCollisionBoxesToList(self.worldObj, self.xCoord, self.yCoord, self.zCoord, tempBox, collisionBoxes, (Entity)null);
+                // IDFK why this needs 1.5 instead of 1.0
+                for (AxisAlignedBB collisionBox : collisionBoxes) {
+                    collisionBox.minX += dX * 1.5D;
+                    collisionBox.minY += dY * 1.5D;
+                    collisionBox.minZ += dZ * 1.5D;
+                    collisionBox.maxX += dX * 1.5D;
+                    collisionBox.maxY += dY * 1.5D;
+                    collisionBox.maxZ += dZ * 1.5D;
                 }
-                //if (!self.worldObj.isRemote) AddonHandler.logMessage("Stored direction: "+direction);
-                double directionOffset = isExtending ? lastProgress - 1.0F : 1.0F - lastProgress;
-                double dX = (double)Facing.offsetsXForSide[direction];
-                double dY = (double)Facing.offsetsYForSide[direction];
-                double dZ = (double)Facing.offsetsZForSide[direction];
+            }
+            if (!collisionBoxes.isEmpty()) {
+                double directionOffset = lastProgress - 1.0F;
+                if (!self.isExtending()) {
+                    directionOffset = 1.0F - lastProgress;
+                    direction = ((direction)^1);
+                    dX = -dX;
+                    dY = -dY;
+                    dZ = -dZ;
+                }
                 AxisAlignedBB boundingBox = null;
                 for (AxisAlignedBB collisionBox : collisionBoxes) {
+                    // Offset the collision boxes in the correct
+                    // direction for the piston movement.
                     collisionBox.minX += directionOffset * dX;
                     collisionBox.minY += directionOffset * dY;
                     collisionBox.minZ += directionOffset * dZ;
                     collisionBox.maxX += directionOffset * dX;
                     collisionBox.maxY += directionOffset * dY;
                     collisionBox.maxZ += directionOffset * dZ;
+                    // boundingBox won't exist on the first iteration,
+                    // so just duplicate the collision rather than expanding
                     if (boundingBox != null) {
                         boundingBox.expandToInclude(collisionBox);
                     } else {
@@ -212,7 +312,10 @@ public class BlockEntityPistonMixins extends TileEntity implements IBlockEntityP
                     }
                 }
                 double idkOffset = progress - lastProgress;
-                AxisAlignedBB tempBox = boundingBox.copy();
+                // Stretch the entity check box a bit
+                // to properly detect things in front
+                // of the moving block.
+                tempBox.setBB(boundingBox);
                 switch (direction) {
                     case 0:
                         tempBox.maxY = tempBox.minY;
@@ -243,9 +346,6 @@ public class BlockEntityPistonMixins extends TileEntity implements IBlockEntityP
                 int storedMeta = self.getBlockMetadata();
                 List<Entity> entityList = self.worldObj.getEntitiesWithinAABBExcludingEntity((Entity)null, tempBox);
                 if (!entityList.isEmpty()) {
-                    //if (!self.worldObj.isRemote) AddonHandler.logMessage("Entity list created");
-                    //List pushedObjects = ((IBlockEntityPistonAccessMixins)self).getPushedObjects();
-                    //pushedObjects.addAll(entityList);
                     boolean isBouncy = ((IBlockMixins)(Object)block).isBouncyWhenMoved(direction, storedMeta);
                     for (Entity entity : entityList) {
                         //if (entity instanceof EntityPlayerMP) {
@@ -264,10 +364,6 @@ public class BlockEntityPistonMixins extends TileEntity implements IBlockEntityP
                             continue;
                         }
                         if (isBouncy && (((entityPushFlags)&2)!=0)) {
-                            //entity.motionX += dX;
-                            //entity.motionY += dY;
-                            //entity.motionZ += dZ;
-                            // RIP infinite bounce cannons?
                             double entityBounceMultiplier = ((IEntityMixins)entity).getPistonBounceMultiplier(direction);
                             switch (((direction)&~1)) {
                                 case 0x4: {
@@ -329,7 +425,8 @@ public class BlockEntityPistonMixins extends TileEntity implements IBlockEntityP
                                     break;
                             }
                             if (tempBox.intersectsWith(entityBox)) {
-                                //if (!self.worldObj.isRemote) AddonHandler.logMessage("Entity intersected");
+                                // Calculate how far the entity is intersecting
+                                // the movement box.
                                 double newDistance;
                                 switch (direction) {
                                     case 0:
@@ -353,60 +450,34 @@ public class BlockEntityPistonMixins extends TileEntity implements IBlockEntityP
                                 }
                                 pushDistance = Math.max(pushDistance, newDistance);
                                 if (pushDistance >= idkOffset) {
+                                    // This breaks from the for loop
+                                    // checking collision boxes
                                     break;
                                 }
                             }
                         }
                         if (pushDistance <= 0.0D) {
+                            // Continue to next entity
                             continue;
                         }
                         pushDistance = Math.min(pushDistance, idkOffset) + 0.01D;
                          ;
-                        //NOCLIP_DIRECTION.set(direction);
                         ((IEntityMixins)entity).moveEntityByPiston(
                             pushDistance * dX,
                             pushDistance * dY,
                             pushDistance * dZ
                         );
-                        //NOCLIP_DIRECTION.set(-1);
                          ;
-                        /*
-                        if (!isExtending && isSourcePiston) {
-                            
+                        if (this.isRetractingBase()) {
+                            //AddonHandler.logMessage("Entity in baseA");
+                            // tempBox is just getting reused from the AABB pool here
+                            this.ejectEntityFromPistonBase(entity, entityBox, direction, idkOffset, tempBox);
                         }
-                        */
                     }
-                    //pushedObjects.clear();
                 }
                 if (((IBlockMixins)(Object)block).isStickyForEntitiesWhenMoved(direction, storedMeta)) {
-                    /*
-                    switch (storedDirection) {
-                        case DIRECTION_DOWN: case DIRECTION_UP:
-                            boundingBox.minX = Math.floor(boundingBox.minX);
-                            //boundingBox.minY += progressOffset;
-                            boundingBox.minZ = Math.floor(boundingBox.minZ);
-                            boundingBox.maxX = Math.ceil(boundingBox.maxX);
-                            //boundingBox.maxY += progressOffset;
-                            boundingBox.maxZ = Math.ceil(boundingBox.maxZ);
-                            break;
-                        case DIRECTION_NORTH: case DIRECTION_SOUTH:
-                            boundingBox.minX = Math.floor(boundingBox.minX);
-                            boundingBox.minY = Math.floor(boundingBox.minY);
-                            //boundingBox.minZ += progressOffset;
-                            boundingBox.maxX = Math.ceil(boundingBox.maxX);
-                            boundingBox.maxY = Math.ceil(boundingBox.maxY);
-                            //boundingBox.maxZ += progressOffset;
-                            break;
-                        default:
-                            //boundingBox.minX += progressOffset;
-                            boundingBox.minY = Math.floor(boundingBox.minY);
-                            boundingBox.minZ = Math.floor(boundingBox.minZ);
-                            //boundingBox.maxX += progressOffset;
-                            boundingBox.maxY = Math.ceil(boundingBox.maxY);
-                            boundingBox.maxZ = Math.ceil(boundingBox.maxZ);
-                            break;
-                    }
-                    */
+                    // Extend the bounding box in every direction
+                    // except the direction opposite the movement
                     if (direction != 4) {
                         boundingBox.minX -= GLUE_BLOCK_FUDGE_FACTOR;
                     }
@@ -426,130 +497,70 @@ public class BlockEntityPistonMixins extends TileEntity implements IBlockEntityP
                         boundingBox.maxZ += GLUE_BLOCK_FUDGE_FACTOR;
                     }
                     entityList = self.worldObj.getEntitiesWithinAABBExcludingEntity((Entity)null, boundingBox);
-                    if (!entityList.isEmpty()) {
-                        //NOCLIP_DIRECTION.set(direction);
+                    //if (!entityList.isEmpty()) {
+                        dX *= idkOffset;
+                        dY *= idkOffset;
+                        dZ *= idkOffset;
                         for (Entity entity : entityList) {
                             if ((((((IEntityMixins)entity).getPistonMobilityFlags(direction))&4)!=0)) {
                                  ;
-                                ((IEntityMixins)entity).moveEntityByPiston(
-                                    idkOffset * dX,
-                                    idkOffset * dY,
-                                    idkOffset * dZ
-                                );
+                                ((IEntityMixins)entity).moveEntityByPiston(dX, dY, dZ);
                                  ;
                             }
                         }
-                        //NOCLIP_DIRECTION.set(-1);
-                    }
+                    //}
                 }
             }
         }
-        /// NEW CODE END
-        /*
-        boolean extending = self.isExtending();
-        
-        double d = par2;
-        
-        int storedDirection = self.getPistonOrientation();
-        int storedBlockId = self.getStoredBlockID();
-        boolean isBouncy = false;
-        boolean isSticky = false;
-        Block block = Block.blocksList[storedBlockId];
-        if (!BLOCK_IS_AIR(block)) {
-            int storedMeta = self.getBlockMetadata();
-            if (extending) {
-                isBouncy = ((IBlockMixins)(Object)block).isBouncyWhenMoved(storedDirection, storedMeta);
-            }
-            isSticky = ((IBlockMixins)(Object)block).isStickyForEntitiesWhenMoved(storedDirection, storedMeta);
-        }
-        
-        AxisAlignedBB boundingBox = Block.pistonMoving.getAxisAlignedBB(self.worldObj, self.xCoord, self.yCoord, self.zCoord, storedBlockId, extending ? 1.0F - progress : progress - 1.0F, storedDirection);
-        if (boundingBox != null) {
-            List entityList = self.worldObj.getEntitiesWithinAABBExcludingEntity((Entity)null, boundingBox);
-            
-            if (!entityList.isEmpty()) {
-                List pushedObjects = ((IBlockEntityPistonAccessMixins)self).getPushedObjects();
-                
-                pushedObjects.addAll(entityList);
-                Iterator var5 = pushedObjects.iterator();
-                
-                while (var5.hasNext()) {
-                    Entity entity = (Entity)var5.next();
-                    entity.moveEntity(
-                        d * (double)Facing.offsetsXForSide[storedDirection],
-                        d * (double)Facing.offsetsYForSide[storedDirection],
-                        d * (double)Facing.offsetsZForSide[storedDirection]
-                    );
-                    if (isBouncy) {
-                        entity.motionX += (double)Facing.offsetsXForSide[storedDirection];
-                        entity.motionY += (double)Facing.offsetsYForSide[storedDirection];
-                        entity.motionZ += (double)Facing.offsetsZForSide[storedDirection];
-                    }
-                }
-                pushedObjects.clear();
-            }
-        }
-        float lastProgress;
-        if (isSticky && (lastProgress = ((IBlockEntityPistonAccessMixins)self).getLastProgress()) < 1.0F) {
-            //boundingBox = Block.pistonMoving.getAxisAlignedBB(self.worldObj, self.xCoord, self.yCoord, self.zCoord, storedBlockId, extending ? 1.0F - progress : progress - 1.0F, storedDirection);
-            
-            boundingBox = block.getAsPistonMovingBoundingBox(self.worldObj, self.xCoord - Facing.offsetsXForSide[storedDirection], self.yCoord - Facing.offsetsYForSide[storedDirection], self.zCoord - Facing.offsetsZForSide[storedDirection]);
-            
-            double progressOffset = (storedDirection & 1) == 0 ? -lastProgress : lastProgress;
-            switch (storedDirection) {
-                case DIRECTION_DOWN: case DIRECTION_UP:
-                    boundingBox.minX = Math.floor(boundingBox.minX);
-                    boundingBox.minY += progressOffset;
-                    boundingBox.minZ = Math.floor(boundingBox.minZ);
-                    boundingBox.maxX = Math.ceil(boundingBox.maxX);
-                    boundingBox.maxY += progressOffset;
-                    boundingBox.maxZ = Math.ceil(boundingBox.maxZ);
+    }
+    protected void ejectEntityFromPistonBase(Entity entity, AxisAlignedBB entityBox, int direction, double idkOffset, AxisAlignedBB box) {
+        TileEntityPiston self = (TileEntityPiston)(Object)this;
+        box.maxX = (box.minX = (double)self.xCoord) + 1.0D;
+        box.maxY = (box.minY = (double)self.yCoord) + 1.0D;
+        box.maxZ = (box.minZ = (double)self.zCoord) + 1.0D;
+        if (entityBox.intersectsWith(box)) {
+            double newDistanceA;
+            double newDistanceB;
+            direction = ((direction)^1);
+            switch (direction) {
+                case 0:
+                    newDistanceA = entityBox.maxY - box.minY;
+                    newDistanceB = Math.min(entityBox.maxY, box.maxY) - box.minY;
                     break;
-                case DIRECTION_NORTH: case DIRECTION_SOUTH:
-                    boundingBox.minX = Math.floor(boundingBox.minX);
-                    boundingBox.minY = Math.floor(boundingBox.minY);
-                    boundingBox.minZ += progressOffset;
-                    boundingBox.maxX = Math.ceil(boundingBox.maxX);
-                    boundingBox.maxY = Math.ceil(boundingBox.maxY);
-                    boundingBox.maxZ += progressOffset;
+                case 1:
+                    newDistanceA = box.maxY - entityBox.minY;
+                    newDistanceB = box.maxY - Math.max(entityBox.minY, box.minY);
+                    break;
+                case 2:
+                    newDistanceA = entityBox.maxZ - box.minZ;
+                    newDistanceB = Math.min(entityBox.maxZ, box.maxZ) - box.minZ;
+                    break;
+                case 3:
+                    newDistanceA = box.maxZ - entityBox.minZ;
+                    newDistanceB = box.maxZ - Math.max(entityBox.minZ, box.minZ);
+                    break;
+                case 4:
+                    newDistanceA = entityBox.maxX - box.minX;
+                    newDistanceB = Math.min(entityBox.maxX, box.maxX) - box.minX;
                     break;
                 default:
-                    boundingBox.minX += progressOffset;
-                    boundingBox.minY = Math.floor(boundingBox.minY);
-                    boundingBox.minZ = Math.floor(boundingBox.minZ);
-                    boundingBox.maxX += progressOffset;
-                    boundingBox.maxY = Math.ceil(boundingBox.maxY);
-                    boundingBox.maxZ = Math.ceil(boundingBox.maxZ);
+                    newDistanceA = box.maxX - entityBox.minX;
+                    newDistanceB = box.maxX - Math.max(entityBox.minX, box.minX);
                     break;
             }
-            List entityList = self.worldObj.getEntitiesWithinAABBExcludingEntity((Entity)null, boundingBox);
-            
-            
-            //if (!self.worldObj.isRemote) {
-                //AddonHandler.logMessage(""+self.worldObj.getTotalWorldTime()+" "+progress+" "+lastProgress+" "+d);
-                //AddonHandler.logMessage(" "+boundingBox.minX+" "+boundingBox.minY+" "+boundingBox.minZ);
-                //AddonHandler.logMessage(" "+boundingBox.maxX+" "+boundingBox.maxY+" "+boundingBox.maxZ);
-            //}
-            
-            
-            if (!entityList.isEmpty()) {
-                List pushedObjects = ((IBlockEntityPistonAccessMixins)self).getPushedObjects();
-                
-                pushedObjects.addAll(entityList);
-                Iterator var5 = pushedObjects.iterator();
-                
-                d = progress - lastProgress;
-                while (var5.hasNext()) {
-                    ((Entity)var5.next()).moveEntity(
-                        d * (double)Facing.offsetsXForSide[storedDirection],
-                        d * (double)Facing.offsetsYForSide[storedDirection],
-                        d * (double)Facing.offsetsZForSide[storedDirection]
-                    );
-                }
-                pushedObjects.clear();
+            newDistanceA += 0.01D;
+            newDistanceB += 0.01D;
+            //AddonHandler.logMessage("Entity in baseB "+newDistanceA+" "+newDistanceB+" "+idkOffset);
+            if (Math.abs(newDistanceA - newDistanceB) < 0.01D) {
+                double pushDistance = Math.min(newDistanceA, idkOffset) + 0.01D;
+                //AddonHandler.logMessage("Entity in baseC "+pushDistance);
+                entity.moveEntity(
+                    pushDistance * (double)Facing.offsetsXForSide[direction],
+                    pushDistance * (double)Facing.offsetsYForSide[direction],
+                    pushDistance * (double)Facing.offsetsZForSide[direction]
+                );
             }
         }
-        */
     }
     @Overwrite
     public void updateEntity() {
@@ -574,9 +585,7 @@ public class BlockEntityPistonMixins extends TileEntity implements IBlockEntityP
             return;
         }
         float next_progress = current_progress + 0.5F;
-        this.noclip = true;
         self_access.callUpdatePushedObjects(next_progress, current_progress);
-        this.noclip = false;
         if (next_progress >= 1.0F) {
             next_progress = 1.0F;
         }

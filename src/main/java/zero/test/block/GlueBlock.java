@@ -11,8 +11,9 @@ import zero.test.sound.ZeroTestSounds;
 public class GlueBlock extends Block {
     public GlueBlock(int block_id) {
         super(block_id, Material.grass);
-        this.setHardness(0.0f);
+        this.setHardness(0.0F);
         this.setUnlocalizedName("glue_block");
+        this.setShovelsEffectiveOn(true);
         this.setLightOpacity(1);
         this.stepSound = ZeroTestSounds.slime_step_sound;
         this.setCreativeTab(CreativeTabs.tabRedstone);
@@ -43,30 +44,30 @@ public class GlueBlock extends Block {
         return true;
     }
     public boolean isRedstoneConductor(IBlockAccess block_access, int X, int Y, int Z) {
-        return false;
+        return true;
     }
     public boolean permanentlySupportsMortarBlocks(World world, int X, int Y, int Z, int direction) {
         return true;
     }
     @Override
     public void onFallenUpon(World world, int X, int Y, int Z, Entity entity, float par6) {
-        entity.fallDistance = 0.0f;
+        entity.fallDistance = 0.0F;
     }
     public int getPlatformMobilityFlag(World world, int X, int Y, int Z) {
         return 1;
     }
     @Override
     public AxisAlignedBB getCollisionBoundingBoxFromPool(World world, int X, int Y, int Z) {
-        double dX = X;
-        double dY = Y;
-        double dZ = Z;
-        return AxisAlignedBB.getAABBPool().getAABB(dX + 0.0625, dY + 0.0625, dZ + 0.0625, dX + 0.9375, dY + 0.9375, dZ + 0.9375);
+        double dX = (double)X;
+        double dY = (double)Y;
+        double dZ = (double)Z;
+        return AxisAlignedBB.getAABBPool().getAABB(dX + 0.0625D, dY + 0.0625D, dZ + 0.0625D, dX + 0.9375D, dY + 0.9375D, dZ + 0.9375D);
     }
     @Override
     public void onEntityCollidedWithBlock(World world, int X, int Y, int Z, Entity entity) {
-        entity.motionX *= 0.4;
-        entity.motionY *= 0.05;
-        entity.motionZ *= 0.4;
+        entity.motionX *= 0.4D;
+        entity.motionY *= 0.05D;
+        entity.motionZ *= 0.4D;
     }
     @Override
     public MapColor getMapColor(int meta) {
@@ -81,9 +82,10 @@ public class GlueBlock extends Block {
     @Environment(EnvType.CLIENT)
     @Override
     public boolean shouldSideBeRendered(IBlockAccess block_access, int neighborX, int neighborY, int neighborZ, int neighbor_side) {
-        return block_access.getBlockId(neighborX, neighborY, neighborZ) != 1321
-                ? super.shouldSideBeRendered(block_access, neighborX, neighborY, neighborZ, neighbor_side)
-                : false;
+        if (block_access.getBlockId(neighborX, neighborY, neighborZ) != this.blockID) {
+            return super.shouldSideBeRendered(block_access, neighborX, neighborY, neighborZ, neighbor_side);
+        }
+        return false;
     }
     @Environment(EnvType.CLIENT)
     @Override
@@ -94,6 +96,6 @@ public class GlueBlock extends Block {
     @Environment(EnvType.CLIENT)
     @Override
     public float getAmbientOcclusionLightValue(IBlockAccess block_access, int X, int Y, int Z) {
-        return 1.0f;
+        return 1.0F;
     }
 }

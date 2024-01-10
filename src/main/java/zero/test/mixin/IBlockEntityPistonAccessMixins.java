@@ -26,6 +26,8 @@ public interface IBlockEntityPistonAccessMixins {
     public float getLastProgress();
     @Accessor
     public void setLastProgress(float value);
+    @Accessor
+    public boolean getShouldHeadBeRendered();
     @Invoker("destroyAndDropIfShoveled")
     public abstract boolean callDestroyAndDropIfShoveled();
     @Invoker("preBlockPlaced")

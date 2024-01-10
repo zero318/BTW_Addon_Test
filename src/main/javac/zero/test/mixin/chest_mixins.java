@@ -76,4 +76,11 @@ public class ChestMixins {
         return ((BlockChest)(Object)this).canPlaceBlockAt(world, X, Y, Z) ? meta : -1;
     }
 #endif
+
+    public boolean isStickyForBlocks(World world, int X, int Y, int Z, int direction) {
+        // Only attach to other chests.
+        // Somehow the rendering when splitting double chests
+        // got broken and I have no idea how to fix it, so this
+        return direction >= 2 && ((BlockChest)(Object)this).blockID == world.getBlockId(X + Facing.offsetsXForSide[direction], Y + Facing.offsetsYForSide[direction], Z + Facing.offsetsZForSide[direction]);
+    }
 }
