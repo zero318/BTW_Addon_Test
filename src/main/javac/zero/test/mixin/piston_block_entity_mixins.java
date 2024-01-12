@@ -7,6 +7,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 
@@ -724,7 +725,7 @@ public class BlockEntityPistonMixins extends TileEntity implements IBlockEntityP
             if (Math.abs(newDistanceA - newDistanceB) < 0.01D) {
                 double pushDistance = Math.min(newDistanceA, idkOffset) + 0.01D;
                 //AddonHandler.logMessage("Entity in baseC "+pushDistance);
-                entity.moveEntity(
+                ((IEntityMixins)entity).moveEntityByPiston(
                     pushDistance * (double)Facing.offsetsXForSide[direction],
                     pushDistance * (double)Facing.offsetsYForSide[direction],
                     pushDistance * (double)Facing.offsetsZForSide[direction]
@@ -764,5 +765,24 @@ public class BlockEntityPistonMixins extends TileEntity implements IBlockEntityP
             nextProgress = 1.0F;
         }
         self_access.setProgress(nextProgress);
+    }
+    
+    
+    @Inject(
+        method = "readFromNBT(Lnet/minecraft/src/NBTTagCompound;)V",
+        at = @At("TAIL")
+    )
+    public void readFromNBT_inject(NBTTagCompound compound, CallbackInfo info) {
+        if (compound.hasKey("source")) {
+            ((IBlockEntityPistonAccessMixins)this).setShouldHeadBeRendered(compound.getBoolean("source"));
+        }
+    }
+    
+    @Inject(
+        method = "writeToNBT(Lnet/minecraft/src/NBTTagCompound;)V",
+        at = @At("TAIL")
+    )
+    public void writeToNBT_inject(NBTTagCompound compound, CallbackInfo info) {
+        compound.setBoolean("source", ((IBlockEntityPistonAccessMixins)this).getShouldHeadBeRendered());
     }
 }

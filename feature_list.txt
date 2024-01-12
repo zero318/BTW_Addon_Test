@@ -73,7 +73,7 @@ Pistons:
 - Completely rewrote the implementation of block/entity pushing
 - Attempted to make moving blocks match their normal collision
 - Suffocate entities that're clipped inside
-- No longer let entities clip through moving blocks
+- Fixed MC-1230 (No longer let entities clip through moving blocks)
 
 Note Blocks:
 - Interact with oberservers like in modern versions

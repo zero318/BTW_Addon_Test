@@ -495,7 +495,7 @@ public class WorldMixins implements IWorldMixins {
     }
 */
 
-    // These fix entities falling through moving blocks
+    // These fix entities falling through moving blocks (MC-1230)
     @Redirect(
         method = { "getCollidingBoundingBoxes", "getCollidingBlockBounds" },
         at = @At(

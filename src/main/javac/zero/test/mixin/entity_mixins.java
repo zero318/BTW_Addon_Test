@@ -21,6 +21,7 @@ import zero.test.IEntityMixins;
 @Mixin(Entity.class)
 public class EntityMixins implements IEntityMixins {
 #if ENABLE_NOCLIP_COMMAND
+/*
     @Inject(
         method = "pushOutOfBlocks(DDD)Z",
         at = @At("HEAD"),
@@ -32,17 +33,13 @@ public class EntityMixins implements IEntityMixins {
             callbackInfo.setReturnValue(false);
         }
     }
+*/
 #endif
 
     public long timeOfLastPistonPush;
     public double pistonX;
     public double pistonY;
     public double pistonZ;
-    public int pistonDirection = -1;
-    
-    public int getPistonDirection() {
-        return pistonDirection;
-    }
     
     public void moveEntityByPiston(double x, double y, double z) {
         Entity self = (Entity)(Object)this;
@@ -54,31 +51,26 @@ public class EntityMixins implements IEntityMixins {
             }
             double temp;
             if (x != 0.0D) {
-                this.pistonDirection = x < 0.0D ? DIRECTION_WEST : DIRECTION_EAST;
                 x = (temp = MATH_CLAMP(x + this.pistonX, -0.51D, 0.51D)) - this.pistonX;
                 this.pistonX = temp;
                 temp = x;
                 y = z = 0.0D;
             }
             else if (y != 0.0D) {
-                this.pistonDirection = y < 0.0D ? DIRECTION_DOWN : DIRECTION_UP;
                 y = (temp = MATH_CLAMP(y + this.pistonY, -0.51D, 0.51D)) - this.pistonY;
                 this.pistonY = temp;
                 temp = y;
                 z = 0.0D;
             }
             else {
-                this.pistonDirection = z < 0.0D ? DIRECTION_NORTH : DIRECTION_SOUTH;
                 z = (temp = MATH_CLAMP(z + this.pistonZ, -0.51D, 0.51D)) - this.pistonZ;
                 this.pistonZ = temp;
                 temp = z;
             }
             if (Math.abs(temp) <= 1.0E-5D) {
-                this.pistonDirection = -1;
                 return;
             }
         }
         self.moveEntity(x, y, z);
-        this.pistonDirection = -1;
     }
 }

@@ -10,8 +10,6 @@ import net.minecraft.src.*;
 public interface IEntityMixins {
     public void moveEntityByPiston(double x, double y, double z);
     
-    public int getPistonDirection();
-    
     default public int getPistonMobilityFlags(int direction) {
         return PISTON_CAN_MOVE | PISTON_CAN_BOUNCE | PISTON_CAN_STICK;
     }
