@@ -17,28 +17,31 @@ import zero.test.IWorldMixins;
 // Block piston reactions
 //updateNeighbourShapes
 @Mixin(NoteBlock.class)
-public class NoteBlockMixins {
-    //@Overwrite
-    public void onNeighborBlockChange(World world, int X, int Y, int Z, int neighbor_id) {
-        boolean is_receiving_power = world.isBlockIndirectlyGettingPowered(X, Y, Z);
-        int meta = world.getBlockMetadata(X, Y, Z);
-        if (is_receiving_power != ((((meta)&1)!=0))) {
-            TileEntityNote tile_entity = (TileEntityNote)world.getBlockTileEntity(X, Y, Z);
+public class NoteBlockMixins extends Block {
+    public NoteBlockMixins(int par1, Material par2) {
+        super(par1, par2);
+    }
+    @Override
+    public void onNeighborBlockChange(World world, int x, int y, int z, int neighborId) {
+        boolean isReceivingPower = world.isBlockIndirectlyGettingPowered(x, y, z);
+        int meta = world.getBlockMetadata(x, y, z);
+        if (isReceivingPower != ((((meta)&1)!=0))) {
+            TileEntityNote tile_entity = (TileEntityNote)world.getBlockTileEntity(x, y, z);
             if (tile_entity != null) {
-                tile_entity.previousRedstoneState = is_receiving_power;
-                tile_entity.triggerNote(world, X, Y, Z);
+                tile_entity.previousRedstoneState = isReceivingPower;
+                tile_entity.triggerNote(world, x, y, z);
             }
-            world.setBlockMetadataWithNotify(X, Y, Z, meta ^ 1, 0x01 | 0x02 | 0x80);
+            world.setBlockMetadataWithNotify(x, y, z, ((meta)^1), 0x01 | 0x02 | 0x80);
         }
     }
     @Inject(
         method = "onBlockActivated",
         at = @At("HEAD")
     )
-    public void onBlockActivated_inject(World world, int X, int Y, int Z, EntityPlayer player, int iFacing, float fXClick, float fYClick, float fZClick, CallbackInfoReturnable info) {
+    public void onBlockActivated_inject(World world, int x, int y, int z, EntityPlayer player, int facing, float xClick, float yClick, float zClick, CallbackInfoReturnable info) {
         if (!world.isRemote) {
             // Just do *something* to the metadata so that stuff updates
-            world.setBlockMetadataWithNotify(X, Y, Z, world.getBlockMetadata(X, Y, Z) ^ 2, 0x01 | 0x02 | 0x80);
+            world.setBlockMetadataWithNotify(x, y, z, ((world.getBlockMetadata(x, y, z))^2), 0x01 | 0x02 | 0x80);
         }
     }
 }

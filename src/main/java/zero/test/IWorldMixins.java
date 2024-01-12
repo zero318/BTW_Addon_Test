@@ -5,13 +5,13 @@ import zero.test.IBlockMixins;
 // Block piston reactions
 public interface IWorldMixins {
     //public boolean get_is_handling_piston_move();
-    public void updateNeighbourShapes(int X, int Y, int Z, int flags);
-    public int updateFromNeighborShapes(int X, int Y, int Z, int block_id, int block_meta);
-    public int getBlockStrongPowerInputExceptFacing(int X, int Y, int Z, int facing);
-    public int getBlockWeakPowerInputExceptFacing(int X, int Y, int Z, int facing);
-    default public boolean isBlockRedstoneConductor(int X, int Y, int Z) {
+    public void updateNeighbourShapes(int x, int y, int z, int flags);
+    public int updateFromNeighborShapes(int x, int y, int z, int blockId, int blockMeta);
+    public int getBlockStrongPowerInputExceptFacing(int x, int y, int z, int facing);
+    public int getBlockWeakPowerInputExceptFacing(int x, int y, int z, int facing);
+    default public boolean isBlockRedstoneConductor(int x, int y, int z) {
         World self = (World)(Object)this;
-        Block block = Block.blocksList[self.getBlockId(X, Y, Z)];
-        return !((block)==null) && ((IBlockMixins)block).isRedstoneConductor(self, X, Y, Z);
+        Block block = Block.blocksList[self.getBlockId(x, y, z)];
+        return !((block)==null) && ((IBlockMixins)block).isRedstoneConductor(self, x, y, z);
     }
 }

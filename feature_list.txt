@@ -73,6 +73,7 @@ Pistons:
 - Completely rewrote the implementation of block/entity pushing
 - Attempted to make moving blocks match their normal collision
 - Suffocate entities that're clipped inside
+- No longer let entities clip through moving blocks
 
 Note Blocks:
 - Interact with oberservers like in modern versions
@@ -133,7 +134,6 @@ Known Issues
 - Slime/glue have kinda broken rendering just because 1.5.2
 - Slime blocks don't bounce entities that fall on them despite having code for it
 - Players touching the south/bottom of a glue block have glitchy interactions with the "can't see when inside a solid block" mechanic
-- Entities standing near the edge of a glue block aren't moved properly when retracting. Works properly if standing between two glue blocks.
 - The CUD block recipe sucks
 - Sloped rails don't flatten out when the rail they're connected to is moved down by a piston
 - Block placers/breakers have lazy texturing

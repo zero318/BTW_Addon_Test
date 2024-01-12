@@ -32,8 +32,8 @@ public interface IBlockDispenserBlockAccessMixins {
     public Icon[] getIconBySideArray();
 
     @Invoker("consumeFacingBlock")
-    public abstract void callConsumeFacingBlock(World world, int X, int Y, int Z);
+    public abstract void callConsumeFacingBlock(World world, int x, int y, int z);
     @Invoker("dispenseBlockOrItem")
-    public abstract boolean callDispenseBlockOrItem(World world, int X, int Y, int Z);
+    public abstract boolean callDispenseBlockOrItem(World world, int x, int y, int z);
 #endif
 }

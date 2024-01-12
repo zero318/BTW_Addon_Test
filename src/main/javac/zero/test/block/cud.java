@@ -11,6 +11,7 @@ import net.minecraft.src.*;
 
 import java.util.Random;
 
+#include "..\feature_flags.h"
 #include "..\util.h"
 #include "..\ids.h"
 
@@ -18,13 +19,13 @@ import java.util.Random;
 #define DIRECTION_META_OFFSET 1
 
 public class CUDBlock extends BuddyBlock {
-    public CUDBlock(int block_id) {
-        super(block_id);
+    public CUDBlock(int blockId) {
+        super(blockId);
         this.setUnlocalizedName("cud_block");
     }
     
     @Override
-    public void onBlockAdded(World world, int X, int Y, int Z) {
+    public void onBlockAdded(World world, int x, int y, int z) {
         // HACK: 
         // Java doesn't have super.super, so there's no way of
         // calling Block.onBlockAdded without going through
@@ -34,7 +35,7 @@ public class CUDBlock extends BuddyBlock {
     }
     
     @Override
-    public int onPreBlockPlacedByPiston(World world, int X, int Y, int Z, int meta, int direction) {
+    public int onPreBlockPlacedByPiston(World world, int x, int y, int z, int meta, int direction) {
         return meta;
     }
     
@@ -44,32 +45,38 @@ public class CUDBlock extends BuddyBlock {
     }
     
     @Override
-    public void onNeighborBlockChange(World world, int X, int Y, int Z, int neighbor_id) {
+    public void onNeighborBlockChange(World world, int x, int y, int z, int neighborId) {
         // IDK why this check works for preventing a crash, but it does
-        if (neighbor_id != CUD_BLOCK_ID) {
-            int meta = world.getBlockMetadata(X, Y, Z);
+        if (neighborId != CUD_BLOCK_ID) {
+            int meta = world.getBlockMetadata(x, y, z);
             if (!READ_META_FIELD(meta, POWERED)) {
-                Block neighbor_block = blocksList[neighbor_id];
+                Block neighbor_block = blocksList[neighborId];
                 
                 if (
                     !BLOCK_IS_AIR(neighbor_block) &&
                     neighbor_block.hasComparatorInputOverride() &&
-                    !world.isUpdatePendingThisTickForBlock(X, Y, Z, blockID)
+                    !world.isUpdatePendingThisTickForBlock(x, y, z, this.blockID)
                 ) {
                     // minimal delay when triggered to avoid notfying neighbors of change in same tick
                     // that they are notifying of the original change. Not doing so causes problems 
                     // with some blocks (like ladders) that haven't finished initializing their state 
                     // on placement when they send out the notification
                     
-                    world.scheduleBlockUpdate(X, Y, Z, blockID, 1); 
+                    world.scheduleBlockUpdate(x, y, z, this.blockID, 1); 
                 }
             }
         }
     }
     
-    public boolean getWeakChanges(World world, int X, int Y, int Z, int neighbor_id) {
+    public boolean getWeakChanges(World world, int x, int y, int z, int neighborId) {
         return true;
     }
+    
+#if ENABLE_BETTER_REDSTONE_WIRE_CONNECTIONS
+    public boolean canRedstoneConnectToSide(IBlockAccess blockAccess, int x, int y, int z, int flatDirection) {
+        return OPPOSITE_DIRECTION(READ_META_FIELD(blockAccess.getBlockMetadata(x, y, z), DIRECTION)) == Direction.directionToFacing[flatDirection];
+    }
+#endif
     
 
     @Environment(EnvType.CLIENT)
@@ -77,9 +84,8 @@ public class CUDBlock extends BuddyBlock {
 
     @Override
     @Environment(EnvType.CLIENT)
-    public void registerIcons( IconRegister register )
-    {
-        super.registerIcons( register );
+    public void registerIcons(IconRegister register) {
+        super.registerIcons(register);
 
         this.texture_front = register.registerIcon("cud_block_front");
     }
@@ -93,14 +99,14 @@ public class CUDBlock extends BuddyBlock {
 
     @Override
     @Environment(EnvType.CLIENT)
-    public Icon getBlockTexture(IBlockAccess blockAccess, int X, int Y, int Z, int side) {
+    public Icon getBlockTexture(IBlockAccess blockAccess, int x, int y, int z, int side) {
         
-        if (this.isRedstoneOn(blockAccess, X, Y, Z)) {
+        if (this.isRedstoneOn(blockAccess, x, y, z)) {
             // Use original powered textures
-            return super.getBlockTexture(blockAccess, X, Y, Z, side);
+            return super.getBlockTexture(blockAccess, x, y, z, side);
         }
         
-        return getFacing(blockAccess, X, Y, Z) == side
+        return getFacing(blockAccess, x, y, z) == side
                 ? this.texture_front
                 : this.blockIcon;
     }  

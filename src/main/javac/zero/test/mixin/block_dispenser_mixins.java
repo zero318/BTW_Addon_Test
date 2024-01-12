@@ -20,11 +20,11 @@ import zero.test.IBlockMixins;
 public class BlockDispenserBlockMixins {
 #if ENABLE_LESS_CRAP_BLOCK_DISPENSER && 0
     @Overwrite
-    public boolean validateBlockDispenser(World world, int X, int Y, int Z) {
+    public boolean validateBlockDispenser(World world, int x, int y, int z) {
         return true;
     }
     @Overwrite
-	public boolean isCurrentStateValid(World world, int X, int Y, int Z) {
+	public boolean isCurrentStateValid(World world, int x, int y, int z) {
         return true;
     }
 #endif

@@ -9,31 +9,31 @@ import zero.test.IBlockMixins;
 
 @Mixin(MortarReceiverStairsBlock.class)
 public class MortarReceiverStairsBlockMixins extends FallingStairsBlock {
-    MortarReceiverStairsBlockMixins(int id, Block reference_block, int reference_block_meta) {
-        super(id, reference_block, reference_block_meta);
+    public MortarReceiverStairsBlockMixins(int id, Block referenceBlock, int referenceBlockMeta) {
+        super(id, referenceBlock, referenceBlockMeta);
     }
     @Override
-    public void updateTick(World world, int X, int Y, int Z, Random random) {
+    public void updateTick(World world, int x, int y, int z, Random random) {
         has_adjacent_slime: do {
             int facing = 0;
             do {
-                int nextX = X + Facing.offsetsXForSide[facing];
-                int nextY = Y + Facing.offsetsYForSide[facing];
-                int nextZ = Z + Facing.offsetsZForSide[facing];
-                Block neighbor_block = Block.blocksList[world.getBlockId(nextX, nextY, nextZ)];
+                int nextX = x + Facing.offsetsXForSide[facing];
+                int nextY = y + Facing.offsetsYForSide[facing];
+                int nextZ = z + Facing.offsetsZForSide[facing];
+                Block neighborBlock = Block.blocksList[world.getBlockId(nextX, nextY, nextZ)];
                 if (
-                    !((neighbor_block)==null) &&
-                    ((IBlockMixins)neighbor_block).permanentlySupportsMortarBlocks(world, nextX, nextY, nextZ, facing)
+                    !((neighborBlock)==null) &&
+                    ((IBlockMixins)neighborBlock).permanentlySupportsMortarBlocks(world, nextX, nextY, nextZ, facing)
                 ) {
                     break has_adjacent_slime;
                 }
-            } while (++facing < 6);
-            if (checkForFall(world, X, Y, Z)) {
+            } while (((++facing)<=5));
+            if (checkForFall(world, x, y, z)) {
                 return;
             }
         } while(false);
-        if (getIsUpsideDown(world, X, Y, Z)) {
-            setIsUpsideDown(world, X, Y, Z, false);
+        if (getIsUpsideDown(world, x, y, z)) {
+            setIsUpsideDown(world, x, y, z, false);
         }
     }
 }

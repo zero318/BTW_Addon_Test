@@ -26,12 +26,10 @@ public class EntityMixins implements IEntityMixins {
         at = @At("HEAD"),
         cancellable = true
     )
-    protected void pushOutOfBlocks_cancel_if_noclip(double X, double Y, double Z, CallbackInfoReturnable callback_info) {
+    protected void pushOutOfBlocks_cancel_if_noclip(double x, double y, double z, CallbackInfoReturnable callbackInfo) {
         Entity self = (Entity)(Object)this;
         if (self instanceof EntityPlayer && self.noClip) {
-            //AddonHandler.logMessage("Player noclip state C: "+self.noClip);
-            callback_info.setReturnValue(false);
-            callback_info.cancel();
+            callbackInfo.setReturnValue(false);
         }
     }
 #endif
@@ -40,39 +38,47 @@ public class EntityMixins implements IEntityMixins {
     public double pistonX;
     public double pistonY;
     public double pistonZ;
+    public int pistonDirection = -1;
     
-#define HYPER_OPTIMIZE_MATH_CODE 1
+    public int getPistonDirection() {
+        return pistonDirection;
+    }
     
-    public void moveEntityByPiston(double X, double Y, double Z) {
+    public void moveEntityByPiston(double x, double y, double z) {
         Entity self = (Entity)(Object)this;
-        if (X * X + Y * Y + Z * Z > 1.0E-7D) {
+        if (x * x + y * y + z * z > 1.0E-7D) {
             long time = self.worldObj.getTotalWorldTime();
-            double temp;
             if (time != this.timeOfLastPistonPush) {
                 this.timeOfLastPistonPush = time;
                 pistonX = pistonY = pistonZ = 0.0D;
             }
-            if (X != 0.0D) {
-                X = (temp = MATH_CLAMP(X + this.pistonX, -0.51D, 0.51D)) - this.pistonX;
+            double temp;
+            if (x != 0.0D) {
+                this.pistonDirection = x < 0.0D ? DIRECTION_WEST : DIRECTION_EAST;
+                x = (temp = MATH_CLAMP(x + this.pistonX, -0.51D, 0.51D)) - this.pistonX;
                 this.pistonX = temp;
-                temp = X;
-                Y = Z = 0.0D;
+                temp = x;
+                y = z = 0.0D;
             }
-            else if (Y != 0.0D) {
-                Y = (temp = MATH_CLAMP(Y + this.pistonY, -0.51D, 0.51D)) - this.pistonY;
+            else if (y != 0.0D) {
+                this.pistonDirection = y < 0.0D ? DIRECTION_DOWN : DIRECTION_UP;
+                y = (temp = MATH_CLAMP(y + this.pistonY, -0.51D, 0.51D)) - this.pistonY;
                 this.pistonY = temp;
-                temp = Y;
-                Z = 0.0D;
+                temp = y;
+                z = 0.0D;
             }
             else {
-                Z = (temp = MATH_CLAMP(Z + this.pistonZ, -0.51D, 0.51D)) - this.pistonZ;
+                this.pistonDirection = z < 0.0D ? DIRECTION_NORTH : DIRECTION_SOUTH;
+                z = (temp = MATH_CLAMP(z + this.pistonZ, -0.51D, 0.51D)) - this.pistonZ;
                 this.pistonZ = temp;
-                temp = Z;
+                temp = z;
             }
             if (Math.abs(temp) <= 1.0E-5D) {
+                this.pistonDirection = -1;
                 return;
             }
         }
-        self.moveEntity(X, Y, Z);
+        self.moveEntity(x, y, z);
+        this.pistonDirection = -1;
     }
 }

@@ -152,4 +152,7 @@ MACRO_VOID(/* Prevent shoveling slime/glue despite regular shovels being effecti
 MACRO_VOID(/* */)
 #define ENABLE_REDSTONE_DUST_ROUTING 0
 
+MACRO_VOID(/* */)
+#define ENABLE_MINECART_FIXES 0
+
 #endif

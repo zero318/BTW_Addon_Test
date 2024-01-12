@@ -25,5 +25,5 @@ import zero.test.IBlockMixins;
 @Mixin(BlockPistonBase.class)
 public interface IPistonBaseAccessMixins {
     @Invoker("isIndirectlyPowered")
-    public abstract boolean callIsIndirectlyPowered(World world, int X, int Y, int Z, int direction);
+    public abstract boolean callIsIndirectlyPowered(World world, int x, int y, int z, int direction);
 }

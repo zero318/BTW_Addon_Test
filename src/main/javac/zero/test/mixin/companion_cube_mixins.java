@@ -30,8 +30,8 @@ public class CompanionCubeBlockMixins {
     // isNormalBlock that screws with redstone.
     //
     // See the other explanation in the platform mixins.
-    public boolean isRedstoneConductor(IBlockAccess block_access, int X, int Y, int Z) {
-        return !((CompanionCubeBlock)(Object)this).getIsSlab(block_access, X, Y, Z);
+    public boolean isRedstoneConductor(IBlockAccess blockAccess, int x, int y, int z) {
+        return BOOL_INVERT(((CompanionCubeBlock)(Object)this).getIsSlab(blockAccess, x, y, z));
     }
 #endif
 }

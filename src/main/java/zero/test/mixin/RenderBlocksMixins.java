@@ -52,15 +52,15 @@ public class RenderBlocksMixins implements IRenderBlocksMixins {
 */
 
     @Overwrite
-    public boolean renderBlockRedstoneWire(Block block, int X, int Y, int Z) {
+    public boolean renderBlockRedstoneWire(Block block, int x, int y, int z) {
         RenderBlocks self = (RenderBlocks)(Object)this;
         Tessellator tessellator = Tessellator.instance;
-        tessellator.setBrightness(block.getMixedBrightnessForBlock(self.blockAccess, X, Y, Z));
-        Block below_block = Block.blocksList[self.blockAccess.getBlockId(X, Y - 1, Z)];
+        tessellator.setBrightness(block.getMixedBrightnessForBlock(self.blockAccess, x, y, z));
+        Block belowBlock = Block.blocksList[self.blockAccess.getBlockId(x, y - 1, z)];
         // Assuming the redstone isn't floating in midair seems
         // a bit *too* dangerous, even for my taste
-        boolean render_bottom = ((below_block)==null) || below_block.shouldRenderNeighborFullFaceSide(self.blockAccess, X, Y - 1, Z, 1);
-        int power = (((self.blockAccess.getBlockMetadata(X, Y, Z))));
+        boolean renderBottom = ((belowBlock)==null) || belowBlock.shouldRenderNeighborFullFaceSide(self.blockAccess, x, y - 1, z, 1);
+        int power = (((self.blockAccess.getBlockMetadata(x, y, z))));
         float red;
         float green;
         float blue;
@@ -82,17 +82,17 @@ public class RenderBlocksMixins implements IRenderBlocksMixins {
             blue = 0.0F;
         }
         tessellator.setColorOpaque_F(red, green, blue);
-        int connections = ((IBlockRedstoneWireMixins)block).getConnectingSides(self.blockAccess, X, Y, Z, true);
+        int connections = ((IBlockRedstoneWireMixins)block).getConnectingSides(self.blockAccess, x, y, z, true);
         int texture_index = ((IBlockRedstoneWireMixins)block).get_texture_index_for_connections(connections);
         Icon base_texture = ((IBlockRedstoneWireMixins)block).get_texture_by_index(texture_index);
         Icon overlay_texture = ((IBlockRedstoneWireMixins)block).get_texture_by_index(texture_index + 1);
         double minX, maxX;
         double minY;
         double minZ, maxZ;
-        maxX = (minX = (double)X) + 1.0D;
-        //maxY = (minY = (double)Y) + 0.015625D;
-        maxZ = (minZ = (double)Z) + 1.0D;
-        minY = (double)Y + 0.015625D;
+        maxX = (minX = (double)x) + 1.0D;
+        //maxY = (minY = (double)y) + 0.015625D;
+        maxZ = (minZ = (double)z) + 1.0D;
+        minY = (double)y + 0.015625D;
         double tempMinX;
         double tempMaxX;
         double tempMinZ;
@@ -142,7 +142,7 @@ public class RenderBlocksMixins implements IRenderBlocksMixins {
             tessellator.addVertexWithUV(tempMaxX, minY, tempMinZ, texMaxU, texMinV);
             tessellator.addVertexWithUV(tempMinX, minY, tempMinZ, texMinU, texMinV);
             tessellator.addVertexWithUV(tempMinX, minY, tempMaxZ, texMinU, texMaxV);
-            if (render_bottom) {
+            if (renderBottom) {
                 tessellator.addVertexWithUV(tempMinX, minY, tempMaxZ, texMinU, texMaxV);
                 tessellator.addVertexWithUV(tempMinX, minY, tempMinZ, texMinU, texMinV);
                 tessellator.addVertexWithUV(tempMaxX, minY, tempMinZ, texMaxU, texMinV);
@@ -157,7 +157,7 @@ public class RenderBlocksMixins implements IRenderBlocksMixins {
             tessellator.addVertexWithUV(tempMaxX, minY, tempMinZ, texMaxU, texMinV);
             tessellator.addVertexWithUV(tempMinX, minY, tempMinZ, texMinU, texMinV);
             tessellator.addVertexWithUV(tempMinX, minY, tempMaxZ, texMinU, texMaxV);
-            if (render_bottom) {
+            if (renderBottom) {
                 tessellator.addVertexWithUV(tempMinX, minY, tempMaxZ, texMinU, texMaxV);
                 tessellator.addVertexWithUV(tempMinX, minY, tempMinZ, texMinU, texMinV);
                 tessellator.addVertexWithUV(tempMaxX, minY, tempMinZ, texMaxU, texMinV);
@@ -181,7 +181,7 @@ public class RenderBlocksMixins implements IRenderBlocksMixins {
             tessellator.addVertexWithUV(maxX, minY, minZ, texMaxU, texMinV);
             tessellator.addVertexWithUV(minX, minY, minZ, base_texture.getMinU(), base_texture.getMinV());
             tessellator.addVertexWithUV(minX, minY, maxZ, texMinU, texMaxV);
-            if (render_bottom) {
+            if (renderBottom) {
                 tessellator.addVertexWithUV(minX, minY, maxZ, texMinU, texMaxV);
                 tessellator.addVertexWithUV(minX, minY, minZ, base_texture.getMinU(), base_texture.getMinV());
                 tessellator.addVertexWithUV(maxX, minY, minZ, texMaxU, texMinV);
@@ -203,7 +203,7 @@ public class RenderBlocksMixins implements IRenderBlocksMixins {
             tessellator.addVertexWithUV(maxX, minY, minZ, texMaxU, texMinV);
             tessellator.addVertexWithUV(minX, minY, minZ, overlay_texture.getMinU(), overlay_texture.getMinV());
             tessellator.addVertexWithUV(minX, minY, maxZ, texMinU, texMaxV);
-            if (render_bottom) {
+            if (renderBottom) {
                 tessellator.addVertexWithUV(minX, minY, maxZ, texMinU, texMaxV);
                 tessellator.addVertexWithUV(minX, minY, minZ, overlay_texture.getMinU(), overlay_texture.getMinV());
                 tessellator.addVertexWithUV(maxX, minY, minZ, texMaxU, texMinV);
@@ -215,7 +215,7 @@ public class RenderBlocksMixins implements IRenderBlocksMixins {
             tessellator.setColorOpaque_F(red, green, blue);
             base_texture = ((IBlockRedstoneWireMixins)block).get_texture_by_index(0);
             double maxY;
-            maxY = (minY = (double)Y) + 1.021875D;
+            maxY = (minY = (double)y) + 1.021875D;
             tempMinX = minX + 0.015625D;
             tempMaxX = maxX - 0.015625D;
             tempMinZ = minZ + 0.015625D;
@@ -325,7 +325,7 @@ public class RenderBlocksMixins implements IRenderBlocksMixins {
         method = "renderBlockRepeater(Lnet/minecraft/src/BlockRedstoneRepeater;III)Z",
         at = @At("HEAD")
     )
-    public void renderBlockRepeater_inject(BlockRedstoneRepeater block, int X, int Y, int Z, CallbackInfoReturnable info) {
+    public void renderBlockRepeater_inject(BlockRedstoneRepeater block, int x, int y, int z, CallbackInfoReturnable info) {
         ((IBlockRedstoneLogicMixins)block).setRenderingBaseTextures(false);
     }
     // Apparently this is unused?
@@ -334,20 +334,20 @@ public class RenderBlocksMixins implements IRenderBlocksMixins {
         method = "renderBlockComparator(Lnet/minecraft/src/BlockComparator;III)Z",
         at = @At("HEAD")
     )
-    public void renderBlockComparator_inject(BlockComparator block, int X, int Y, int Z, CallbackInfoReturnable info) {
+    public void renderBlockComparator_inject(BlockComparator block, int x, int y, int z, CallbackInfoReturnable info) {
         ((IBlockRedstoneLogicMixins)block).setRenderingBaseTextures(false);
     }
     // Replacement torch rendering that skips the unnecessary
     // XZ offset calculations and prevents torches clipping
     // into the base of the block.
-    public void renderTorchForRedstoneLogic(Block block, double X, double Y, double Z, int meta) {
+    public void renderTorchForRedstoneLogic(Block block, double x, double y, double z, int meta) {
         RenderBlocks self = (RenderBlocks)(Object)this;
         Tessellator tessellator = Tessellator.instance;
         Icon texture = self.getBlockIconFromSideAndMetadata(block, 0, meta);
         if (self.hasOverrideBlockTexture()) {
             // Comparator front torch hack
             if ((meta & 4) != 0) {
-                Y -= 0.125D;
+                y -= 0.125D;
             }
             texture = ((IRenderBlocksAccessMixins)self).getOverrideBlockTexture();
         }
@@ -355,39 +355,39 @@ public class RenderBlocksMixins implements IRenderBlocksMixins {
         double minV = (double)texture.getInterpolatedV(6.0D);
         double maxU = (double)texture.getInterpolatedU(9.0D);
         double maxV = (double)texture.getInterpolatedV(8.0D);
-        double minX = X + 0.4375D;
-        double maxX = X + 0.5625D;
-        double minZ = Z + 0.4375D;
-        double maxZ = Z + 0.5625D;
-        double maxY = Y + 0.625D;
+        double minX = x + 0.4375D;
+        double maxX = x + 0.5625D;
+        double minZ = z + 0.4375D;
+        double maxZ = z + 0.5625D;
+        double maxY = y + 0.625D;
         tessellator.addVertexWithUV(minX, maxY, minZ, minU, minV);
         tessellator.addVertexWithUV(minX, maxY, maxZ, minU, maxV);
         tessellator.addVertexWithUV(maxX, maxY, maxZ, maxU, maxV);
         tessellator.addVertexWithUV(maxX, maxY, minZ, maxU, minV);
-        maxY = Y + 1.0D;
-        Y = Math.ceil((double)Y) + 0.125D;
+        maxY = y + 1.0D;
+        y = Math.ceil((double)y) + 0.125D;
         minU = texture.getMinU();
         minV = texture.getMinV();
         maxU = texture.getMaxU();
-        maxV = (double)texture.getInterpolatedV((maxY - Y) * 16.0D);
-        double temp = Z + 1.0D;
-        tessellator.addVertexWithUV(minX, maxY, Z, minU, minV);
-        tessellator.addVertexWithUV(minX, Y, Z, minU, maxV);
-        tessellator.addVertexWithUV(minX, Y, temp, maxU, maxV);
+        maxV = (double)texture.getInterpolatedV((maxY - y) * 16.0D);
+        double temp = z + 1.0D;
+        tessellator.addVertexWithUV(minX, maxY, z, minU, minV);
+        tessellator.addVertexWithUV(minX, y, z, minU, maxV);
+        tessellator.addVertexWithUV(minX, y, temp, maxU, maxV);
         tessellator.addVertexWithUV(minX, maxY, temp, maxU, minV);
         tessellator.addVertexWithUV(maxX, maxY, temp, minU, minV);
-        tessellator.addVertexWithUV(maxX, Y, temp, minU, maxV);
-        tessellator.addVertexWithUV(maxX, Y, Z, maxU, maxV);
-        tessellator.addVertexWithUV(maxX, maxY, Z, maxU, minV);
-        temp = X + 1.0D;
-        tessellator.addVertexWithUV(X, maxY, maxZ, minU, minV);
-        tessellator.addVertexWithUV(X, Y, maxZ, minU, maxV);
-        tessellator.addVertexWithUV(temp, Y, maxZ, maxU, maxV);
+        tessellator.addVertexWithUV(maxX, y, temp, minU, maxV);
+        tessellator.addVertexWithUV(maxX, y, z, maxU, maxV);
+        tessellator.addVertexWithUV(maxX, maxY, z, maxU, minV);
+        temp = x + 1.0D;
+        tessellator.addVertexWithUV(x, maxY, maxZ, minU, minV);
+        tessellator.addVertexWithUV(x, y, maxZ, minU, maxV);
+        tessellator.addVertexWithUV(temp, y, maxZ, maxU, maxV);
         tessellator.addVertexWithUV(temp, maxY, maxZ, maxU, minV);
         tessellator.addVertexWithUV(temp, maxY, minZ, minU, minV);
-        tessellator.addVertexWithUV(temp, Y, minZ, minU, maxV);
-        tessellator.addVertexWithUV(X, Y, minZ, maxU, maxV);
-        tessellator.addVertexWithUV(X, maxY, minZ, maxU, minV);
+        tessellator.addVertexWithUV(temp, y, minZ, minU, maxV);
+        tessellator.addVertexWithUV(x, y, minZ, maxU, maxV);
+        tessellator.addVertexWithUV(x, maxY, minZ, maxU, minV);
     }
     @Redirect(
         method = { "renderBlockRepeater", "renderBlockComparator" },
@@ -396,14 +396,14 @@ public class RenderBlocksMixins implements IRenderBlocksMixins {
             target = "Lnet/minecraft/src/RenderBlocks;renderTorchAtAngle(Lnet/minecraft/src/Block;DDDDDI)V"
         )
     )
-    public void renderTorchAtAngle_redirect(RenderBlocks self, Block block, double X, double Y, double Z, double angleA, double angleB, int meta) {
-        ((IRenderBlocksMixins)self).renderTorchForRedstoneLogic(block, X, Y, Z, meta);
+    public void renderTorchAtAngle_redirect(RenderBlocks self, Block block, double x, double y, double z, double angleA, double angleB, int meta) {
+        ((IRenderBlocksMixins)self).renderTorchForRedstoneLogic(block, x, y, z, meta);
     }
     @Inject(
         method = "renderBlockRedstoneLogicMetadata(Lnet/minecraft/src/BlockRedstoneLogic;IIII)V",
         at = @At("HEAD")
     )
-    public void renderBlockRedstoneLogicMetadata_inject(BlockRedstoneLogic block, int X, int Y, int Z, int meta, CallbackInfo info) {
+    public void renderBlockRedstoneLogicMetadata_inject(BlockRedstoneLogic block, int x, int y, int z, int meta, CallbackInfo info) {
         ((IBlockRedstoneLogicMixins)block).setRenderingBaseTextures(true);
     }
 }

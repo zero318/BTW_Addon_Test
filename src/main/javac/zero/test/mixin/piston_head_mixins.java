@@ -37,19 +37,26 @@ import zero.test.IBlockEntityPistonMixins;
 #define STICKY_IS_BOOL true
 
 @Mixin(BlockPistonExtension.class)
-public class BlockPistonExtensionMixins {
+public class BlockPistonExtensionMixins extends Block {
+    
+    public BlockPistonExtensionMixins(int blockId, Material material) {
+        super(blockId, material);
+    }
+    
 #if ENABLE_BETTER_BUDDY_DETECTION
-    //@Override
+    @Override
     public boolean triggersBuddy() {
         return false;
     }
 #endif
     
+    @Override
     public boolean hasLargeCenterHardPointToFacing(IBlockAccess blockAccess, int x, int y, int z, int direction, boolean ignoreTransparency) {
         return direction == READ_META_FIELD(blockAccess.getBlockMetadata(x, y, z), DIRECTION);
     }
     
     @Environment(EnvType.CLIENT)
+    @Override
     public boolean shouldRenderNeighborFullFaceSide(IBlockAccess blockAccess, int x, int y, int z, int direction) {
         return direction != READ_META_FIELD(blockAccess.getBlockMetadata(x, y, z), DIRECTION);
     }

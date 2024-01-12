@@ -72,15 +72,17 @@ public class ChestMixins {
 
     // This breaks the chest if it would
     // form a triple chest
-    public int updateShape(World world, int X, int Y, int Z, int direction, int meta) {
-        return ((BlockChest)(Object)this).canPlaceBlockAt(world, X, Y, Z) ? meta : -1;
+    public int updateShape(World world, int x, int y, int z, int direction, int meta) {
+        return ((BlockChest)(Object)this).canPlaceBlockAt(world, x, y, z) ? meta : SHAPE_BREAK_BLOCK;
     }
 #endif
 
-    public boolean isStickyForBlocks(World world, int X, int Y, int Z, int direction) {
+#if ENABLE_MOVING_BLOCK_CHAINING
+    public boolean isStickyForBlocks(World world, int x, int y, int z, int direction) {
         // Only attach to other chests.
         // Somehow the rendering when splitting double chests
         // got broken and I have no idea how to fix it, so this
-        return direction >= 2 && ((BlockChest)(Object)this).blockID == world.getBlockId(X + Facing.offsetsXForSide[direction], Y + Facing.offsetsYForSide[direction], Z + Facing.offsetsZForSide[direction]);
+        return DIRECTION_IS_HORIZONTAL(direction) && ((BlockChest)(Object)this).blockID == world.getBlockId(x + Facing.offsetsXForSide[direction], y + Facing.offsetsYForSide[direction], z + Facing.offsetsZForSide[direction]);
     }
+#endif
 }

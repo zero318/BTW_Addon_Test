@@ -17,35 +17,35 @@ import zero.test.IBlockMixins;
 
 @Mixin(MortarReceiverStairsBlock.class)
 public class MortarReceiverStairsBlockMixins extends FallingStairsBlock {
-    MortarReceiverStairsBlockMixins(int id, Block reference_block, int reference_block_meta) {
-        super(id, reference_block, reference_block_meta);
+    public MortarReceiverStairsBlockMixins(int id, Block referenceBlock, int referenceBlockMeta) {
+        super(id, referenceBlock, referenceBlockMeta);
     }
     
 #if ENABLE_MOVING_BLOCK_CHAINING && ENABLE_SLIME_SUPPORTING_MORTAR_BLOCKS
     @Override
-    public void updateTick(World world, int X, int Y, int Z, Random random) {
+    public void updateTick(World world, int x, int y, int z, Random random) {
         
         goto_block(has_adjacent_slime) {
             int facing = 0;
             do {
-                int nextX = X + Facing.offsetsXForSide[facing];
-                int nextY = Y + Facing.offsetsYForSide[facing];
-                int nextZ = Z + Facing.offsetsZForSide[facing];
-                Block neighbor_block = Block.blocksList[world.getBlockId(nextX, nextY, nextZ)];
+                int nextX = x + Facing.offsetsXForSide[facing];
+                int nextY = y + Facing.offsetsYForSide[facing];
+                int nextZ = z + Facing.offsetsZForSide[facing];
+                Block neighborBlock = Block.blocksList[world.getBlockId(nextX, nextY, nextZ)];
                 if (
-                    !BLOCK_IS_AIR(neighbor_block) &&
-                    ((IBlockMixins)neighbor_block).permanentlySupportsMortarBlocks(world, nextX, nextY, nextZ, facing)
+                    !BLOCK_IS_AIR(neighborBlock) &&
+                    ((IBlockMixins)neighborBlock).permanentlySupportsMortarBlocks(world, nextX, nextY, nextZ, facing)
                 ) {
                     goto(has_adjacent_slime);
                 }
-            } while (++facing < 6);
-            if (checkForFall(world, X, Y, Z)) {
+            } while (DIRECTION_IS_VALID(++facing));
+            if (checkForFall(world, x, y, z)) {
                 return;
             }
         } goto_target(has_adjacent_slime);
         
-        if (getIsUpsideDown(world, X, Y, Z)) {
-            setIsUpsideDown(world, X, Y, Z, false);
+        if (getIsUpsideDown(world, x, y, z)) {
+            setIsUpsideDown(world, x, y, z, false);
         }
     }
 #endif

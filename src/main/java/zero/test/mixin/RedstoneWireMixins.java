@@ -19,24 +19,24 @@ import zero.test.mixin.IRedstoneWireAccessMixins;
 @Mixin(BlockRedstoneWire.class)
 public class RedstoneWireMixins implements IBlockRedstoneWireMixins {
     //@Override
-    //public void updateIndirectNeighbourShapes(World world, int X, int Y, int Z) {
-        //((IRedstoneWireAccessMixins)(Object)this).callUpdateAndPropagateCurrentStrength(world, X, Y, Z);
+    //public void updateIndirectNeighbourShapes(World world, int x, int y, int z) {
+        //((IRedstoneWireAccessMixins)(Object)this).callUpdateAndPropagateCurrentStrength(world, x, y, z);
     //}
-    public boolean canRedstoneConnectToSide(IBlockAccess block_access, int X, int Y, int Z, int flat_direction) {
+    public boolean canRedstoneConnectToSide(IBlockAccess blockAccess, int x, int y, int z, int flatDirection) {
         return true;
     }
     @Overwrite
-    public static boolean isPowerProviderOrWire(IBlockAccess block_access, int X, int Y, int Z, int flat_direction) {
-        int block_id = block_access.getBlockId(X, Y, Z);
-        if (block_id != 0) {
+    public static boolean isPowerProviderOrWire(IBlockAccess blockAccess, int x, int y, int z, int flatDirection) {
+        int blockId = blockAccess.getBlockId(x, y, z);
+        if (blockId != 0) {
             if (
-                block_id == Block.redstoneWire.blockID
+                blockId == Block.redstoneWire.blockID
             ) {
                 return true;
             }
-            if (flat_direction >= 0) {
-                Block block = Block.blocksList[block_id];
-                return ((IBlockMixins)block).canRedstoneConnectToSide(block_access, X, Y, Z, flat_direction);
+            if (flatDirection >= 0) {
+                Block block = Block.blocksList[blockId];
+                return ((IBlockMixins)block).canRedstoneConnectToSide(blockAccess, x, y, z, flatDirection);
             }
         }
         return false;
@@ -63,95 +63,95 @@ public class RedstoneWireMixins implements IBlockRedstoneWireMixins {
             target = "Lnet/minecraft/src/World;isBlockNormalCube(III)Z"
         )
     )
-    public boolean redirect_isBlockNormalCube(World world, int X, int Y, int Z) {
-        return ((IWorldMixins)world).isBlockRedstoneConductor(X, Y, Z);
+    public boolean redirect_isBlockNormalCube(World world, int x, int y, int z) {
+        return ((IWorldMixins)world).isBlockRedstoneConductor(x, y, z);
     }
-    public int getConnectingSides(IBlockAccess block_access, int X, int Y, int Z, boolean for_rendering) {
+    public int getConnectingSides(IBlockAccess blockAccess, int x, int y, int z, boolean forRendering) {
         BlockRedstoneWire self = (BlockRedstoneWire)(Object)this;
         int connections = 0;
-        ++Y;
-        Block block = Block.blocksList[block_access.getBlockId(X, Y, Z)];
-        boolean above_is_conductive = !((block)==null) && ((IBlockMixins)block).isRedstoneConductor(block_access, X, Y, Z);
-        Y -= 2;
-        block = Block.blocksList[block_access.getBlockId(X, Y, Z)];
-        boolean below_is_conductive =
-            !for_rendering &&
-            !((block)==null) && ((IBlockMixins)block).isRedstoneConductor(block_access, X, Y, Z);
-        ++Y;
+        ++y;
+        Block block = Block.blocksList[blockAccess.getBlockId(x, y, z)];
+        boolean aboveIsConductive = !((block)==null) && ((IBlockMixins)block).isRedstoneConductor(blockAccess, x, y, z);
+        y -= 2;
+        block = Block.blocksList[blockAccess.getBlockId(x, y, z)];
+        boolean belowIsConductive =
+            !forRendering &&
+            !((block)==null) && ((IBlockMixins)block).isRedstoneConductor(blockAccess, x, y, z);
+        ++y;
         int direction = 2;
         do {
             connections <<= 3;
-            int nextX = X + Facing.offsetsXForSide[direction];
-            int nextZ = Z + Facing.offsetsZForSide[direction];
-            block = Block.blocksList[block_access.getBlockId(nextX, Y, nextZ)];
+            int nextX = x + Facing.offsetsXForSide[direction];
+            int nextZ = z + Facing.offsetsZForSide[direction];
+            block = Block.blocksList[blockAccess.getBlockId(nextX, y, nextZ)];
             if (
-                !above_is_conductive &&
+                !aboveIsConductive &&
                 /*
-                self.canPlaceBlockAt(nextX, Y, nextZ) &&
-                isPowerProviderOrWire(block_access, nextX, Y + 1, nextZ, Direction.facingToDirection[direction])
+                self.canPlaceBlockAt(nextX, y, nextZ) &&
+                isPowerProviderOrWire(blockAccess, nextX, y + 1, nextZ, Direction.facingToDirection[direction])
                 */
-                block_access.getBlockId(nextX, Y + 1, nextZ) == Block.redstoneWire.blockID
+                blockAccess.getBlockId(nextX, y + 1, nextZ) == Block.redstoneWire.blockID
             ) {
                 if (
-                    !for_rendering ||
+                    !forRendering ||
                     // These conditions only affect rendering of vertical
                     // connections, primarily to prevent floating dust.
-                    block.hasCenterHardPointToFacing(block_access, nextX, Y, nextZ, ((direction)^1), true) ||
-                    block.isNormalCube(block_access, nextX, Y, nextZ) // dangerous stinky hack to make more things show up
+                    block.hasCenterHardPointToFacing(blockAccess, nextX, y, nextZ, ((direction)^1), true) ||
+                    block.isNormalCube(blockAccess, nextX, y, nextZ) // dangerous stinky hack to make more things show up
                 ) {
                     connections += 2;
                     if (
-                        for_rendering &&
-                        block.shouldRenderNeighborFullFaceSide(block_access, nextX, Y, nextZ, ((direction)^1))
+                        forRendering &&
+                        block.shouldRenderNeighborFullFaceSide(blockAccess, nextX, y, nextZ, ((direction)^1))
                     ) {
                         connections += 4;
                     }
                 }
                 connections += 1;
             }
-            else if (isPowerProviderOrWire(block_access, nextX, Y, nextZ, Direction.facingToDirection[direction])) {
+            else if (isPowerProviderOrWire(blockAccess, nextX, y, nextZ, Direction.facingToDirection[direction])) {
                 connections += 1;
             }
             if (
                 (
                     ((block)==null) ||
-                    !((IBlockMixins)block).isRedstoneConductor(block_access, nextX, Y, nextZ)
+                    !((IBlockMixins)block).isRedstoneConductor(blockAccess, nextX, y, nextZ)
                 ) &&
-                block_access.getBlockId(nextX, Y - 1, nextZ) == Block.redstoneWire.blockID
+                blockAccess.getBlockId(nextX, y - 1, nextZ) == Block.redstoneWire.blockID
             ) {
                 connections |= 1;
-                if (below_is_conductive) {
+                if (belowIsConductive) {
                     connections += 4;
                 }
             }
-        } while (++direction < 6);
-        int connections_ret = connections;
-        if (!for_rendering) {
+        } while (((++direction)<=5));
+        int connectionsRet = connections;
+        if (!forRendering) {
             if (!(((connections)&~0x1C0)!=0)) {
-                connections_ret += 0x200;
+                connectionsRet += 0x200;
             }
             if (!(((connections)&~0xE00)!=0)) {
-                connections_ret += 0x040;
+                connectionsRet += 0x040;
             }
             if (!((connections)>0x007)) {
-                connections_ret += 0x008;
+                connectionsRet += 0x008;
             }
             if (!(((connections)&~0x038)!=0)) {
-                connections_ret += 0x001;
+                connectionsRet += 0x001;
             }
         }
-        return connections_ret;
+        return connectionsRet;
     }
     @Overwrite
-    public int isProvidingWeakPower(IBlockAccess block_access, int X, int Y, int Z, int direction) {
+    public int isProvidingWeakPower(IBlockAccess block_access, int x, int y, int z, int direction) {
         BlockRedstoneWire self = (BlockRedstoneWire)(Object)this;
         if (
             direction != 0 &&
             self.canProvidePower()
         ) {
-            int power = (((block_access.getBlockMetadata(X, Y, Z))));
+            int power = (((block_access.getBlockMetadata(x, y, z))));
             if (power != 0) {
-                int connections = this.getConnectingSides(block_access, X, Y, Z, false);
+                int connections = this.getConnectingSides(block_access, x, y, z, false);
                                                                                                                            ;
                 switch (direction) {
                     case 2:
@@ -210,7 +210,7 @@ public class RedstoneWireMixins implements IBlockRedstoneWireMixins {
                 return self.getField_94411_cP();
         }
     }
-    public int getPlatformMobilityFlag(World world, int X, int Y, int Z) {
+    public int getPlatformMobilityFlag(World world, int x, int y, int z) {
         return 2;
     }
     public int adjustMetadataForPlatformMove(int meta) {

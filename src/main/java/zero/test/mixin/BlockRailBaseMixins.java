@@ -12,29 +12,33 @@ import zero.test.IBlockBaseRailLogicMixins;
 import zero.test.mixin.IBlockBaseRailLogicAccessMixins;
 // Block piston reactions
 @Mixin(BlockRailBase.class)
-public class BlockRailBaseMixins {
+public class BlockRailBaseMixins extends Block {
+    public BlockRailBaseMixins(int par1, Material par2Material) {
+        super(par1, par2Material);
+    }
     /*
     @Inject(
         method = "breakBlock(Lnet/minecraft/src/World;IIIII)V",
         at = @At("HEAD"),
         cancellable = true
     )
-    public void break_block_new(World world, int X, int Y, int Z, int par5, int meta, CallbackInfo callback_info) {
+    public void break_block_new(World world, int x, int y, int z, int par5, int meta, CallbackInfo callbackInfo) {
         if (((IWorldMixins)world).get_is_handling_piston_move()) {
             //AddonHandler.logMessage("Cancel break rail");
-            callback_info.cancel();
+            callbackInfo.cancel();
         }
         //AddonHandler.logMessage("Break rail");
     }
     */
-    //@Override
-    public int preBlockPlacedBy(World world, int X, int Y, int Z, int meta, EntityLiving entity_living) {
-        return entity_living instanceof EntityPlayer &&
-               0x2 != ((Direction.directionToFacing[(int)Math.floor(entity_living.rotationYaw / 90.0 + 0.5) & 3])&~1)
+    // Make rail placement match the direction players are facing
+    @Override
+    public int preBlockPlacedBy(World world, int x, int y, int z, int meta, EntityLiving entityLiving) {
+        return /*entityLiving instanceof EntityPlayer &&*/
+               0x2 != ((Direction.directionToFacing[(int)Math.floor(entityLiving.rotationYaw / 90.0D + 0.5D) & 3])&~1)
                 ? 1
                 : 0;
     }
-    public int getPlatformMobilityFlag(World world, int X, int Y, int Z) {
+    public int getPlatformMobilityFlag(World world, int x, int y, int z) {
         return 2;
     }
     public int adjustMetadataForPlatformMove(int meta) {

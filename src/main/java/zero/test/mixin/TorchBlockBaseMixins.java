@@ -24,8 +24,8 @@ public abstract class TorchBlockBaseMixins {
             target = "Lbtw/world/util/WorldUtils;doesBlockHaveCenterHardpointToFacing(Lnet/minecraft/src/IBlockAccess;IIII)Z"
         )
     )
-    public boolean redirect_doesBlockHaveCenterHardpointToFacing(IBlockAccess block_access, int X, int Y, int Z, int direction) {
-        Block block = Block.blocksList[block_access.getBlockId(X, Y, Z)];
-        return !((block)==null) && block.hasCenterHardPointToFacing(block_access, X, Y, Z, ((direction)^1), true);
+    public boolean doesBlockHaveCenterHardpointToFacing_redirect(IBlockAccess blockAccess, int x, int y, int z, int direction) {
+        Block block = Block.blocksList[blockAccess.getBlockId(x, y, z)];
+        return !((block)==null) && block.hasCenterHardPointToFacing(blockAccess, x, y, z, ((direction)^1), true);
     }
 }

@@ -27,9 +27,9 @@ public class NetServerHandlerMixins {
         at = @At("HEAD"),
         cancellable = true
     )
-    public void getCollidingBoundingBoxesIgnoreSpecifiedEntities_cancel_if_noclip(World world, Entity entity, AxisAlignedBB bounding_box, CallbackInfoReturnable callback_info) {
+    public void getCollidingBoundingBoxesIgnoreSpecifiedEntities_cancel_if_noclip(World world, Entity entity, AxisAlignedBB boundingBox, CallbackInfoReturnable callbackInfo) {
         if (entity instanceof EntityPlayer && entity.noClip) {
-            callback_info.setReturnValue(new ArrayList());
+            callbackInfo.setReturnValue(new ArrayList());
         }
     }
 #endif

@@ -14,33 +14,33 @@ public interface IBlockMixins {
     
     // Whether or not the block should have onNeighborBlockChange
     // called in response to comparator updates
-    default public boolean getWeakChanges(World world, int X, int Y, int Z, int neighbor_id) {
+    default public boolean getWeakChanges(World world, int x, int y, int z, int neighborId) {
         return false;
     }
     
 #if ENABLE_DIRECTIONAL_UPDATES
     
-    default public int updateShape(World world, int X, int Y, int Z, int direction, int meta) {
+    default public int updateShape(World world, int x, int y, int z, int direction, int meta) {
         return meta;
     }
     
-    //default public void updateIndirectNeighbourShapes(World world, int X, int Y, int Z) {
+    //default public void updateIndirectNeighbourShapes(World world, int x, int y, int z) {
     //}
 #endif
 
 #if ENABLE_MOVING_BLOCK_CHAINING
 
-    public int getMobilityFlag(World world, int X, int Y, int Z);
+    public int getMobilityFlag(World world, int x, int y, int z);
 
     // The direction argument is intended to allow for
     // blocks that are only sticky on specific faces
-    default public boolean isStickyForBlocks(World world, int X, int Y, int Z, int direction) {
+    default public boolean isStickyForBlocks(World world, int x, int y, int z, int direction) {
         return false;
     }
     
     // This is only called after the face shared with the
     // neighbor block is already known to be sticky
-    default public boolean canBeStuckTo(World world, int X, int Y, int Z, int direction, int neighbor_id) {
+    default public boolean canBeStuckTo(World world, int x, int y, int z, int direction, int neighborId) {
         return true;
     }
     
@@ -55,7 +55,7 @@ public interface IBlockMixins {
     }
     
 #if ENABLE_SLIME_SUPPORTING_MORTAR_BLOCKS
-    default public boolean permanentlySupportsMortarBlocks(World world, int X, int Y, int Z, int direction) {
+    default public boolean permanentlySupportsMortarBlocks(World world, int x, int y, int z, int direction) {
         return false;
     }
 #endif
@@ -63,21 +63,21 @@ public interface IBlockMixins {
 
 #if ENABLE_MODERN_REDSTONE_WIRE
     // Default to the old behavior for conductivity testing
-    default public boolean isRedstoneConductor(IBlockAccess block_access, int X, int Y, int Z) {
-        //return ((Block)(Object)this).isNormalCube(world, X, Y, Z);
-        return block_access.isBlockNormalCube(X, Y, Z);
+    default public boolean isRedstoneConductor(IBlockAccess blockAccess, int x, int y, int z) {
+        //return ((Block)(Object)this).isNormalCube(world, x, y, z);
+        return blockAccess.isBlockNormalCube(x, y, z);
     }
 #endif
 
 #if ENABLE_BETTER_REDSTONE_WIRE_CONNECTIONS
     // Default to the old behavior for dust connections
-    default public boolean canRedstoneConnectToSide(IBlockAccess block_access, int X, int Y, int Z, int flat_direction) {
+    default public boolean canRedstoneConnectToSide(IBlockAccess blockAccess, int x, int y, int z, int flatDirection) {
         return ((Block)(Object)this).canProvidePower();
     }
 #endif
 
 #if ENABLE_PLATFORM_FIXES
-    default public int getPlatformMobilityFlag(World world, int X, int Y, int Z) {
+    default public int getPlatformMobilityFlag(World world, int x, int y, int z) {
         return PLATFORM_CANNOT_MOVE;
     }
     

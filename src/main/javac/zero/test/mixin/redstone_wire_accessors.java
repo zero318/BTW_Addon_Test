@@ -24,7 +24,7 @@ import zero.test.IBlockMixins;
 public interface IRedstoneWireAccessMixins {
 #if ENABLE_MODERN_REDSTONE_WIRE
     //@Invoker("updateAndPropagateCurrentStrength")
-    //public abstract void callUpdateAndPropagateCurrentStrength(World world, int X, int Y, int Z);
+    //public abstract void callUpdateAndPropagateCurrentStrength(World world, int x, int y, int z);
     
     @Environment(EnvType.CLIENT)
     @Accessor

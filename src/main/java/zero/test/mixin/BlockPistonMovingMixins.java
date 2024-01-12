@@ -24,18 +24,22 @@ import java.util.ArrayList;
 // Block piston reactions
 //#define getInputSignal(...) func_94482_f(__VA_ARGS__)
 @Mixin(PistonBlockMoving.class)
-public class BlockPistonMovingMixins {
-    //@Override
+public class BlockPistonMovingMixins extends BlockPistonMoving {
+    public BlockPistonMovingMixins(int block_id) {
+        super(block_id);
+    }
+    @Override
     public boolean triggersBuddy() {
         return false;
     }
-    //@Overwrite
+    @Override
     public void addCollisionBoxesToList(World world, int x, int y, int z, AxisAlignedBB maskBox, List list, Entity entity) {
         TileEntity tileEntity = world.getBlockTileEntity(x, y, z);
         if (tileEntity instanceof TileEntityPiston) {
-            ((IBlockEntityPistonMixins)(Object)tileEntity).getCollisionList(maskBox, list);
+            ((IBlockEntityPistonMixins)(Object)tileEntity).getCollisionList(maskBox, list, entity);
         }
     }
+    @Override
     public boolean hasSmallCenterHardPointToFacing(IBlockAccess blockAccess, int x, int y, int z, int direction, boolean ignoreTransparency) {
         TileEntity tileEntity = blockAccess.getBlockTileEntity(x, y, z);
         if (tileEntity instanceof TileEntityPiston) {
@@ -43,6 +47,7 @@ public class BlockPistonMovingMixins {
         }
         return false;
     }
+    @Override
     public boolean hasCenterHardPointToFacing(IBlockAccess blockAccess, int x, int y, int z, int direction, boolean ignoreTransparency) {
         TileEntity tileEntity = blockAccess.getBlockTileEntity(x, y, z);
         if (tileEntity instanceof TileEntityPiston) {
@@ -50,6 +55,7 @@ public class BlockPistonMovingMixins {
         }
         return false;
     }
+    @Override
     public boolean hasLargeCenterHardPointToFacing(IBlockAccess blockAccess, int x, int y, int z, int direction, boolean ignoreTransparency) {
         TileEntity tileEntity = blockAccess.getBlockTileEntity(x, y, z);
         if (tileEntity instanceof TileEntityPiston) {
@@ -60,6 +66,7 @@ public class BlockPistonMovingMixins {
     // If the whole point of this is to test the block bounds,
     // maybe overriding to use raw collision isn't a good idea?
     /*
+    @Override
     public MovingObjectPosition collisionRayTraceVsBlockBounds(World world, int x, int y, int z, Vec3 startRay, Vec3 endRay) {
         TileEntity tileEntity = world.getBlockTileEntity(x, y, z);
         if (tileEntity instanceof TileEntityPiston) {

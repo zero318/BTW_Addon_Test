@@ -12,7 +12,7 @@ public interface IBlockRedstoneWireMixins {
     
 #if ENABLE_MODERN_REDSTONE_WIRE
     
-    public int getConnectingSides(IBlockAccess block_access, int X, int Y, int Z, boolean for_rendering);
+    public int getConnectingSides(IBlockAccess blockAccess, int x, int y, int z, boolean forRendering);
 
 #if ENABLE_REDSTONE_WIRE_DOT_SHAPE
     public boolean getIsDot();

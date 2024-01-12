@@ -16,7 +16,7 @@ import zero.test.IBlockMixins;
 @Mixin(BlockRedstoneWire.class)
 public interface IRedstoneWireAccessMixins {
     //@Invoker("updateAndPropagateCurrentStrength")
-    //public abstract void callUpdateAndPropagateCurrentStrength(World world, int X, int Y, int Z);
+    //public abstract void callUpdateAndPropagateCurrentStrength(World world, int x, int y, int z);
     @Environment(EnvType.CLIENT)
     @Accessor
     public Icon getField_94413_c();

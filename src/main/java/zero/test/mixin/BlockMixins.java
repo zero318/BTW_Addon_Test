@@ -10,10 +10,10 @@ import java.util.List;
 @Mixin(Block.class)
 public class BlockMixins implements IBlockMixins {
     @Overwrite
-    public boolean hasLargeCenterHardPointToFacing(IBlockAccess block_access, int X, int Y, int Z, int direction, boolean ignore_transparency) {
+    public boolean hasLargeCenterHardPointToFacing(IBlockAccess blockAccess, int x, int y, int z, int direction, boolean ignoreTransparency) {
         // Skip the extra block lookup from chaining through world
         // since the block is already known.
-  return ((Block)(Object)this).isNormalCube(block_access, X, Y, Z);
+  return ((Block)(Object)this).isNormalCube(blockAccess, x, y, z);
  }
     /*
         THESE IGNORE THE WorldUtils VERSIONS OF HARDPOINT CHECKS
@@ -26,15 +26,15 @@ public class BlockMixins implements IBlockMixins {
         Effects:
     */
     @Overwrite
-    public boolean hasSmallCenterHardPointToFacing(IBlockAccess blockAccess, int i, int j, int k, int iFacing) {
-        return ((Block)(Object)this).hasSmallCenterHardPointToFacing(blockAccess, i, j, k, iFacing, true);
+    public boolean hasSmallCenterHardPointToFacing(IBlockAccess blockAccess, int x, int y, int z, int facing) {
+        return ((Block)(Object)this).hasSmallCenterHardPointToFacing(blockAccess, x, y, z, facing, true);
     }
     /*
         Effects:
     */
     @Overwrite
-    public boolean hasCenterHardPointToFacing(IBlockAccess blockAccess, int i, int j, int k, int iFacing) {
-  return ((Block)(Object)this).hasCenterHardPointToFacing(blockAccess, i, j, k, iFacing, true);
+    public boolean hasCenterHardPointToFacing(IBlockAccess blockAccess, int x, int y, int z, int facing) {
+  return ((Block)(Object)this).hasCenterHardPointToFacing(blockAccess, x, y, z, facing, true);
  }
     /*
         Effects:
@@ -56,16 +56,16 @@ public class BlockMixins implements IBlockMixins {
         - Comparators
     */
     @Overwrite
-    public boolean hasLargeCenterHardPointToFacing(IBlockAccess blockAccess, int i, int j, int k, int iFacing) {
-  return ((Block)(Object)this).hasLargeCenterHardPointToFacing(blockAccess, i, j, k, iFacing, true);
+    public boolean hasLargeCenterHardPointToFacing(IBlockAccess blockAccess, int x, int y, int z, int facing) {
+  return ((Block)(Object)this).hasLargeCenterHardPointToFacing(blockAccess, x, y, z, facing, true);
  }
     /*
         Effects:
         - Prevent above changes from impacting grass
     */
     @Overwrite
-    public boolean getCanGrassGrowUnderBlock(World world, int i, int j, int k, boolean bGrassOnHalfSlab) {
-  return bGrassOnHalfSlab || !((Block)(Object)this).hasLargeCenterHardPointToFacing(world, i, j, k, 0, false);
+    public boolean getCanGrassGrowUnderBlock(World world, int x, int y, int z, boolean grassOnHalfSlab) {
+  return grassOnHalfSlab || !((Block)(Object)this).hasLargeCenterHardPointToFacing(world, x, y, z, 0, false);
  }
     /*
         Check for effects:
@@ -75,7 +75,7 @@ public class BlockMixins implements IBlockMixins {
     // Extra variant of getMobilityFlag that allows
     // changing the result based on metadata.
     @Override
-    public int getMobilityFlag(World world, int X, int Y, int Z) {
+    public int getMobilityFlag(World world, int x, int y, int z) {
         return ((Block)(Object)this).getMobilityFlag();
     }
     /*
@@ -93,13 +93,13 @@ public class BlockMixins implements IBlockMixins {
     }
     */
     @Overwrite
-    public boolean rotateAroundJAxis(World world, int X, int Y, int Z, boolean reverse) {
-        int prev_meta = world.getBlockMetadata(X, Y, Z);
+    public boolean rotateAroundJAxis(World world, int x, int y, int z, boolean reverse) {
+        int prevMeta = world.getBlockMetadata(x, y, z);
         Block self = (Block)(Object)this;
-        int new_meta = self.rotateMetadataAroundJAxis(prev_meta, reverse);
-        if (prev_meta != new_meta) {
-            new_meta = ((IWorldMixins)world).updateFromNeighborShapes(X, Y, Z, self.blockID, new_meta);
-            world.setBlockMetadataWithNotify(X, Y, Z, new_meta, 0x01 | 0x02);
+        int newMeta = self.rotateMetadataAroundJAxis(prevMeta, reverse);
+        if (prevMeta != newMeta) {
+            newMeta = ((IWorldMixins)world).updateFromNeighborShapes(x, y, z, self.blockID, newMeta);
+            world.setBlockMetadataWithNotify(x, y, z, newMeta, 0x01 | 0x02);
             return true;
         }
         return false;

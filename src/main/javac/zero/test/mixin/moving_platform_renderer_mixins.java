@@ -60,7 +60,7 @@ public abstract class MovingPlatformRendererMixins {
             opcode = Opcodes.GETSTATIC
         )
     )
-    private Block redirect_block_get(Entity entity, double x, double y, double z, float fYaw, float renderPartialTicks) {
+    private Block redirect_block_get(Entity entity, double x, double y, double z, float yaw, float renderPartialTicks) {
         Block block = Block.blocksList[((IMovingPlatformEntityMixins)(MovingPlatformEntity)entity).getBlockId()];
         return !BLOCK_IS_AIR(block) ? block : BTWBlocks.platform;
     }

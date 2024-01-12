@@ -33,7 +33,6 @@ public class NetClientHandlerMixins {
                     player.noClip = true;
                     break;
             }
-            //AddonHandler.logMessage("Player noclip state B: "+player.noClip);
         }
     }
 #endif

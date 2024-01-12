@@ -141,9 +141,9 @@ public class BlockBaseRailLogicMixins {
         //if (!world.isRemote) AddonHandler.logMessage("Rail metas "+meta+" "+previous_shape+" "+rail_shape+" "+new_rail_shape);
         if (par2 || meta != new_rail_shape) {
             world.setBlockMetadataWithNotify(selfX, selfY, selfZ, new_rail_shape, 0x01 | 0x02);
-            List position_list = self.getRailChunkPosition();
-            for (int i = 0; i < position_list.size(); ++i) {
-                IBlockBaseRailLogicAccessMixins rail_logic = (IBlockBaseRailLogicAccessMixins)self.getRail((ChunkPosition)position_list.get(i));
+            List<ChunkPosition> position_list = self.getRailChunkPosition();
+            for (ChunkPosition position : position_list) {
+                IBlockBaseRailLogicAccessMixins rail_logic = (IBlockBaseRailLogicAccessMixins)self.getRail(position);
                 if (rail_logic != null) {
                     rail_logic.removeSoftConnections();
                     if (rail_logic.callCanConnectTo((BlockBaseRailLogic)(Object)this)) {

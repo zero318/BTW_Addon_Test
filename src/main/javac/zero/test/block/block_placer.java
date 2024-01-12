@@ -33,12 +33,12 @@ public class BlockPlacer extends BlockDispenserBlock {
 #if ENABLE_BLOCK_DISPENSER_VARIANTS
 
     @Override
-    public void onBlockAdded(World world, int X, int Y, int Z) {
+    public void onBlockAdded(World world, int x, int y, int z) {
     }
     
     @Override
-	public void onBlockPlacedBy(World world, int X, int Y, int Z, EntityLiving entity, ItemStack stack) {
-		setFacing(world, X, Y, Z, MiscUtils.convertPlacingEntityOrientationToBlockFacingReversed(entity));
+	public void onBlockPlacedBy(World world, int x, int y, int z, EntityLiving entity, ItemStack stack) {
+		setFacing(world, x, y, z, MiscUtils.convertPlacingEntityOrientationToBlockFacingReversed(entity));
 	}
     
     @Override
@@ -47,28 +47,28 @@ public class BlockPlacer extends BlockDispenserBlock {
     }
     
     @Override
-    public void onNeighborBlockChange(World world, int X, int Y, int Z, int neighbor_id) {
-        boolean receiving_power = world.isBlockIndirectlyGettingPowered(X, Y, Z) || world.isBlockIndirectlyGettingPowered(X, Y + 1, Z);
-        int meta = world.getBlockMetadata(X, Y, Z);
-        boolean is_powered = READ_META_FIELD(meta, POWERED);
+    public void onNeighborBlockChange(World world, int x, int y, int z, int neighborId) {
+        boolean receivingPower = world.isBlockIndirectlyGettingPowered(x, y, z) || world.isBlockIndirectlyGettingPowered(x, y + 1, z);
+        int meta = world.getBlockMetadata(x, y, z);
+        boolean isPowered = READ_META_FIELD(meta, POWERED);
         
-        if (receiving_power != is_powered) {
-            if (!is_powered) {
-                world.scheduleBlockUpdate(X, Y, Z, this.blockID, this.tickRate(world));
+        if (receivingPower != isPowered) {
+            if (!isPowered) {
+                world.scheduleBlockUpdate(x, y, z, this.blockID, this.tickRate(world));
             }
-            world.setBlockMetadataWithNotify(X, Y, Z, meta ^ 8, UPDATE_INVISIBLE);
+            world.setBlockMetadataWithNotify(x, y, z, TOGGLE_META_FIELD(meta, POWERED), UPDATE_INVISIBLE);
         }
     }
     
     // This matches what the base block does
     @Override
-    public void randomUpdateTick(World world, int X, int Y, int Z, Random random) {
-        updateTick(world, X, Y, Z, random);
+    public void randomUpdateTick(World world, int x, int y, int z, Random random) {
+        updateTick(world, x, y, z, random);
     }
     
     @Override
-    public void updateTick(World world, int X, int Y, int Z, Random random) {
-        ((IBlockDispenserBlockAccessMixins)this).callDispenseBlockOrItem(world, X, Y, Z);
+    public void updateTick(World world, int x, int y, int z, Random random) {
+        ((IBlockDispenserBlockAccessMixins)this).callDispenseBlockOrItem(world, x, y, z);
     }
     
     @Override

@@ -7,23 +7,22 @@ import java.util.Random;
 // Block piston reactions
 @Mixin(RedstoneClutchBlock.class)
 public class RedstoneClutchBlockMixins extends GearBoxBlock {
-    public RedstoneClutchBlockMixins(int block_id) {
-        super(block_id);
+    public RedstoneClutchBlockMixins(int blockId) {
+        super(blockId);
     }
     // Prevent clutches getting quasi powered
     @Overwrite
-    public void updateTick(World world, int X, int Y, int Z, Random random) {
-        this.updateMechPoweredState(world, X, Y, Z,
-            this.isInputtingMechanicalPower(world, X, Y, Z) &&
-            !world.isBlockGettingPowered(X, Y, Z) // a Redstone powered gearbox outputs no mechanical power
+    public void updateTick(World world, int x, int y, int z, Random random) {
+        this.updateMechPoweredState(world, x, y, z,
+            this.isInputtingMechanicalPower(world, x, y, z) &&
+            !world.isBlockGettingPowered(x, y, z) // a Redstone powered gearbox outputs no mechanical power
         );
     }
     @Overwrite
-    public boolean isCurrentStateValid(World world, int X, int Y, int Z) {
-        //RedstoneClutchBlock self = (RedstoneClutchBlock)(Object)this;
-     return this.isGearBoxOn(world, X, Y, Z) == (
-            this.isInputtingMechanicalPower(world, X, Y, Z) &&
-            !world.isBlockGettingPowered(X, Y, Z) // a Redstone powered gearbox outputs no mechanical power
+    public boolean isCurrentStateValid(World world, int x, int y, int z) {
+        return this.isGearBoxOn(world, x, y, z) == (
+            this.isInputtingMechanicalPower(world, x, y, z) &&
+            !world.isBlockGettingPowered(x, y, z) // a Redstone powered gearbox outputs no mechanical power
         );
  }
 }

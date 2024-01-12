@@ -94,37 +94,37 @@ public class MovingPlatformEntityMixins implements IMovingPlatformEntityMixins {
     }
     
     @Overwrite(remap=false)
-    public void convertToBlock(int X, int Y, int Z, MovingAnchorEntity associatedAnchor, boolean bMovingUpwards) {
+    public void convertToBlock(int x, int y, int z, MovingAnchorEntity associatedAnchor, boolean bMovingUpwards) {
         MovingPlatformEntity self = (MovingPlatformEntity)(Object)this;
         
-    	int dest_block_id = self.worldObj.getBlockId(X, Y, Z);
+    	int destBlockId = self.worldObj.getBlockId(x, y, z);
     	
-    	if (WorldUtils.isReplaceableBlock(self.worldObj, X, Y, Z)) {
-    		//self.worldObj.setBlockWithNotify(X, Y, Z, this.block_id);
-            self.worldObj.setBlock(X, Y, Z, this.block_id, this.block_meta, UPDATE_NEIGHBORS | UPDATE_CLIENTS);
+    	if (WorldUtils.isReplaceableBlock(self.worldObj, x, y, z)) {
+    		//self.worldObj.setBlockWithNotify(x, y, z, this.block_id);
+            self.worldObj.setBlock(x, y, z, this.block_id, this.block_meta, UPDATE_NEIGHBORS | UPDATE_CLIENTS);
     	}
     	else if (
             !Block.blocksList[dest_block_id].blockMaterial.isSolid() ||
-            dest_block_id == Block.web.blockID ||
-    		dest_block_id == BTWBlocks.web.blockID
+            destBlockId == Block.web.blockID ||
+    		destBlockId == BTWBlocks.web.blockID
         ) {
-    		int iTargetMetadata = self.worldObj.getBlockMetadata(X, Y, Z);
+    		int targetMetadata = self.worldObj.getBlockMetadata(x, y, z);
     		
-    		Block.blocksList[dest_block_id].dropBlockAsItem( 
+    		Block.blocksList[destBlockId].dropBlockAsItem( 
 				self.worldObj,
-                X, Y, Z,
-                iTargetMetadata,
+                x, y, z,
+                targetMetadata,
                 0
             );
     		
 	        self.worldObj.playAuxSFX(
                 BTWEffectManager.DESTROY_BLOCK_RESPECT_PARTICLE_SETTINGS_EFFECT_ID,
-	        	X, Y, Z,
-                dest_block_id + (iTargetMetadata << 12)
+	        	x, y, z,
+                destBlockId + (targetMetadata << 12)
             );
 	        
-    		//self.worldObj.setBlockWithNotify(X, Y, Z, this.block_id);
-            self.worldObj.setBlock(X, Y, Z, this.block_id, this.block_meta, UPDATE_NEIGHBORS | UPDATE_CLIENTS);
+    		//self.worldObj.setBlockWithNotify(x, y, z, this.block_id);
+            self.worldObj.setBlock(x, y, z, this.block_id, this.block_meta, UPDATE_NEIGHBORS | UPDATE_CLIENTS);
 		}
     	else {
     		// this shouldn't usually happen, but if the block is already occupied, eject the platform
@@ -132,18 +132,18 @@ public class MovingPlatformEntityMixins implements IMovingPlatformEntityMixins {
     		
 			ItemUtils.ejectSingleItemWithRandomOffset(
                 self.worldObj,
-                X, Y, Z,
+                x, y, z,
                 this.block_id,
                 0
             );
     	}
     	
-    	MiscUtils.positionAllNonPlayerMoveableEntitiesOutsideOfLocation(self.worldObj, X, Y, Z);
+    	MiscUtils.positionAllNonPlayerMoveableEntitiesOutsideOfLocation(self.worldObj, x, y, z);
     	
 		// FCTODO: hacky way of making sure players don't fall through platforms when they stop
 		
-    	MiscUtils.serverPositionAllPlayerEntitiesOutsideOfLocation(self.worldObj, X, Y + (!bMovingUpwards ? 1 : -1), Z);
-        MiscUtils.serverPositionAllPlayerEntitiesOutsideOfLocation(self.worldObj, X, Y, Z);
+    	MiscUtils.serverPositionAllPlayerEntitiesOutsideOfLocation(self.worldObj, x, y + (!movingUpwards ? 1 : -1), z);
+        MiscUtils.serverPositionAllPlayerEntitiesOutsideOfLocation(self.worldObj, x, y, z);
     	
     	self.setDead();
     }

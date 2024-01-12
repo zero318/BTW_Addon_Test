@@ -34,7 +34,7 @@ public abstract class ComparatorBlockMixins  extends BlockComparator {
         method = "renderBlock(Lnet/minecraft/src/RenderBlocks;III)Z",
         at = @At("HEAD")
     )
-    public void renderBlockComparator_inject(RenderBlocks render, int X, int Y, int Z, CallbackInfoReturnable info) {
+    public void renderBlockComparator_inject(RenderBlocks render, int x, int y, int z, CallbackInfoReturnable info) {
         ((IBlockRedstoneLogicMixins)(ComparatorBlock)(Object)this).setRenderingBaseTextures(false);
     }
     
@@ -46,7 +46,7 @@ public abstract class ComparatorBlockMixins  extends BlockComparator {
             target = "Lnet/minecraft/src/RenderBlocks;renderTorchAtAngle(Lnet/minecraft/src/Block;DDDDDI)V"
         )
     )
-    public void renderTorchAtAngle_redirect(RenderBlocks self, Block block, double X, double Y, double Z, double angleA, double angleB, int meta) {
-        ((IRenderBlocksMixins)self).renderTorchForRedstoneLogic(block, X, Y, Z, meta);
+    public void renderTorchAtAngle_redirect(RenderBlocks self, Block block, double x, double y, double z, double angleA, double angleB, int meta) {
+        ((IRenderBlocksMixins)self).renderTorchForRedstoneLogic(block, x, y, z, meta);
     }
 }

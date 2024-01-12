@@ -9,40 +9,39 @@ import zero.test.IBlockMixins;
 
 @Mixin(MortarReceiverSlabBlock.class)
 public abstract class MortarReceiverSlabBlockMixins extends FallingSlabBlock {
-    MortarReceiverSlabBlockMixins(int id, Material material) {
+    public MortarReceiverSlabBlockMixins(int id, Material material) {
         super(id, material);
     }
     @Override
-    public void updateTick(World world, int X, int Y, int Z, Random random) {
+    public void updateTick(World world, int x, int y, int z, Random random) {
         has_adjacent_slime: do {
-            int facing = getIsUpsideDown(world, X, Y, Z) ? 1 : 0;
-            int nextY = Y + Facing.offsetsXForSide[facing];
-            Block neighbor_block = Block.blocksList[world.getBlockId(X, nextY, Z)];
+            int facing = getIsUpsideDown(world, x, y, z) ? 1 : 0;
+            int nextY = y + Facing.offsetsXForSide[facing];
+            Block neighborBlock = Block.blocksList[world.getBlockId(x, nextY, z)];
             if (
-                !((neighbor_block)==null) &&
-                ((IBlockMixins)neighbor_block).permanentlySupportsMortarBlocks(world, X, nextY, Z, facing)
+                !((neighborBlock)==null) &&
+                ((IBlockMixins)neighborBlock).permanentlySupportsMortarBlocks(world, x, nextY, z, facing)
             ) {
                 break has_adjacent_slime;
             }
             facing = 2;
             do {
-                int nextX = X + Facing.offsetsXForSide[facing];
-                //int nextY = Y + Facing.offsetsYForSide[facing];
-                int nextZ = Z + Facing.offsetsZForSide[facing];
-                neighbor_block = Block.blocksList[world.getBlockId(nextX, Y, nextZ)];
+                int nextX = x + Facing.offsetsXForSide[facing];
+                int nextZ = z + Facing.offsetsZForSide[facing];
+                neighborBlock = Block.blocksList[world.getBlockId(nextX, y, nextZ)];
                 if (
-                    !((neighbor_block)==null) &&
-                    ((IBlockMixins)neighbor_block).permanentlySupportsMortarBlocks(world, nextX, Y, nextZ, facing)
+                    !((neighborBlock)==null) &&
+                    ((IBlockMixins)neighborBlock).permanentlySupportsMortarBlocks(world, nextX, y, nextZ, facing)
                 ) {
                     break has_adjacent_slime;
                 }
-            } while (++facing < 6);
-            if (checkForFall(world, X, Y, Z)) {
+            } while (((++facing)<=5));
+            if (checkForFall(world, x, y, z)) {
                 return;
             }
         } while(false);
-        if (getIsUpsideDown(world, X, Y, Z)) {
-            setIsUpsideDown(world, X, Y, Z, false);
+        if (getIsUpsideDown(world, x, y, z)) {
+            setIsUpsideDown(world, x, y, z, false);
         }
     }
 }

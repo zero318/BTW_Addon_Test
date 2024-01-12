@@ -24,15 +24,20 @@ import zero.test.IBlockEntityPistonMixins;
 // Block piston reactions
 //#define getInputSignal(...) func_94482_f(__VA_ARGS__)
 @Mixin(BlockPistonExtension.class)
-public class BlockPistonExtensionMixins {
-    //@Override
+public class BlockPistonExtensionMixins extends Block {
+    public BlockPistonExtensionMixins(int blockId, Material material) {
+        super(blockId, material);
+    }
+    @Override
     public boolean triggersBuddy() {
         return false;
     }
+    @Override
     public boolean hasLargeCenterHardPointToFacing(IBlockAccess blockAccess, int x, int y, int z, int direction, boolean ignoreTransparency) {
         return direction == (((blockAccess.getBlockMetadata(x, y, z))&7));
     }
     @Environment(EnvType.CLIENT)
+    @Override
     public boolean shouldRenderNeighborFullFaceSide(IBlockAccess blockAccess, int x, int y, int z, int direction) {
         return direction != (((blockAccess.getBlockMetadata(x, y, z))&7));
     }

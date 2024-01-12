@@ -65,18 +65,20 @@ public abstract class PistonMixins extends BlockPistonBase {
     }
 
     // Suffocate entities inside a retracted piston
+    @Override
     public boolean isNormalCube(IBlockAccess blockAccess, int x, int y, int z) {
         return !READ_META_FIELD(blockAccess.getBlockMetadata(x, y, z), EXTENDED);
     }
 #endif
-    
+
+    @Override
     public boolean hasCenterHardPointToFacing(IBlockAccess blockAccess, int x, int y, int z, int facing, boolean ignoreTransparency) {
         int meta = blockAccess.getBlockMetadata(x, y, z);
         if (READ_META_FIELD(meta, EXTENDED)) {
             int direction = READ_META_FIELD(meta, DIRECTION);
             if (
                 direction == facing ||
-                (direction < 2 && facing >= 2)
+                DIRECTION_IS_VERTICAL(direction) && DIRECTION_IS_HORIZONTAL(facing)
             ) {
                 return false;
             }
@@ -85,6 +87,7 @@ public abstract class PistonMixins extends BlockPistonBase {
     }
     
     // The back of a piston is still a large hardpoint when extended
+    @Override
     public boolean hasLargeCenterHardPointToFacing(IBlockAccess blockAccess, int x, int y, int z, int facing, boolean ignoreTransparency) {
         int meta = blockAccess.getBlockMetadata(x, y, z);
         return !READ_META_FIELD(meta, EXTENDED) || OPPOSITE_DIRECTION(facing) == READ_META_FIELD(meta, DIRECTION);
@@ -215,7 +218,7 @@ public abstract class PistonMixins extends BlockPistonBase {
                     }
                 }
             }
-        } while (++facing < 6);
+        } while (DIRECTION_IS_VALID(++facing));
         return true;
     }
 
@@ -768,7 +771,7 @@ public abstract class PistonMixins extends BlockPistonBase {
     private static final int PISTON_EVENT_RETRACTING_NORMAL = 1;
     private static final int PISTON_EVENT_RETRACTING_DROP_BLOCK = 2;
     
-    //@Override
+    @Override
     public void updatePistonState(World world, int x, int y, int z) {
         if (!world.isRemote) {
             int meta = world.getBlockMetadata(x, y, z);
@@ -778,7 +781,7 @@ public abstract class PistonMixins extends BlockPistonBase {
             // Apparently directions 6 and 7 have been well known
             // to crash older versions. Extended this check to try
             // and prevent that.
-            if (direction < 6) {
+            if (DIRECTION_IS_VALID(direction)) {
                 boolean isPowered = ((IPistonBaseAccessMixins)(Object)this).callIsIndirectlyPowered(world, x, y, z, direction);
                 if (isPowered != READ_META_FIELD(meta, EXTENDED)) {
                     if (isPowered) {
@@ -820,7 +823,7 @@ public abstract class PistonMixins extends BlockPistonBase {
         }
     }
     
-    //@Override
+    @Override
     public boolean onBlockEventReceived(World world, int x, int y, int z, int eventType, int direction) {
         if (!world.isRemote) {
             boolean isPowered = ((IPistonBaseAccessMixins)(Object)this).callIsIndirectlyPowered(world, x, y, z, direction);
@@ -861,10 +864,15 @@ public abstract class PistonMixins extends BlockPistonBase {
                     ((TileEntityPiston)tileEntity).clearPistonTileEntity();
                 }
                 
+                // This is the only time that the metadata of the moving block itself
+                // and the metadata of the moving block entity are different.
+                // This is done specifically so that a non-extended piston will be placed
+                // by the moving block but an extended piston will be used for all
+                // property tests while the block is moving.
                 world.setBlock(x, y, z, Block.pistonMoving.blockID, MERGE_META_FIELD(direction, EXTENDED, true), UPDATE_SUPPRESS_DROPS);
                 world.setBlockTileEntity(x, y, z, BlockPistonMoving.getTileEntity(this.blockID, direction, direction, false, true));
-                world.notifyBlockChange(x, y, z, Block.pistonMoving.blockID);
-                ((IWorldMixins)world).updateNeighbourShapes(x, y, z, UPDATE_CLIENTS);
+                //world.notifyBlockChange(x, y, z, Block.pistonMoving.blockID);
+                //((IWorldMixins)world).updateNeighbourShapes(x, y, z, UPDATE_CLIENTS);
                 
                 if (this.isSticky) {
                     int currentX = nextX + Facing.offsetsXForSide[direction];
@@ -920,6 +928,7 @@ public abstract class PistonMixins extends BlockPistonBase {
     //}
 
     @Environment(EnvType.CLIENT)
+    @Override
     public boolean shouldRenderNeighborFullFaceSide(IBlockAccess blockAccess, int x, int y, int z, int direction) {
         return !this.hasLargeCenterHardPointToFacing(blockAccess, x, y, z, direction, true);
     }

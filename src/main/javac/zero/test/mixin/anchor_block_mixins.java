@@ -163,7 +163,7 @@ public class AnchorBlockMixins {
                     }
                 }
             }
-        } while (++facing < 6);
+        } while (DIRECTION_IS_VALID(++facing));
         return true;
     }
 

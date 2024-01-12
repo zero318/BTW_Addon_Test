@@ -56,7 +56,6 @@
     "PaneBlockMixins"
   ],
   "client": [
-    "ZeroTestMixin",
     "ComparatorBlockMixins",
     "BlockLiftedByPlatformRendererMixins",
     "MovingPlatformRendererMixins"

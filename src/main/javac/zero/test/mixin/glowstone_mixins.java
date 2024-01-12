@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.Mixin;
 @Mixin(BlockGlowStone.class)
 public class BlockGlowStoneMixins {
 #if ENABLE_MODERN_REDSTONE_WIRE
-    public boolean isRedstoneConductor(IBlockAccess block_access, int X, int Y, int Z) {
+    public boolean isRedstoneConductor(IBlockAccess blockAccess, int x, int y, int z) {
         return false;
     }
 #endif

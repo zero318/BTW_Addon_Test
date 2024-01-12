@@ -19,9 +19,9 @@ public class EntityPlayerMixins {
         at = @At("HEAD"),
         cancellable = true
     )
-    protected void isEntityInsideOpaqueBlock_cancel_if_noclip(CallbackInfoReturnable callback_info) {
+    protected void isEntityInsideOpaqueBlock_cancel_if_noclip(CallbackInfoReturnable callbackInfo) {
         if (((EntityPlayer)(Object)this).noClip) {
-            callback_info.setReturnValue(false);
+            callbackInfo.setReturnValue(false);
         }
     }
 }

@@ -21,6 +21,6 @@ import java.util.Random;
 public interface IBlockComparatorAccessMixins {
 #if ENABLE_REDSTONE_BUGFIXES
     @Invoker
-    public abstract void callFunc_96476_c(World world, int X, int Y, int Z, Random random);
+    public abstract void callFunc_96476_c(World world, int x, int y, int z, Random random);
 #endif
 }

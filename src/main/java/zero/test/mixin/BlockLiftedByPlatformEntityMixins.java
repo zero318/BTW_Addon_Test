@@ -50,15 +50,15 @@ public class BlockLiftedByPlatformEntityMixins {
         self.setDead();
     }
     @Overwrite(remap=false)
-    public void convertToBlock(int X, int Y, int Z) {
+    public void convertToBlock(int x, int y, int z) {
         BlockLiftedByPlatformEntity self = (BlockLiftedByPlatformEntity)(Object)this;
-        Block block_below = Block.blocksList[self.worldObj.getBlockId(X, Y - 1, Z)];
+        Block block_below = Block.blocksList[self.worldObj.getBlockId(x, y - 1, z)];
         if (
             !((block_below)==null) &&
-            ((IBlockMixins)block_below).getPlatformMobilityFlag(self.worldObj, X, Y, Z) == 1 &&
-            WorldUtils.isReplaceableBlock(self.worldObj, X, Y, Z)
+            ((IBlockMixins)block_below).getPlatformMobilityFlag(self.worldObj, x, y, z) == 1 &&
+            WorldUtils.isReplaceableBlock(self.worldObj, x, y, z)
         ) {
-            self.worldObj.setBlockAndMetadataWithNotify(X, Y, Z, self.getBlockID(), self.getBlockMetadata());
+            self.worldObj.setBlockAndMetadataWithNotify(x, y, z, self.getBlockID(), self.getBlockMetadata());
             self.setDead();
         }
         else {
@@ -97,19 +97,13 @@ public class BlockLiftedByPlatformEntityMixins {
                             self.prevPosZ = self.posZ;
                             switch (facing) {
                                 case 5:
-                                    newPosX += platform.posX < self.posX
-                                                ? 1.0D
-                                                : -1.0D;
+                                    newPosX += platform.posX < self.posX ? 1.0D : -1.0D;
                                     break;
                                 case 1:
-                                    newPosY += platform.posY < self.posY
-                                                ? 1.0D
-                                                : -1.0D;
+                                    newPosY += platform.posY < self.posY ? 1.0D : -1.0D;
                                     break;
                                 default:
-                                    newPosZ += platform.posZ < self.posZ
-                                                ? 1.0D
-                                                : -1.0D;
+                                    newPosZ += platform.posZ < self.posZ ? 1.0D : -1.0D;
                                     break;
                             }
                             self.setPosition(newPosX, newPosY, newPosZ);
@@ -117,7 +111,7 @@ public class BlockLiftedByPlatformEntityMixins {
                         }
                     }
                 }
-            } while ((facing += 2) < 6);
+            } while (((facing += 2)<=5));
             if (!self.worldObj.isRemote) {
                 this.convertToBlock(
                     MathHelper.floor_double(self.posX),
@@ -147,7 +141,7 @@ public class BlockLiftedByPlatformEntityMixins {
             target = "Lnet/minecraft/src/World;setBlockWithNotify(IIII)Z"
         )
     )
-    public boolean setBlockWithNotify_redirect(World world, int X, int Y, int Z, int block_id) {
+    public boolean setBlockWithNotify_redirect(World world, int x, int y, int z, int blockId) {
         // Don't do this from inside a constructor
         return true;
     }

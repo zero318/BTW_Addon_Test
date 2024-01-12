@@ -36,12 +36,12 @@ import java.util.Random;
 @Mixin(PlatformBlock.class)
 public class PlatformBlockMixins {
 #if ENABLE_PLATFORMS_WITH_PISTONS
-    public boolean isStickyForBlocks(World world, int X, int Y, int Z, int direction) {
+    public boolean isStickyForBlocks(World world, int x, int y, int z, int direction) {
         // Only attach to other platforms.
         // Check is done here to act as a whitelist
         // rather than blacklisting it from canBeStuckTo
         // on everything else.
-        return ((PlatformBlock)(Object)this).blockID == world.getBlockId(X + Facing.offsetsXForSide[direction], Y + Facing.offsetsYForSide[direction], Z + Facing.offsetsZForSide[direction]);
+        return ((PlatformBlock)(Object)this).blockID == world.getBlockId(x + Facing.offsetsXForSide[direction], y + Facing.offsetsYForSide[direction], z + Facing.offsetsZForSide[direction]);
     }
 #endif
 
@@ -55,33 +55,33 @@ public class PlatformBlockMixins {
     // chains through Block::isNormalCube (thus the override)
     // but ChunkCache::isBlockNormalCube directly tests block
     // properties and avoids the override.
-    public boolean isRedstoneConductor(IBlockAccess block_access, int X, int Y, int Z) {
+    public boolean isRedstoneConductor(IBlockAccess block_access, int x, int y, int z) {
         return false;
     }
 #endif
 
 #if ENABLE_PLATFORM_FIXES
-    public int getPlatformMobilityFlag(World world, int X, int Y, int Z) {
+    public int getPlatformMobilityFlag(World world, int x, int y, int z) {
         return PLATFORM_MAIN_SUPPORT;
     }
 
     @Overwrite
-    public void attemptToLiftBlockWithPlatform(World world, int X, int Y, int Z) {
-        int block_id = world.getBlockId(X, Y, Z);
-        Block block = Block.blocksList[block_id];
+    public void attemptToLiftBlockWithPlatform(World world, int x, int y, int z) {
+        int blockId = world.getBlockId(x, y, z);
+        Block block = Block.blocksList[blockId];
         if (
             !BLOCK_IS_AIR(block) &&
-            ((IBlockMixins)block).getPlatformMobilityFlag(world, X, Y, Z) == PLATFORM_CAN_LIFT
+            ((IBlockMixins)block).getPlatformMobilityFlag(world, x, y, z) == PLATFORM_CAN_LIFT
         ) {
-            //PLATFORM_LIFT_DEBUG("Trying to lift "+block_id);
-            BlockLiftedByPlatformEntity lifted_entity = (BlockLiftedByPlatformEntity)EntityList.createEntityOfType(
+            //PLATFORM_LIFT_DEBUG("Trying to lift "+blockId);
+            BlockLiftedByPlatformEntity liftedEntity = (BlockLiftedByPlatformEntity)EntityList.createEntityOfType(
                 BlockLiftedByPlatformEntity.class, world,
-                (double)X + 0.5D, (double)Y + 0.5D, (double)Z + 0.5D
+                (double)x + 0.5D, (double)y + 0.5D, (double)z + 0.5D
             );
-            lifted_entity.setBlockID(block_id);
-            lifted_entity.setBlockMetadata(((IBlockMixins)block).adjustMetadataForPlatformMove(world.getBlockMetadata(X, Y, Z)));
-            world.spawnEntityInWorld(lifted_entity);
-            world.setBlock(X, Y, Z, 0, 0, UPDATE_NEIGHBORS | UPDATE_CLIENTS | UPDATE_IMMEDIATE | UPDATE_SUPPRESS_DROPS | UPDATE_MOVE_BY_PISTON);
+            liftedEntity.setBlockID(blockId);
+            liftedEntity.setBlockMetadata(((IBlockMixins)block).adjustMetadataForPlatformMove(world.getBlockMetadata(x, y, z)));
+            world.spawnEntityInWorld(liftedEntity);
+            world.setBlock(x, y, z, 0, 0, UPDATE_NEIGHBORS | UPDATE_CLIENTS | UPDATE_IMMEDIATE | UPDATE_SUPPRESS_DROPS | UPDATE_MOVE_BY_PISTON);
         }
     }
 #endif

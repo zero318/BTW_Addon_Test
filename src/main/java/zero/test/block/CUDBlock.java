@@ -9,13 +9,14 @@ import net.fabricmc.api.Environment;
 import net.minecraft.src.*;
 import java.util.Random;
 // Block piston reactions
+
 public class CUDBlock extends BuddyBlock {
-    public CUDBlock(int block_id) {
-        super(block_id);
+    public CUDBlock(int blockId) {
+        super(blockId);
         this.setUnlocalizedName("cud_block");
     }
     @Override
-    public void onBlockAdded(World world, int X, int Y, int Z) {
+    public void onBlockAdded(World world, int x, int y, int z) {
         // HACK: 
         // Java doesn't have super.super, so there's no way of
         // calling Block.onBlockAdded without going through
@@ -24,7 +25,7 @@ public class CUDBlock extends BuddyBlock {
         // is still empty and doing nothing.
     }
     @Override
-    public int onPreBlockPlacedByPiston(World world, int X, int Y, int Z, int meta, int direction) {
+    public int onPreBlockPlacedByPiston(World world, int x, int y, int z, int meta, int direction) {
         return meta;
     }
     @Override
@@ -32,36 +33,38 @@ public class CUDBlock extends BuddyBlock {
         return true;
     }
     @Override
-    public void onNeighborBlockChange(World world, int X, int Y, int Z, int neighbor_id) {
+    public void onNeighborBlockChange(World world, int x, int y, int z, int neighborId) {
         // IDK why this check works for preventing a crash, but it does
-        if (neighbor_id != 1318) {
-            int meta = world.getBlockMetadata(X, Y, Z);
+        if (neighborId != 1318) {
+            int meta = world.getBlockMetadata(x, y, z);
             if (!((((meta)&1)!=0))) {
-                Block neighbor_block = blocksList[neighbor_id];
+                Block neighbor_block = blocksList[neighborId];
                 if (
                     !((neighbor_block)==null) &&
                     neighbor_block.hasComparatorInputOverride() &&
-                    !world.isUpdatePendingThisTickForBlock(X, Y, Z, blockID)
+                    !world.isUpdatePendingThisTickForBlock(x, y, z, this.blockID)
                 ) {
                     // minimal delay when triggered to avoid notfying neighbors of change in same tick
                     // that they are notifying of the original change. Not doing so causes problems 
                     // with some blocks (like ladders) that haven't finished initializing their state 
                     // on placement when they send out the notification
-                    world.scheduleBlockUpdate(X, Y, Z, blockID, 1);
+                    world.scheduleBlockUpdate(x, y, z, this.blockID, 1);
                 }
             }
         }
     }
-    public boolean getWeakChanges(World world, int X, int Y, int Z, int neighbor_id) {
+    public boolean getWeakChanges(World world, int x, int y, int z, int neighborId) {
         return true;
+    }
+    public boolean canRedstoneConnectToSide(IBlockAccess blockAccess, int x, int y, int z, int flatDirection) {
+        return (((((blockAccess.getBlockMetadata(x, y, z))>>>1)))^1) == Direction.directionToFacing[flatDirection];
     }
     @Environment(EnvType.CLIENT)
     private Icon texture_front;
     @Override
     @Environment(EnvType.CLIENT)
-    public void registerIcons( IconRegister register )
-    {
-        super.registerIcons( register );
+    public void registerIcons(IconRegister register) {
+        super.registerIcons(register);
         this.texture_front = register.registerIcon("cud_block_front");
     }
     @Override
@@ -72,12 +75,12 @@ public class CUDBlock extends BuddyBlock {
     }
     @Override
     @Environment(EnvType.CLIENT)
-    public Icon getBlockTexture(IBlockAccess blockAccess, int X, int Y, int Z, int side) {
-        if (this.isRedstoneOn(blockAccess, X, Y, Z)) {
+    public Icon getBlockTexture(IBlockAccess blockAccess, int x, int y, int z, int side) {
+        if (this.isRedstoneOn(blockAccess, x, y, z)) {
             // Use original powered textures
-            return super.getBlockTexture(blockAccess, X, Y, Z, side);
+            return super.getBlockTexture(blockAccess, x, y, z, side);
         }
-        return getFacing(blockAccess, X, Y, Z) == side
+        return getFacing(blockAccess, x, y, z) == side
                 ? this.texture_front
                 : this.blockIcon;
     }

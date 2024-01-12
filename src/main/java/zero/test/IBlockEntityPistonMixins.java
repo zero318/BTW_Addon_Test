@@ -9,6 +9,6 @@ public interface IBlockEntityPistonMixins {
     public boolean hasSmallCenterHardPointToFacing(int x, int y, int z, int direction, boolean ignoreTransparency);
     public boolean hasCenterHardPointToFacing(int x, int y, int z, int direction, boolean ignoreTransparency);
     public boolean hasLargeCenterHardPointToFacing(int x, int y, int z, int direction, boolean ignoreTransparency);
-    public void getCollisionList(AxisAlignedBB maskBox, List list);
+    public void getCollisionList(AxisAlignedBB maskBox, List list, Entity entity);
     public AxisAlignedBB getBlockBoundsFromPoolBasedOnState();
 }

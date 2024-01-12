@@ -56,12 +56,12 @@ public abstract class BlockLiftedByPlatformRendererMixins extends Render {
         method = "doRender(Lnet/minecraft/src/Entity;DDDFF)V",
         at = @At("TAIL")
     )
-    public void doRender_inject(Entity entity, double x, double y, double z, float fYaw, float renderPartialTicks, CallbackInfo info) {
+    public void doRender_inject(Entity entity, double x, double y, double z, float yaw, float renderPartialTicks, CallbackInfo info) {
         BlockLiftedByPlatformEntity liftedBlockEntity = (BlockLiftedByPlatformEntity)entity;
         
-        int iBlockID = liftedBlockEntity.getBlockID();
+        int blockID = liftedBlockEntity.getBlockID();
     	
-    	Block block = Block.blocksList[iBlockID];
+    	Block block = Block.blocksList[blockID];
         
         if (
             !BLOCK_IS_AIR(block) &&

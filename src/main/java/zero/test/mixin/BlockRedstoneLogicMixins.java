@@ -16,8 +16,8 @@ import zero.test.mixin.IBlockRedstoneLogicAccessMixins;
 //#define getInputSignal(...) func_94482_f(__VA_ARGS__)
 @Mixin(BlockRedstoneLogic.class)
 public abstract class BlockRedstoneLogicMixins extends BlockDirectional implements IBlockRedstoneLogicMixins {
-    public BlockRedstoneLogicMixins(int block_id, Material material) {
-        super(block_id, material);
+    public BlockRedstoneLogicMixins(int blockId, Material material) {
+        super(blockId, material);
     }
     public boolean isRenderingLogicBase;
     public void setRenderingBaseTextures(boolean value) {
@@ -40,10 +40,10 @@ public abstract class BlockRedstoneLogicMixins extends BlockDirectional implemen
     // texture when it isn't needed
     @Environment(EnvType.CLIENT)
     @Overwrite
-    public boolean shouldSideBeRendered(IBlockAccess block_access, int neighborX, int neighborY, int neighborZ, int neighbor_side) {
-        switch (neighbor_side) {
+    public boolean shouldSideBeRendered(IBlockAccess blockAccess, int neighborX, int neighborY, int neighborZ, int neighborSide) {
+        switch (neighborSide) {
             case 0:
-                return super.shouldSideBeRendered(block_access, neighborX, neighborY, neighborZ, neighbor_side);
+                return super.shouldSideBeRendered(blockAccess, neighborX, neighborY, neighborZ, neighborSide);
             case 1:
                 return false;
             default:

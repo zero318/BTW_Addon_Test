@@ -19,11 +19,9 @@ public class EntityPlayerSPMixins {
         at = @At("HEAD"),
         cancellable = true
     )
-    protected void pushOutOfBlocks_cancel_if_noclip(double X, double Y, double Z, CallbackInfoReturnable callback_info) {
-        EntityPlayerSP self = (EntityPlayerSP)(Object)this;
-        if (self.noClip) {
-            //AddonHandler.logMessage("Player noclip state A: "+self.noClip);
-            callback_info.setReturnValue(false);
+    protected void pushOutOfBlocks_cancel_if_noclip(double x, double y, double z, CallbackInfoReturnable callbackInfo) {
+        if (((EntityPlayerSP)(Object)this).noClip) {
+            callbackInfo.setReturnValue(false);
         }
     }
 }

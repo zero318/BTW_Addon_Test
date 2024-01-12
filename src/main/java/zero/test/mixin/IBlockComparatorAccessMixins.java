@@ -14,5 +14,5 @@ import java.util.Random;
 @Mixin(BlockComparator.class)
 public interface IBlockComparatorAccessMixins {
     @Invoker
-    public abstract void callFunc_96476_c(World world, int X, int Y, int Z, Random random);
+    public abstract void callFunc_96476_c(World world, int x, int y, int z, Random random);
 }

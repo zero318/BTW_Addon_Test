@@ -10,8 +10,8 @@ import btw.AddonHandler;
 import java.util.Random;
 // Block piston reactions
 public class ObserverBlock extends BuddyBlock {
-    public ObserverBlock(int block_id) {
-        super(block_id);
+    public ObserverBlock(int blockId) {
+        super(blockId);
         this.setUnlocalizedName("observer");
         this.setTickRandomly(false);
     }
@@ -24,7 +24,7 @@ public class ObserverBlock extends BuddyBlock {
         return true;
     }
     @Override
-    public void onBlockAdded(World world, int X, int Y, int Z) {
+    public void onBlockAdded(World world, int x, int y, int z) {
         // HACK: 
         // Java doesn't have super.super, so there's no way of
         // calling Block.onBlockAdded without going through
@@ -33,62 +33,56 @@ public class ObserverBlock extends BuddyBlock {
         // is still empty and doing nothing.
     }
     @Override
-    public void onNeighborBlockChange(World world, int X, int Y, int Z, int neighbor_id) {
+    public void onNeighborBlockChange(World world, int x, int y, int z, int neighborId) {
     }
-    public int updateShape(World world, int X, int Y, int Z, int direction, int meta) {
+    public int updateShape(World world, int x, int y, int z, int direction, int meta) {
         if (
             (((meta)>>>1)) == ((direction)^1) &&
-            !world.isUpdateScheduledForBlock(X, Y, Z, this.blockID)
+            !world.isUpdateScheduledForBlock(x, y, z, this.blockID)
         ) {
-            world.scheduleBlockUpdate(X, Y, Z, this.blockID, 2);
+            world.scheduleBlockUpdate(x, y, z, this.blockID, 2);
         }
         return meta;
     }
     @Override
-    public void updateTick(World world, int X, int Y, int Z, Random random) {
-        int meta = world.getBlockMetadata(X, Y, Z);
+    public void updateTick(World world, int x, int y, int z, Random random) {
+        int meta = world.getBlockMetadata(x, y, z);
         if (((((meta)&1)!=0))) {
-            world.setBlockMetadataWithClient(X, Y, Z, (((meta)&14)));
+            world.setBlockMetadataWithClient(x, y, z, (((meta)&14)));
         } else {
-            world.setBlockMetadataWithClient(X, Y, Z, (((meta)|1)));
-            world.scheduleBlockUpdate(X, Y, Z, this.blockID, 2);
+            world.setBlockMetadataWithClient(x, y, z, (((meta)|1)));
+            world.scheduleBlockUpdate(x, y, z, this.blockID, 2);
         }
         int direction = (((meta)>>>1));
-        X += Facing.offsetsXForSide[direction];
-        Y += Facing.offsetsYForSide[direction];
-        Z += Facing.offsetsZForSide[direction];
-        Block neighbor_block = Block.blocksList[world.getBlockId(X, Y, Z)];
-        if (!((neighbor_block)==null)) {
-            neighbor_block.onNeighborBlockChange(world, X, Y, Z, this.blockID);
+        x += Facing.offsetsXForSide[direction];
+        y += Facing.offsetsYForSide[direction];
+        z += Facing.offsetsZForSide[direction];
+        Block neighborBlock = Block.blocksList[world.getBlockId(x, y, z)];
+        if (!((neighborBlock)==null)) {
+            neighborBlock.onNeighborBlockChange(world, x, y, z, this.blockID);
         }
-        world.notifyBlocksOfNeighborChange(X, Y, Z, this.blockID, ((direction)^1));
+        world.notifyBlocksOfNeighborChange(x, y, z, this.blockID, ((direction)^1));
     }
-    public boolean isRedstoneConductor(IBlockAccess block_access, int X, int Y, int Z) {
+    public boolean isRedstoneConductor(IBlockAccess blockAccess, int x, int y, int z) {
         return false;
     }
-    public boolean canRedstoneConnectToSide(IBlockAccess block_access, int X, int Y, int Z, int flat_direction) {
-        return (((((block_access.getBlockMetadata(X, Y, Z))>>>1)))^1) == Direction.directionToFacing[flat_direction];
+    public boolean canRedstoneConnectToSide(IBlockAccess blockAccess, int x, int y, int z, int flatDirection) {
+        return (((((blockAccess.getBlockMetadata(x, y, z))>>>1)))^1) == Direction.directionToFacing[flatDirection];
     }
     // This just gets rid of the clicking sound
     // TODO: Remove override now that the code
     // is being used directly in updateTick
     @Override
-    public void setBlockRedstoneOn(World world, int X, int Y, int Z, boolean is_activated) {
-        if (is_activated != isRedstoneOn(world, X, Y, Z)) {
-            int meta = world.getBlockMetadata(X, Y, Z);
-            if (is_activated) {
-                meta |= 1;
-            }
-            else {
-                meta &= ~1;
-            }
-            world.setBlockMetadataWithClient(X, Y, Z, meta);
+    public void setBlockRedstoneOn(World world, int x, int y, int z, boolean isActivated) {
+        if (isActivated != isRedstoneOn(world, x, y, z)) {
+            int meta = world.getBlockMetadata(x, y, z);
+            world.setBlockMetadataWithClient(x, y, z, (((meta)&14|((isActivated)?1:0))));
             // only notify on the output side to prevent weird shit like doors auto-closing when the block
             // goes off
-            int direction = this.getFacing(world, X, Y, Z);
-            notifyNeigborsToFacingOfPowerChange(world, X, Y, Z, direction);
+            int direction = this.getFacing(world, x, y, z);
+            notifyNeigborsToFacingOfPowerChange(world, x, y, z, direction);
             // the following forces a re-render (for texture change)
-            world.markBlockRangeForRenderUpdate(X, Y, Z, X, Y, Z);
+            world.markBlockRangeForRenderUpdate(x, y, z, x, y, z);
         }
     }
     // Maybe this will prevent it getting stuck on when moved?
@@ -135,8 +129,8 @@ public class ObserverBlock extends BuddyBlock {
     }
     @Override
     @Environment(EnvType.CLIENT)
-    public Icon getBlockTexture(IBlockAccess block_access, int X, int Y, int Z, int side) {
-        int meta = block_access.getBlockMetadata(X, Y, Z);
+    public Icon getBlockTexture(IBlockAccess block_access, int x, int y, int z, int side) {
+        int meta = block_access.getBlockMetadata(x, y, z);
         int facing = (((meta)>>>1));
         if (facing == side) {
             return ((((meta)&1)!=0))
@@ -154,9 +148,9 @@ public class ObserverBlock extends BuddyBlock {
     }
     @Override
     @Environment(EnvType.CLIENT)
-    public boolean renderBlock(RenderBlocks render, int X, int Y, int Z) {
+    public boolean renderBlock(RenderBlocks render, int x, int y, int z) {
         // IDK why these rotation values work
-        switch ((((render.blockAccess.getBlockMetadata(X, Y, Z))>>>1))) {
+        switch ((((render.blockAccess.getBlockMetadata(x, y, z))>>>1))) {
             case 0:
                 render.setUVRotateEast(3);
                 render.setUVRotateWest(3);
@@ -184,8 +178,8 @@ public class ObserverBlock extends BuddyBlock {
                 render.setUVRotateBottom(2);
                 break;
         }
-        render.setRenderBounds(0.0, 0.0, 0.0, 1.0, 1.0, 1.0);
-        boolean ret = render.renderStandardBlock(this, X, Y, Z);
+        render.setRenderBounds(0.0D, 0.0D, 0.0D, 1.0D, 1.0D, 1.0D);
+        boolean ret = render.renderStandardBlock(this, x, y, z);
         render.clearUVRotation();
         return ret;
     }

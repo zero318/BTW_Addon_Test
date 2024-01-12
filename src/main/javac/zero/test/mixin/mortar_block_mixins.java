@@ -18,27 +18,27 @@ import zero.test.IBlockMixins;
 
 @Mixin(MortarReceiverBlock.class)
 public class MortarReceiverBlockMixins extends FallingFullBlock {
-    MortarReceiverBlockMixins(int id, Material material) {
+    public MortarReceiverBlockMixins(int id, Material material) {
         super(id, material);
     }
     
 #if ENABLE_MOVING_BLOCK_CHAINING && ENABLE_SLIME_SUPPORTING_MORTAR_BLOCKS
     @Override
-    public void updateTick(World world, int X, int Y, int Z, Random random) {
+    public void updateTick(World world, int x, int y, int z, Random random) {
         int facing = 0;
         do {
-            int nextX = X + Facing.offsetsXForSide[facing];
-            int nextY = Y + Facing.offsetsYForSide[facing];
-            int nextZ = Z + Facing.offsetsZForSide[facing];
-            Block neighbor_block = Block.blocksList[world.getBlockId(nextX, nextY, nextZ)];
+            int nextX = x + Facing.offsetsXForSide[facing];
+            int nextY = y + Facing.offsetsYForSide[facing];
+            int nextZ = z + Facing.offsetsZForSide[facing];
+            Block neighborBlock = Block.blocksList[world.getBlockId(nextX, nextY, nextZ)];
             if (
-                !BLOCK_IS_AIR(neighbor_block) &&
-                ((IBlockMixins)neighbor_block).permanentlySupportsMortarBlocks(world, nextX, nextY, nextZ, facing)
+                !BLOCK_IS_AIR(neighborBlock) &&
+                ((IBlockMixins)neighborBlock).permanentlySupportsMortarBlocks(world, nextX, nextY, nextZ, facing)
             ) {
                 return;
             }
-        } while (++facing < 6);
-        checkForFall(world, X, Y, Z);
+        } while (DIRECTION_IS_VALID(++facing));
+        checkForFall(world, x, y, z);
     }
 #endif
 }

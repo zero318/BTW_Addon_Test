@@ -13,6 +13,9 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 
 import zero.test.IBlockMixins;
 
+import java.util.List;
+import java.util.ArrayList;
+
 #include "..\func_aliases.h"
 #include "..\feature_flags.h"
 #include "..\util.h"
@@ -21,6 +24,8 @@ import zero.test.IBlockMixins;
 public interface IWorldAccessMixins {
     @Accessor
     public boolean getScanningTileEntities();
+    //@Accessor
+    //public ArrayList getCollidingBoundingBoxes();
     @Accessor
     public void setScanningTileEntities(boolean value);
 }

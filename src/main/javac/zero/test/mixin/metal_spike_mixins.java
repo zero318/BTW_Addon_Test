@@ -27,69 +27,65 @@ import java.util.Random;
 #define POWERED_META_OFFSET 3
 
 @Mixin(MetalSpikeBlock.class)
-public class MetalSpikeBlockMixins {
+public class MetalSpikeBlockMixins extends Block {
+    
+    public MetalSpikeBlockMixins(int par1, Material par2) {
+        super(par1, par2);
+    }
+    
 #if ENABLE_CONDUCTIVE_METAL_SPIKES
+    @Override
     public boolean canProvidePower() {
         return true;
     }
     
-    public void updateNeighborsInDirection(World world, int X, int Y, int Z, int direction) {
-        X += Facing.offsetsXForSide[direction];
-        Y += Facing.offsetsYForSide[direction];
-        Z += Facing.offsetsZForSide[direction];
+    public void updateNeighborsInDirection(World world, int x, int y, int z, int direction) {
+        x += Facing.offsetsXForSide[direction];
+        y += Facing.offsetsYForSide[direction];
+        z += Facing.offsetsZForSide[direction];
         
         MetalSpikeBlock self = (MetalSpikeBlock)(Object)this;
         
-        Block neighbor_block = Block.blocksList[world.getBlockId(X, Y, Z)];
-        if (!BLOCK_IS_AIR(neighbor_block)) {
-            neighbor_block.onNeighborBlockChange(world, X, Y, Z, self.blockID);
+        Block neighborBlock = Block.blocksList[world.getBlockId(x, y, z)];
+        if (!BLOCK_IS_AIR(neighborBlock)) {
+            neighborBlock.onNeighborBlockChange(world, x, y, z, self.blockID);
         }
-        world.notifyBlocksOfNeighborChange(X, Y, Z, self.blockID, OPPOSITE_DIRECTION(direction));
+        world.notifyBlocksOfNeighborChange(x, y, z, self.blockID, OPPOSITE_DIRECTION(direction));
     }
     
-    public void refreshOutputState(World world, int X, int Y, int Z) {
-        int meta = world.getBlockMetadata(X, Y, Z);
+    public void refreshOutputState(World world, int x, int y, int z) {
+        int meta = world.getBlockMetadata(x, y, z);
             
         int direction = READ_META_FIELD(meta, DIRECTION);
         
-        boolean is_receiving_power = ((IWorldMixins)world).getBlockStrongPowerInputExceptFacing(X, Y, Z, direction) > 0;
+        boolean isReceivingPower = ((IWorldMixins)world).getBlockStrongPowerInputExceptFacing(x, y, z, direction) > 0;
         
         //AddonHandler.logMessage("SpikeUpdate: "+meta+" "+is_receiving_power);
         
-        if (is_receiving_power != READ_META_FIELD(meta, POWERED)) {
+        if (isReceivingPower != READ_META_FIELD(meta, POWERED)) {
             
             // 
-            world.setBlockMetadataWithNotify(X, Y, Z, meta ^ 8, UPDATE_CLIENTS | UPDATE_SUPPRESS_LIGHT);
+            world.setBlockMetadataWithNotify(x, y, z, TOGGLE_META_FIELD(meta, POWERED), UPDATE_CLIENTS | UPDATE_SUPPRESS_LIGHT);
             
-            this.updateNeighborsInDirection(world, X, Y, Z, direction);
+            this.updateNeighborsInDirection(world, x, y, z, direction);
         }
     }
     
-    /*
-    @Inject(
-        method = "onBlockAdded",
-        at = @At("TAIL")
-    )
-    */
-    public void onBlockAdded(World world, int X, int Y, int Z) {
-        this.refreshOutputState(world, X, Y, Z);
+    @Override
+    public void onBlockAdded(World world, int x, int y, int z) {
+        this.refreshOutputState(world, x, y, z);
     }
     
-    /*
-    @Inject(
-        method = "breakBlock",
-        at = @At("TAIL")
-    )
-    */
-    public void breakBlock(World world, int X, int Y, int Z, int idk, int prev_meta) {
-        this.updateNeighborsInDirection(world, X, Y, Z, READ_META_FIELD(prev_meta, DIRECTION));
+    @Override
+    public void breakBlock(World world, int x, int y, int z, int idk, int prevMeta) {
+        this.updateNeighborsInDirection(world, x, y, z, READ_META_FIELD(prevMeta, DIRECTION));
     }
     
     @Inject(
         method = "onNeighborBlockChange",
         at = @At("TAIL")
     )
-    public void onNeighborBlockChange_inject(World world, int X, int Y, int Z, int neighbor_id, CallbackInfo info) {
+    public void onNeighborBlockChange_inject(World world, int x, int y, int z, int neighborId, CallbackInfo info) {
         // The block can already be set to air
         // when updated normally since this is
         // only added to the tail of the function
@@ -100,22 +96,24 @@ public class MetalSpikeBlockMixins {
         // TODO: Do indirect neighbors still need
         // to be notified, or would removing the
         // block already take care of that?
-        if (world.getBlockId(X, Y, Z) != 0) {
-            this.refreshOutputState(world, X, Y, Z);
+        if (world.getBlockId(x, y, z) != 0) {
+            this.refreshOutputState(world, x, y, z);
         }
     }
     
-    public int isProvidingStrongPower(IBlockAccess block_access, int X, int Y, int Z, int side) {
+    @Override
+    public int isProvidingStrongPower(IBlockAccess blockAccess, int x, int y, int z, int side) {
         // This prevents supplying power to redstone wire
         // via the output block
         if (Block.redstoneWire.canProvidePower()) {
-            return isProvidingWeakPower(block_access, X, Y, Z, side);
+            return isProvidingWeakPower(blockAccess, x, y, z, side);
         }
         return 0;
     }
     
-    public int isProvidingWeakPower(IBlockAccess block_access, int X, int Y, int Z, int side) {
-        int meta = block_access.getBlockMetadata(X, Y, Z);
+    @Override
+    public int isProvidingWeakPower(IBlockAccess blockAccess, int x, int y, int z, int side) {
+        int meta = blockAccess.getBlockMetadata(x, y, z);
         //AddonHandler.logMessage("SpikeUpdate: "+meta+" "+side);
         int direction;
         if (
@@ -124,13 +122,13 @@ public class MetalSpikeBlockMixins {
         ) {
             // Only check for strong power to prevent getting
             // powered by a weakly powered block
-            return ((IWorldMixins)block_access).getBlockStrongPowerInputExceptFacing(X, Y, Z, direction);
+            return ((IWorldMixins)blockAccess).getBlockStrongPowerInputExceptFacing(x, y, z, direction);
         }
         return 0;
     }
     
 #if ENABLE_BETTER_REDSTONE_WIRE_CONNECTIONS
-    public boolean canRedstoneConnectToSide(IBlockAccess block_access, int X, int Y, int Z, int flat_direction) {
+    public boolean canRedstoneConnectToSide(IBlockAccess blockAccess, int x, int y, int z, int flatDirection) {
         return true;
     }
 #endif

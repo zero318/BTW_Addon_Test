@@ -21,13 +21,12 @@ public class LadderBlockBaseMixins {
     // of the hardpoint check, which still defaults to false
     // to avoid making 5 million mixins
     @Overwrite
-    public boolean canAttachToFacing(World world, int X, int Y, int Z, int direction) {
-  if (direction >= 2) {
-   X += Facing.offsetsXForSide[direction];
-   Y += Facing.offsetsYForSide[direction];
-   Z += Facing.offsetsZForSide[direction];
-            Block block = Block.blocksList[world.getBlockId(X, Y, Z)];
-   return !((block)==null) && block.hasLargeCenterHardPointToFacing(world, X, Y, Z, ((direction)^1), true);
+    public boolean canAttachToFacing(World world, int x, int y, int z, int direction) {
+  if (((direction)>=2)) {
+   x += Facing.offsetsXForSide[direction];
+   y += Facing.offsetsZForSide[direction];
+            Block block = Block.blocksList[world.getBlockId(x, y, z)];
+   return !((block)==null) && block.hasLargeCenterHardPointToFacing(world, x, y, z, ((direction)^1), true);
   }
   return false;
  }

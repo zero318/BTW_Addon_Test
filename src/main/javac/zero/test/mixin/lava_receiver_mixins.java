@@ -19,59 +19,59 @@ import zero.test.IBlockMixins;
 
 @Mixin(LavaReceiverBlock.class)
 public abstract class LavaReceiverBlockMixins extends MortarReceiverBlock {
-    LavaReceiverBlockMixins(int id, Material material) {
+    public LavaReceiverBlockMixins(int id, Material material) {
         super(id, material);
     }
     
 #if ENABLE_MOVING_BLOCK_CHAINING && ENABLE_SLIME_SUPPORTING_MORTAR_BLOCKS
     @Shadow
-    protected abstract boolean getHasLavaInCracks(IBlockAccess block_access, int X, int Y, int Z);
+    protected abstract boolean getHasLavaInCracks(IBlockAccess blockAccess, int x, int y, int z);
     
     @Shadow
-    protected abstract void setHasLavaInCracks(World block_access, int X, int Y, int Z, boolean has_lava);
+    protected abstract void setHasLavaInCracks(World blockAccess, int x, int y, int z, boolean hasLava);
     
     @Shadow
-    protected abstract boolean hasLavaAbove(IBlockAccess block_access, int X, int Y, int Z);
+    protected abstract boolean hasLavaAbove(IBlockAccess blockAccess, int x, int y, int z);
     
     @Shadow
-    protected abstract boolean hasWaterAbove(IBlockAccess block_access, int X, int Y, int Z);
+    protected abstract boolean hasWaterAbove(IBlockAccess blockAccess, int x, int y, int z);
     
     @Shadow
-    public abstract int getStrata(IBlockAccess block_access, int X, int Y, int Z);
+    public abstract int getStrata(IBlockAccess blockAccess, int x, int y, int z);
 
 
     @Override
-    public void updateTick(World world, int X, int Y, int Z, Random random) {
+    public void updateTick(World world, int x, int y, int z, Random random) {
         goto_block(has_adjacent_slime) {
             int facing = 0;
             do {
-                int nextX = X + Facing.offsetsXForSide[facing];
-                int nextY = Y + Facing.offsetsYForSide[facing];
-                int nextZ = Z + Facing.offsetsZForSide[facing];
-                Block neighbor_block = Block.blocksList[world.getBlockId(nextX, nextY, nextZ)];
+                int nextX = x + Facing.offsetsXForSide[facing];
+                int nextY = y + Facing.offsetsYForSide[facing];
+                int nextZ = z + Facing.offsetsZForSide[facing];
+                Block neighborBlock = Block.blocksList[world.getBlockId(nextX, nextY, nextZ)];
                 if (
-                    !BLOCK_IS_AIR(neighbor_block) &&
-                    ((IBlockMixins)neighbor_block).permanentlySupportsMortarBlocks(world, nextX, nextY, nextZ, facing)
+                    !BLOCK_IS_AIR(neighborBlock) &&
+                    ((IBlockMixins)neighborBlock).permanentlySupportsMortarBlocks(world, nextX, nextY, nextZ, facing)
                 ) {
                     goto(has_adjacent_slime);
                 }
-            } while (++facing < 6);
-            if (checkForFall(world, X, Y, Z)) {
+            } while (DIRECTION_IS_VALID(++facing));
+            if (checkForFall(world, x, y, z)) {
                 return;
             }
         } goto_target(has_adjacent_slime);
         
-        if (getHasLavaInCracks(world, X, Y, Z)) {
-            if (hasWaterAbove(world, X, Y, Z)) {
-                world.playAuxSFX(BTWEffectManager.FIRE_FIZZ_EFFECT_ID, X, Y, Z, 0);
+        if (getHasLavaInCracks(world, x, y, z)) {
+            if (hasWaterAbove(world, x, y, z)) {
+                world.playAuxSFX(BTWEffectManager.FIRE_FIZZ_EFFECT_ID, x, y, z, 0);
                 
-                world.setBlockAndMetadataWithNotify(X, Y, Z, Block.stone.blockID, getStrata(world, X, Y, Z));
+                world.setBlockAndMetadataWithNotify(x, y, z, Block.stone.blockID, getStrata(world, x, y, z));
                 
                 return;
             }
         }
-        else if (hasLavaAbove(world, X, Y, Z)) {
-            setHasLavaInCracks(world, X, Y, Z, true);
+        else if (hasLavaAbove(world, x, y, z)) {
+            setHasLavaInCracks(world, x, y, z, true);
         }
     }
 #endif

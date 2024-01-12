@@ -6,8 +6,8 @@ import btw.block.blocks.*;
 
 public class IronTrapDoor extends TrapDoorBlock {
     
-    public IronTrapDoor(int block_id) {
-        super(block_id);
+    public IronTrapDoor(int blockId) {
+        super(blockId);
         this.blockMaterial = Material.iron;
         this.setAxesEffectiveOn(false);
         this.setPicksEffectiveOn(true);
@@ -17,44 +17,44 @@ public class IronTrapDoor extends TrapDoorBlock {
     }
     
     @Override
-	public boolean onBlockActivated(World world, int X, int Y, int Z, EntityPlayer player, int side, float hitX, float hitY, float hitZ) {
+	public boolean onBlockActivated(World world, int x, int y, int z, EntityPlayer player, int side, float hitX, float hitY, float hitZ) {
 		return false;
 	}
     
     @Override
-    public void onNeighborBlockChange(World world, int X, int Y, int Z, int neighbor_id) {
+    public void onNeighborBlockChange(World world, int x, int y, int z, int neighborId) {
         if (!world.isRemote) {
-            boolean receiving_power = world.isBlockIndirectlyGettingPowered(X, Y, Z);
+            boolean receivingPower = world.isBlockIndirectlyGettingPowered(x, y, z);
 
-            if (receiving_power || neighbor_id > 0 && Block.blocksList[neighbor_id].canProvidePower()) {
-                this.onPoweredBlockChange(world, X, Y, Z, receiving_power);
+            if (receivingPower || neighborId > 0 && Block.blocksList[neighborId].canProvidePower()) {
+                this.onPoweredBlockChange(world, x, y, z, receivingPower);
             }
         }
     }
 
     @Override
-    public void onPoweredBlockChange(World world, int X, int Y, int Z, boolean receiving_power) {
-        int meta = world.getBlockMetadata(X, Y, Z);
-        boolean is_powered = (meta & 4) > 0;
+    public void onPoweredBlockChange(World world, int x, int y, int z, boolean receivingPower) {
+        int meta = world.getBlockMetadata(x, y, z);
+        boolean isPowered = (meta & 4) > 0;
 
-        if (is_powered != receiving_power) {
-            world.setBlockMetadataWithNotify(X, Y, Z, meta ^ 4, 2);
-            world.playAuxSFXAtEntity((EntityPlayer)null, 1003, X, Y, Z, 0);
+        if (isPowered != receivingPower) {
+            world.setBlockMetadataWithNotify(x, y, z, meta ^ 4, 2);
+            world.playAuxSFXAtEntity((EntityPlayer)null, 1003, x, y, z, 0);
         }
     }
     
     @Override
-	public boolean canPlaceBlockOnSide(World world, int X, int Y, int Z, int side) {
+	public boolean canPlaceBlockOnSide(World world, int x, int y, int z, int side) {
 		return true;
 	}
 	
 	@Override
-	public boolean isBreakableBarricade(IBlockAccess block_access, int X, int Y, int Z) {
+	public boolean isBreakableBarricade(IBlockAccess blockAccess, int x, int y, int z) {
 		return false;
 	}
     
     @Override
-    public boolean isBreakableBarricadeOpen(IBlockAccess block_access, int X, int Y, int Z) {
+    public boolean isBreakableBarricadeOpen(IBlockAccess blockAccess, int x, int y, int z) {
 		return false;
 	}
 }
