@@ -227,7 +227,7 @@ public class BlockEntityPistonMixins extends TileEntity implements IBlockEntityP
             direction = ((direction)^1);
         }
         if (direction != NOCLIP_DIRECTION.get()) {
-            AddonHandler.logMessage("Adding boxes");
+            //AddonHandler.logMessage("Adding boxes");
             Block block = Block.blocksList[storedBlockId];
             if (!((block)==null)) {
                 // Hopefully no blocks are big enough to go outside this?
