@@ -53,7 +53,8 @@
     "AnchorBlockMixins",
     "MovingPlatformEntityMixins",
     "IAnchorBlockAccessMixins",
-    "PaneBlockMixins"
+    "PaneBlockMixins",
+    "WorldGeneratorMixins"
   ],
   "client": [
     "ComparatorBlockMixins",
