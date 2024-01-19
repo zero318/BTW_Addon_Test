@@ -20,21 +20,6 @@ import zero.test.IEntityMixins;
 
 @Mixin(Entity.class)
 public class EntityMixins implements IEntityMixins {
-#if ENABLE_NOCLIP_COMMAND
-/*
-    @Inject(
-        method = "pushOutOfBlocks(DDD)Z",
-        at = @At("HEAD"),
-        cancellable = true
-    )
-    protected void pushOutOfBlocks_cancel_if_noclip(double x, double y, double z, CallbackInfoReturnable callbackInfo) {
-        Entity self = (Entity)(Object)this;
-        if (self instanceof EntityPlayer && self.noClip) {
-            callbackInfo.setReturnValue(false);
-        }
-    }
-*/
-#endif
 
     public long timeOfLastPistonPush;
     public double pistonX;
@@ -73,4 +58,24 @@ public class EntityMixins implements IEntityMixins {
         }
         self.moveEntity(x, y, z);
     }
+    
+#if ENABLE_MINECART_LERP_FIXES
+/*
+    public double lerpTargetX() {
+        return ((Entity)(Object)this).posX;
+    }
+    public double lerpTargetY() {
+        return ((Entity)(Object)this).posY;
+    }
+    public double lerpTargetZ() {
+        return ((Entity)(Object)this).posZ;
+    }
+*/
+    public float lerpTargetPitch() {
+        return ((Entity)(Object)this).rotationPitch;
+    }
+    public float lerpTargetYaw() {
+        return ((Entity)(Object)this).rotationYaw;
+    }
+#endif
 }

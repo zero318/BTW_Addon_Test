@@ -15,19 +15,6 @@ import zero.test.IEntityMixins;
 
 @Mixin(Entity.class)
 public class EntityMixins implements IEntityMixins {
-/*
-    @Inject(
-        method = "pushOutOfBlocks(DDD)Z",
-        at = @At("HEAD"),
-        cancellable = true
-    )
-    protected void pushOutOfBlocks_cancel_if_noclip(double x, double y, double z, CallbackInfoReturnable callbackInfo) {
-        Entity self = (Entity)(Object)this;
-        if (self instanceof EntityPlayer && self.noClip) {
-            callbackInfo.setReturnValue(false);
-        }
-    }
-*/
     public long timeOfLastPistonPush;
     public double pistonX;
     public double pistonY;

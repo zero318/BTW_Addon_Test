@@ -19,3 +19,4 @@ release/**
 reobfuscated/**
 trash*.txt
 __temp.txt
+*.diff

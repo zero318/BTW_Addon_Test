@@ -85,13 +85,6 @@ MC-200887
 */)
 #define ENABLE_REDSTONE_BUGFIXES 1
 
-MACRO_VOID(
-// Remove the tile entity from comparators on the
-// client since it never worked right to begin with
-// TODO: Investigate whether this is necessary
-)
-#define ENABLE_COMPARATOR_CLIENT_SIDE_ENTITY_REMOVAL 0
-
 MACRO_VOID(/* Add a property for blocks to control where dust points */)
 #define ENABLE_BETTER_REDSTONE_WIRE_CONNECTIONS 1
 
@@ -154,5 +147,11 @@ MACRO_VOID(/* */)
 
 MACRO_VOID(/* */)
 #define ENABLE_MINECART_FIXES 0
+
+MACRO_VOID(/* */)
+#define ENABLE_MINECART_LERP_FIXES 0
+
+MACRO_VOID(/* Make LAN world sharing suck less */)
+#define ENABLE_MODERN_PUBLISH_COMMAND 1
 
 #endif

@@ -23,7 +23,6 @@
     "BlockBaseRailLogicMixins",
     "IBlockBaseRailLogicAccessMixins",
     "BlockRailBaseMixins",
-    "BlockDispenserBlockMixins",
     "IBlockDispenserBlockAccessMixins",
     "BuddyBlockMixins",
     "BlockRedstoneRepeaterMixins",
@@ -54,12 +53,14 @@
     "MovingPlatformEntityMixins",
     "IAnchorBlockAccessMixins",
     "PaneBlockMixins",
-    "WorldGeneratorMixins"
+    "WorldGeneratorMixins",
+    "CommandServerPublishLocalMixins"
   ],
   "client": [
     "ComparatorBlockMixins",
     "BlockLiftedByPlatformRendererMixins",
-    "MovingPlatformRendererMixins"
+    "MovingPlatformRendererMixins",
+    "HttpUtilMixins"
   ],
   "injectors": {
     "defaultRequire": 1

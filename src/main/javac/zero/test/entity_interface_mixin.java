@@ -17,4 +17,12 @@ public interface IEntityMixins {
     default public double getPistonBounceMultiplier(int direction) {
         return 1.0D;
     }
+    
+#if ENABLE_MINECART_LERP_FIXES
+    //public double lerpTargetX();
+    //public double lerpTargetY();
+    //public double lerpTargetZ();
+    public float lerpTargetPitch();
+    public float lerpTargetYaw();
+#endif
 }

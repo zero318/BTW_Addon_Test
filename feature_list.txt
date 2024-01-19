@@ -107,6 +107,9 @@ Repeaters:
 - Renders properly on top of transparent blocks
 - Fixed MC-9194
 
+Publish Command:
+- Added arguments to match modern versions
+
 ///
 Debug Features (No recipes and more broken)
 ///

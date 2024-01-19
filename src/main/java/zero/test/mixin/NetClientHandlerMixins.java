@@ -9,6 +9,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import zero.test.IEntityMixins;
+//import zero.test.mixin.INetClientHandlerAccessMixins;
 // Block piston reactions
 
 @Mixin(NetClientHandler.class)

@@ -26,7 +26,7 @@ public class ServerNoclipCommand extends CommandBase {
     }
 
     @Override
-    public void processCommand(ICommandSender command_sender, String args[]) {   
+    public void processCommand(ICommandSender command_sender, String args[]) {
         if (command_sender instanceof EntityPlayerMP) {
             EntityPlayerMP player = (EntityPlayerMP)command_sender;
             boolean send_packet = false;
