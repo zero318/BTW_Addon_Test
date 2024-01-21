@@ -140,4 +140,8 @@ public abstract class EntityMinecartFurnaceMixins extends EntityMinecart impleme
         //return ((IEntityMinecartFurnaceAccessMixins)(Object)this).getFuel() > 0 ? BTWBlocks.burningOven : BTWBlocks.idleOven;
         return this.isMinecartPowered() ? BTWBlocks.burningOven : BTWBlocks.idleOven;
     }
+    @Overwrite
+    public int getDefaultDisplayTileData() {
+        return 0;
+    }
 }

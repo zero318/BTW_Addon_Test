@@ -105,7 +105,7 @@ public abstract class EntityMinecartMixins extends Entity {
 #endif
 
     public double getMaxSpeed() {
-        return 4.0D;
+        return 0.4D;
     }
     
     @Overwrite
@@ -180,13 +180,10 @@ public abstract class EntityMinecartMixins extends Entity {
             self.worldObj.theProfiler.endSection();
         }
 
-    //public static double lerp(double d, double d2, double d3) {
-        //return d2 + d * (d3 - d2);
-    //}
-
         if (self.worldObj.isRemote) {
             int turn_progress = ((IEntityMinecartAccessMixins)self).getTurnProgress();
             if (turn_progress > 0) {
+                // Divisions swapped to multiplications for SPEED
                 double dTurn = 1.0D / (double)turn_progress;
                 double dX = self.posX + (((IEntityMinecartAccessMixins)self).getMinecartX() - self.posX) * dTurn;
                 double dY = self.posY + (((IEntityMinecartAccessMixins)self).getMinecartY() - self.posY) * dTurn;
@@ -266,6 +263,7 @@ public abstract class EntityMinecartMixins extends Entity {
             }
 #endif
             
+            // Still trying to fix parallel track collisions...
             /*
             double expandX = 0.0D;
             double expandZ = 0.0D;
@@ -394,7 +392,7 @@ public abstract class EntityMinecartMixins extends Entity {
 #if ENABLE_DEDICATED_SHUNTING_CODE
                     if (this.isShunting() || ((EntityMinecartMixins)entity).isShunting())
 #endif
-                    if (var16 < 0.80D) {
+                    if (var16 < 0.90D) {
                         var2 = -var2;
                         var4 = -var4;
                     }

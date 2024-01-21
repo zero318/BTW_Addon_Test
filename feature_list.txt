@@ -39,6 +39,11 @@ Block Placer:
 - Obtained by cutting a block dispenser in half
 - Places blocks when receiving a pulse of power
 
+Wooden Rails:
+- Cheap rails that are half speed
+- Crafted with planks/moulding instead of nuggets
+- Flammable
+
 /noclip Command:
 - Sort of like spectator mode, but worse
 - Make sure you're already flying in creative mode or you'll just fall into the void
