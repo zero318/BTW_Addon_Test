@@ -272,7 +272,7 @@ public abstract class EntityMinecartMixins extends Entity {
                     }
                     // This seems to make furnace cart shunting work around
                     // corners, but I absolutely hate the magic number
-                    if (var16 < 0.90D) {
+                    if (var16 < 0.80D) {
                         var2 = -var2;
                         var4 = -var4;
                     }

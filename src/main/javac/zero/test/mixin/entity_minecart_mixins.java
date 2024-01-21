@@ -388,11 +388,13 @@ public abstract class EntityMinecartMixins extends Entity {
                         return;
                     }
                     // This seems to make furnace cart shunting work around
-                    // corners, but I absolutely hate the magic number
+                    // corners, but I absolutely hate the magic number.
+                    // HACK: This is speed dependent, come up with a better solution that
+                    // directly tests angles instead
 #if ENABLE_DEDICATED_SHUNTING_CODE
                     if (this.isShunting() || ((EntityMinecartMixins)entity).isShunting())
 #endif
-                    if (var16 < 0.90D) {
+                    if (var16 < 0.80D) {
                         var2 = -var2;
                         var4 = -var4;
                     }
