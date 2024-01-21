@@ -2,12 +2,22 @@ package zero.test.mixin;
 
 import net.minecraft.src.*;
 
+import btw.block.blocks.StubBlock;
+
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.gen.Invoker;
 
 import zero.test.IBlockMixins;
 import zero.test.IWorldMixins;
+import zero.test.block.ActivatorRailShim;
 
 import java.util.List;
 
@@ -147,5 +157,32 @@ public class BlockMixins implements IBlockMixins {
         Block self = (Block)(Object)this;
 		return self.isNormalCube(blockAccess, x, y, z) || self.hasSmallCenterHardPointToFacing(blockAccess, x, y, z, facing, true);
 	}
+#endif
+
+
+#if ENABLE_ACTIVATOR_RAILS
+/*
+    @Redirect(
+        method = "<clinit>()V",
+        at = @At(
+            value = "NEW",
+            target = "btw/block/blocks/StubBlock",
+            ordinal = 3
+        )
+    )
+    private static StubBlock activator_rail_redirect(int id) {
+        //return (StubBlock)(Object)((new ActivatorRailShim(id)).setPicksEffectiveOn().setHardness(0.7F).setStepSound(Block.soundMetalFootstep));
+    }
+*/
+
+    @Inject(
+        method = "<clinit>()V",
+        at = @At("TAIL")
+    )
+    private static void static_init_inject(CallbackInfo info) {
+        Block.railActivator = null;
+        Block.blocksList[157] = null;
+        Block.railActivator = (new ActivatorRailShim(157)).setPicksEffectiveOn().setHardness(0.7F).setStepSound(Block.soundMetalFootstep).setUnlocalizedName("activatorRail");
+    }
 #endif
 }

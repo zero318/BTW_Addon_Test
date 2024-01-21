@@ -4,5 +4,7 @@ package zero.test;
 #include "util.h"
 
 public class ZeroUtil {
+#if ENABLE_MODERN_PUBLISH_COMMAND
     public static int lan_port = 0;
+#endif
 }

@@ -14,6 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import zero.test.IWorldMixins;
 import zero.test.IBlockBaseRailLogicMixins;
 import zero.test.mixin.IBlockBaseRailLogicAccessMixins;
+import zero.test.IBaseRailBlockMixins;
 
 #include "..\feature_flags.h"
 #include "..\util.h"
@@ -33,7 +34,7 @@ import zero.test.mixin.IBlockBaseRailLogicAccessMixins;
 #define POWERED_META_OFFSET 3
 
 @Mixin(BlockRailBase.class)
-public class BlockRailBaseMixins extends Block {
+public abstract class BlockRailBaseMixins extends Block implements IBaseRailBlockMixins {
     
     public BlockRailBaseMixins(int par1, Material par2Material) {
         super(par1, par2Material);
@@ -58,7 +59,7 @@ public class BlockRailBaseMixins extends Block {
     @Override
     public int preBlockPlacedBy(World world, int x, int y, int z, int meta, EntityLiving entityLiving) {
         return /*entityLiving instanceof EntityPlayer &&*/
-               AXIS_Z != DIRECTION_AXIS(Direction.directionToFacing[(int)Math.floor(entityLiving.rotationYaw / 90.0D + 0.5D) & 3])
+               AXIS_Z != DIRECTION_AXIS(YAW_DIRECTION(entityLiving.rotationYaw))
                 ? RAIL_EAST_WEST
                 : RAIL_NORTH_SOUTH;
     }

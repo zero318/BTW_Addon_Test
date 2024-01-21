@@ -54,13 +54,20 @@
     "IAnchorBlockAccessMixins",
     "PaneBlockMixins",
     "WorldGeneratorMixins",
-    "CommandServerPublishLocalMixins"
+    "CommandServerPublishLocalMixins",
+    "EntityMinecartFurnaceMixins",
+    "IEntityMinecartFurnaceAccessMixins",
+    "EntityMinecartMixins",
+    "IEntityMinecartAccessMixins",
+    "ItemMinecartMixins",
+    "IEntityPlayerAccessMixins"
   ],
   "client": [
     "ComparatorBlockMixins",
     "BlockLiftedByPlatformRendererMixins",
     "MovingPlatformRendererMixins",
-    "HttpUtilMixins"
+    "HttpUtilMixins",
+    "RenderMinecartMixins"
   ],
   "injectors": {
     "defaultRequire": 1

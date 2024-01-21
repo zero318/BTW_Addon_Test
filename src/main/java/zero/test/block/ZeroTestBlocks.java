@@ -12,4 +12,5 @@ public class ZeroTestBlocks {
     public static Block dead_coral_fan;
     public static Block block_breaker;
     public static Block block_placer;
+    public static Block wooden_rail;
 }

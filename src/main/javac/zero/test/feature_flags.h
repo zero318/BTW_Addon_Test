@@ -145,13 +145,91 @@ MACRO_VOID(/* Prevent shoveling slime/glue despite regular shovels being effecti
 MACRO_VOID(/* */)
 #define ENABLE_REDSTONE_DUST_ROUTING 0
 
-MACRO_VOID(/* */)
-#define ENABLE_MINECART_FIXES 0
+MACRO_VOID(/*
+Done:
+MC-10186
+MC-14850
+MC-51053
+MC-163375
+MC-200544
+
+Todo:
+MC-8265
+MC-9157
+MC-9551
+MC-170907
+MC-181760
+
+Investigate:
+MC-4057
+MC-51632
+MC-71779
+MC-79528
+MC-80895
+MC-92484
+MC-158169
+MC-158363
+MC-167889
+MC-172407
+MC-179971
+MC-214442
+MC-267151
+
+Well crap:
+MC-868
+MC-113242
+MC-123367
+MC-142045
+MC-148433
+MC-258707
+
+N/A:
+MC-51676 (Already fixed?)
+MC-113871
+
+Won't fix:
+MC-14
+MC-957
+MC-2714
+MC-3430
+MC-89221
+MC-101818
+MC-144321 (Why isn't this invalid?)
+MC-191723
+MC-201621
+
+*/)
+#define ENABLE_MINECART_FIXES 1
 
 MACRO_VOID(/* */)
 #define ENABLE_MINECART_LERP_FIXES 0
 
 MACRO_VOID(/* Make LAN world sharing suck less */)
 #define ENABLE_MODERN_PUBLISH_COMMAND 1
+
+MACRO_VOID(/* */)
+#define ENABLE_BETTER_HOPPER_BLOCKING 0
+
+MACRO_VOID(/* Reskin furnace minecarts to be ovens */)
+#define ENABLE_MINECART_OVEN 1
+
+MACRO_VOID(/* Allow hoppers to add fuel to minecarts */)
+#define ENABLE_HOPPERS_FUELING_CARTS 1
+
+MACRO_VOID(/* */)
+#define ENABLE_MINECART_BLOCK_DISPENSER 0
+
+#if ENABLE_MINECART_BLOCK_DISPENSER
+MACRO_VOID(/* Restore activator rails */)
+#define ENABLE_ACTIVATOR_RAILS 1
+#endif
+
+MACRO_VOID(/* */)
+#define ENABLE_STABLE_MINECART_CAMERA 1
+
+MACRO_VOID(/* Cheap/slow rails. Admittedly not a very original idea. */)
+#define ENABLE_WOODEN_RAILS 1
+
+#define ENABLE_STEEL_RAILS 0
 
 #endif

@@ -1025,6 +1025,22 @@ MACRO_VOID(
 #define POWER_META_14 14
 #define POWER_META_15 15
 
+#define RAIL_INVALID -1
+#define RAIL_NORTH_SOUTH 0
+#define RAIL_EAST_WEST 1
+#define RAIL_ASCENDING_EAST 2
+#define RAIL_ASCENDING_WEST 3
+#define RAIL_ASCENDING_NORTH 4
+#define RAIL_ASCENDING_SOUTH 5
+#define RAIL_SOUTH_EAST 6
+#define RAIL_SOUTH_WEST 7
+#define RAIL_NORTH_WEST 8
+#define RAIL_NORTH_EAST 9
+
+#define RAIL_IS_STRAIGHT(shape) ((shape)<2)
+#define RAIL_IS_ASCENDING(shape) (((shape)>=2)&((shape)<=5))
+#define RAIL_IS_CURVED(shape) ((shape)>5)
+
 #define META_BITS(m) m##_META_BITS
 #define META_IS_BOOL(m) m##_META_IS_BOOL
 #define META_OFFSET(m) m##_META_OFFSET
@@ -1411,6 +1427,20 @@ _OFFSET_DIRECTION_ARGS(X, Y, Z, MACRO_CAT(direction,_OFFSETS))
 
 #define FLAT_DIRECTION_AXES_MATCH(dirA,dirB) ((((dirA)^(dirB))&1)==0)
 
+#define FLAT_DIRECTION8_NORTH 0
+#define FLAT_DIRECTION8_NORTH_EAST 1
+#define FLAT_DIRECTION8_EAST 2
+#define FLAT_DIRECTION8_SOUTH_EAST 3
+#define FLAT_DIRECTION8_SOUTH 4
+#define FLAT_DIRECTION8_SOUTH_WEST 5
+#define FLAT_DIRECTION8_WEST 6
+#define FLAT_DIRECTION8_NORTH_WEST 7
+
+#define FLAT_DIRECTION8_IS_DIAGONAL(dir) ((dir)&1)
+#define FLAT_DIRECTION8_TO_4(dir) ((dir)>>>1)
+
+
+
 #define UPDATE_DIRECTION_OFFSET 28
 
 #define GET_UPDATE_DIRECTION(...) ((__VA_ARGS__)>>>UPDATE_DIRECTION_OFFSET)
@@ -1432,6 +1462,140 @@ _OFFSET_DIRECTION_ARGS(X, Y, Z, MACRO_CAT(direction,_OFFSETS))
 #define UPDATE_DIRECTION_WEST  0x9
 #define UPDATE_DIRECTION_EAST  0xB
 #define UPDATE_DIRECTION_FORCE 0xD
+
+MACRO_VOID(
+/// Data Watcher Types
+)
+
+#define WATCHABLE_BYTE 0
+#define WATCHABLE_SHORT 1
+#define WATCHABLE_INT 2
+#define WATCHABLE_FLOAT 3
+#define WATCHABLE_STRING 4
+#define WATCHABLE_ITEMSTACK 5
+#define WATCHABLE_CHUNKCOORD 6
+
+MACRO_VOID(/* byte, Entity */)
+#define ENTITY_WATCH_FLAGS_A 0
+MACRO_VOID(/* short, Entity */)
+#define ENTITY_WATCH_AIR 1
+MACRO_VOID(/*  */)
+#define ENTITY_WATCH_2 2
+MACRO_VOID(/*  */)
+#define ENTITY_WATCH_3 3
+MACRO_VOID(/*  */)
+#define ENTITY_WATCH_4 4
+MACRO_VOID(/* String, EntityLiving */)
+#define ENTITY_WATCH_CUSTOM_NAME 5
+MACRO_VOID(/* byte, EntityLiving */)
+#define ENTITY_WATCH_CUSTOM_NAME_VISIBLE 6
+MACRO_VOID(/*  */)
+#define ENTITY_WATCH_7 7
+MACRO_VOID(/* int, EntityLiving */)
+#define ENTITY_WATCH_EFFECTS 8
+MACRO_VOID(/* int, EntityEnderCrystal */)
+#define ENTITY_WATCH_CRYSTAL_HEALTH 8
+MACRO_VOID(/* ItemStack, EntityFireworkRocket */)
+#define ENTITY_WATCH_FIREWORK_ITEM 8
+MACRO_VOID(/* byte, EntityLiving */)
+#define ENTITY_WATCH_EFFECTS_AMBIENT 9
+MACRO_VOID(/* byte, EntityLiving */)
+#define ENTITY_WATCH_EMBEDDED_ARROW_COUNT 10
+MACRO_VOID(/* byte, EntityWitherSkull */)
+#define ENTITY_WATCH_SKULL_TYPE 10
+MACRO_VOID(/* byte, EntityLiving */)
+#define ENTITY_WATCH_HAS_TARGET 11
+MACRO_VOID(/* int, EntityAgeable */)
+#define ENTITY_WATCH_AGE 12
+MACRO_VOID(/* byte, EntitySkeleton */)
+#define ENTITY_WATCH_SKELETON_TYPE 13
+MACRO_VOID(/*  */)
+#define ENTITY_WATCH_14 14
+MACRO_VOID(/*  */)
+#define ENTITY_WATCH_15 15
+MACRO_VOID(/*  */)
+#define ENTITY_WATCH_FLAGS_B 16
+MACRO_VOID(/* byte, EntityEnderman */)
+#define ENTITY_WATCH_ENDERMAN_CARRY_ID 16
+MACRO_VOID(/* int, EntityDragon, EntityWither */)
+#define ENTITY_WATCH_BOSS_HEALTH 16
+MACRO_VOID(/* int, EntityVillager */)
+#define ENTITY_WATCH_PROFESSION 16
+MACRO_VOID(/* int, EntityBoat */)
+#define ENTITY_WATCH_HURT_TIME 17
+MACRO_VOID(/* byte, EntityEnderman */)
+#define ENTITY_WATCH_ENDERMAN_CARRY_META 17
+MACRO_VOID(/* int, EntityMinecart */)
+#define ENTITY_WATCH_ROLL_AMPLITUDE 17
+MACRO_VOID(/* byte, EntityPlayer */)
+#define ENTITY_WATCH_PLAYER_UNKNOWN_A 17
+MACRO_VOID(/* String, EntityTameable */)
+#define ENTITY_WATCH_OWNER 17
+MACRO_VOID(/* int, EntityWither */)
+#define ENTITY_WATCH_WITHER_TARGET_A 17
+MACRO_VOID(/* int, EntityBoat */)
+#define ENTITY_WATCH_FORWARD_DIRECTION 18
+MACRO_VOID(/* int, EntityMinecart */)
+#define ENTITY_WATCH_ROLL_DIRECTION 18
+MACRO_VOID(/* byte, EntityEnderman */)
+#define ENTITY_WATCH_ENDERMAN_SCREAMING 18
+MACRO_VOID(/* byte, EntityOcelot */)
+#define ENTITY_WATCH_TAMED 18
+MACRO_VOID(/* int, EntityPlayer */)
+#define ENTITY_WATCH_SCORE 18
+MACRO_VOID(/* int, EntityWither */)
+#define ENTITY_WATCH_WITHER_TARGET_B 18
+MACRO_VOID(/* int, EntityWolf */)
+#define ENTITY_WATCH_WOLF_HEALTH 18
+MACRO_VOID(/* int, EntityBoat, EntityMinecart */)
+#define ENTITY_WATCH_LAST_DAMAGE 19
+MACRO_VOID(/* int, EntityWither */)
+#define ENTITY_WATCH_WITHER_TARGET_C 19
+MACRO_VOID(/* int, EntityWolf */)
+#define ENTITY_WATCH_WOLF_HAS_TARGET 19
+MACRO_VOID(/* int, EntityMinecart */)
+#define ENTITY_WATCH_DISPLAY_BLOCK 20
+MACRO_VOID(/* int, EntityWither */)
+#define ENTITY_WATCH_INVULN_TIME 20
+MACRO_VOID(/* int, EntityWolf */)
+#define ENTITY_WATCH_COLLAR_COLOR 20
+MACRO_VOID(/* byte, EntityAnimal */)
+#define ENTITY_WATCH_HUNGER_LEVEL 21
+MACRO_VOID(/* int, EntityMinecart */)
+#define ENTITY_WATCH_DISPLAY_OFFSET 21
+MACRO_VOID(/* int, EntityAnimal */)
+#define ENTITY_WATCH_IN_LOVE 22
+MACRO_VOID(/* byte, EntityMinecart */)
+#define ENTITY_WATCH_CUSTOM_DISPLAY 22
+MACRO_VOID(/* int, EntityPlayer */)
+#define ENTITY_WATCH_STRONGEST_MAGNETIC_POINT_FOR_LOCATION_X 22
+MACRO_VOID(/* int, MovingAnchorEntity, MovingPlatformEntity */)
+#define ENTITY_WATCH_VERTICAL_MOTION 22
+MACRO_VOID(/* int, MechanicalPowerSourceEntity */)
+#define ENTITY_WATCH_ROTATION_SPEED 22
+MACRO_VOID(/* byte, EntityAnimal */)
+#define ENTITY_WATCH_WEARING_BREEDING_HARNESS 23
+MACRO_VOID(/* int, EntityPlayer */)
+#define ENTITY_WATCH_STRONGEST_MAGNETIC_POINT_FOR_LOCATION_Z 22
+MACRO_VOID(/* byte, EntityCreature */)
+#define ENTITY_WATCH_IS_POSSESSED 24
+MACRO_VOID(/* byte, EntityPlayer */)
+#define ENTITY_WATCH_HAS_VALID_MAGNETIC_POINT_FOR_LOCATION 24
+MACRO_VOID(/* byte, EntityPlayer */)
+#define ENTITY_WATCH_GLOOM_LEVEL 25
+MACRO_VOID(/* byte, EntityPlayer */)
+#define ENTITY_WATCH_FAT_PENALTY 26
+MACRO_VOID(/* byte, EntityPlayer */)
+#define ENTITY_WATCH_HUNGER_PENALTY 27
+MACRO_VOID(/* byte, EntityPlayer */)
+#define ENTITY_WATCH_HEALTH_PENALTY 28
+MACRO_VOID(/* int, EntityPlayer */)
+#define ENTITY_WATCH_SPAWN_CHUNKS_VISUALIZATION_LOCATION_X 29
+MACRO_VOID(/* int, EntityPlayer */)
+#define ENTITY_WATCH_SPAWN_CHUNKS_VISUALIZATION_LOCATION_Y 30
+MACRO_VOID(/* int, EntityPlayer */)
+#define ENTITY_WATCH_SPAWN_CHUNKS_VISUALIZATION_LOCATION_Z 31
+
 
 MACRO_VOID(
 /// Misc. Flags
@@ -1597,5 +1761,14 @@ BLOCK_STATE_LONG_EXTRACT_EXTMETA(state)
 #define _BLOCK_STATE_UNPACK_LONG(id,meta,extmeta,...) __BLOCK_STATE_UNPACK_LONG(id,meta,extmeta,__VA_ARGS__)
 #define BLOCK_STATE_UNPACK_LONG(state,id,meta,extmeta)\
 _BLOCK_STATE_UNPACK_LONG(id,meta,extmeta,BLOCK_STATE_UNPACK_LONG_ARGS(state))
+
+#define RADF(degrees) ((degrees)*0.017453292F)
+#define RAD(degrees) ((degrees)*0.017453292D)
+
+#define YAW_FLAT_DIRECTION(yaw) ((int)MathHelper.floor_double((double)(yaw)/90.0D+0.5D)&3)
+
+#define YAW_DIRECTION(yaw) (Direction.directionToFacing[YAW_FLAT_DIRECTION(yaw)])
+
+#define YAW_FLAT_DIRECTION8(yaw) ((int)MathHelper.floor_double((double)(yaw)/45.0D+0.5D)&7)
 
 #endif

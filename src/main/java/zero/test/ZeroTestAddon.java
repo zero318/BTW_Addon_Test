@@ -15,11 +15,10 @@ import zero.test.item.SlimeBlockItem;
 public class ZeroTestAddon extends BTWAddon {
     private static ZeroTestAddon instance;
     private ZeroTestAddon() {
-        super("Zero Test Addon", "0.1.2", "ZeroTest");
+        super("Zero Test Addon", "0.1.3", "ZeroTest");
     }
     @Override
     public void initialize() {
-        //AddonHandler.logMessage(this.getName() + " Version " + this.getVersionString() + " Initializing...");
         this.registerAddonCommand(new ServerNoclipCommand());
         ZeroTestBlocks.cud_block = new CUDBlock(1318);
         Item.itemsList[1318] = new ItemBlock(1318 -256);
@@ -39,6 +38,8 @@ public class ZeroTestAddon extends BTWAddon {
         Item.itemsList[1325] = new ItemBlock(1325 -256);
         ZeroTestBlocks.block_placer = new BlockPlacer(1326);
         Item.itemsList[1326] = new ItemBlock(1326 -256);
+        ZeroTestBlocks.wooden_rail = new WoodenRailBlock(1327);
+        Item.itemsList[1327] = new ItemBlock(1327 -256);
     }
     @Override
     public void postInitialize() {
@@ -93,11 +94,51 @@ public class ZeroTestAddon extends BTWAddon {
             },
             BTWBlocks.blockDispenser
         );
+        RecipeManager.removeVanillaRecipe(
+            new ItemStack(Item.minecartPowered, 1),
+            new Object[] {
+                "A",
+                "B",
+                'A', Block.furnaceIdle,
+                'B', Item.minecartEmpty
+            }
+        );
+        RecipeManager.addRecipe(
+            new ItemStack(Item.minecartPowered, 1),
+            new Object[] {
+                "A",
+                "B",
+                'A', BTWBlocks.idleOven,
+                'B', Item.minecartEmpty
+            }
+        );
+        RecipeManager.addRecipe(
+            new ItemStack(ZeroTestBlocks.wooden_rail, 12),
+            new Object[] {
+                "X X",
+                "XSX",
+                "X X",
+                'X', Block.planks,
+                'S', Item.stick
+            }
+        );
+        RecipeManager.addRecipe(
+            new ItemStack(ZeroTestBlocks.wooden_rail, 12),
+            new Object[] {
+                "X X",
+                "XSX",
+                "X X",
+                'X', new ItemStack(BTWItems.woodMouldingStubID, 1, InventoryUtils.IGNORE_METADATA),
+                'S', Item.stick
+            }
+        );
     }
     // Is this important?
+    // Also looks kinda backwards tbh (I tried fixing it)
     public static ZeroTestAddon getInstance() {
-        if (instance != null)
+        if (instance == null) {
             instance = new ZeroTestAddon();
+        }
         return instance;
     }
 }

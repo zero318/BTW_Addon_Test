@@ -23,4 +23,7 @@ public class ZeroTestBlocks {
     public static Block block_breaker;
     public static Block block_placer;
 #endif
+#if ENABLE_WOODEN_RAILS
+    public static Block wooden_rail;
+#endif
 }

@@ -10,9 +10,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import zero.test.IWorldMixins;
 import zero.test.IBlockBaseRailLogicMixins;
 import zero.test.mixin.IBlockBaseRailLogicAccessMixins;
+import zero.test.IBaseRailBlockMixins;
 // Block piston reactions
 @Mixin(BlockRailBase.class)
-public class BlockRailBaseMixins extends Block {
+public abstract class BlockRailBaseMixins extends Block implements IBaseRailBlockMixins {
     public BlockRailBaseMixins(int par1, Material par2Material) {
         super(par1, par2Material);
     }
@@ -34,7 +35,7 @@ public class BlockRailBaseMixins extends Block {
     @Override
     public int preBlockPlacedBy(World world, int x, int y, int z, int meta, EntityLiving entityLiving) {
         return /*entityLiving instanceof EntityPlayer &&*/
-               0x2 != ((Direction.directionToFacing[(int)Math.floor(entityLiving.rotationYaw / 90.0D + 0.5D) & 3])&~1)
+               0x2 != (((Direction.directionToFacing[((int)MathHelper.floor_double((double)(entityLiving.rotationYaw)/90.0D+0.5D)&3)]))&~1)
                 ? 1
                 : 0;
     }
