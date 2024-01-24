@@ -1,6 +1,5 @@
 package zero.test.mixin;
 import net.minecraft.src.*;
-import btw.AddonHandler;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -10,21 +9,18 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
-import org.lwjgl.opengl.GL11;
-import zero.test.mixin.IEntityMinecartAccessMixins;
-import zero.test.ZeroUtil;
+import zero.test.IWorldMixins;
 // Block piston reactions
-@Mixin(RenderMinecart.class)
-public abstract class RenderMinecartMixins extends Render {
+@Mixin(EntityBat.class)
+public abstract class EntityBatMixins {
     @Redirect(
-        method = "renderTheMinecart(Lnet/minecraft/src/EntityMinecart;DDDFF)V",
+        method = "updateAITasks()V",
         at = @At(
             value = "INVOKE",
-            target = "Lorg/lwjgl/opengl/GL11;glTranslatef(FFF)V",
-            ordinal = 1
+            target = "Lnet/minecraft/src/World;isBlockNormalCube(III)Z"
         )
     )
-    private void glTranslatef_redirectA(float x, float y, float z) {
-        GL11.glTranslatef(x, y + 0.375F, z);
+    private boolean isBlockNormalCube_redirect(World world, int x, int y, int z) {
+        return ((IWorldMixins)world).isBlockRedstoneConductor(x, y, z);
     }
 }

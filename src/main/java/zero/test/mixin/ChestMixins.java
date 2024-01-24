@@ -3,7 +3,15 @@ import net.minecraft.src.*;
 import btw.block.blocks.AestheticOpaqueBlock;
 import btw.AddonHandler;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.Shadow;
+import zero.test.IWorldMixins;
 // Block piston reactions
 @Mixin(BlockChest.class)
 public class ChestMixins {
@@ -64,5 +72,15 @@ public class ChestMixins {
         // Somehow the rendering when splitting double chests
         // got broken and I have no idea how to fix it, so this
         return ((direction)>=2) && ((BlockChest)(Object)this).blockID == world.getBlockId(x + Facing.offsetsXForSide[direction], y, z + Facing.offsetsZForSide[direction]);
+    }
+    @Redirect(
+        method = "getInventory(Lnet/minecraft/src/World;III)Lnet/minecraft/src/IInventory;",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/src/World;isBlockNormalCube(III)Z"
+        )
+    )
+    private boolean isBlockNormalCube_redirect(World world, int x, int y, int z) {
+        return ((IWorldMixins)world).isBlockRedstoneConductor(x, y, z);
     }
 }

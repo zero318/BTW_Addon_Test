@@ -11,9 +11,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import zero.test.IWorldMixins;
+import zero.test.IBlockMixins;
 import zero.test.IEntityMixins;
 import zero.test.mixin.IEntityMinecartAccessMixins;
 import zero.test.IBaseRailBlockMixins;
+import zero.test.ZeroUtil;
 import java.util.List;
 // Block piston reactions
 
@@ -21,6 +24,16 @@ import java.util.List;
 public abstract class EntityMinecartMixins extends Entity {
     public EntityMinecartMixins(World world) {
         super(world);
+    }
+    @Redirect(
+        method = "updateOnTrack(IIIDDII)V",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/src/World;isBlockNormalCube(III)Z"
+        )
+    )
+    private boolean isBlockNormalCube_redirect(World world, int x, int y, int z) {
+        return ((IWorldMixins)world).isBlockRedstoneConductor(x, y, z);
     }
     @Inject(
         method = "<init>(Lnet/minecraft/src/World;)V",
@@ -131,11 +144,12 @@ public abstract class EntityMinecartMixins extends Entity {
                 --var2;
             }
             int blockId = self.worldObj.getBlockId(x, var2, z);
+            double maxSpeed = this.getMaxSpeed();
             if (BlockRailBase.isRailBlock(blockId)) {
                 int meta = self.worldObj.getBlockMetadata(x, var2, z);
                 this.updateOnTrack(
                     x, var2, z,
-                    this.getMaxSpeed() * ((IBaseRailBlockMixins)Block.blocksList[blockId]).getRailMaxSpeedFactor(),
+                    maxSpeed * ((IBaseRailBlockMixins)Block.blocksList[blockId]).getRailMaxSpeedFactor(),
                     0.0078125D, blockId, meta
                 );
                 if (blockId == Block.railActivator.blockID) {
@@ -143,7 +157,7 @@ public abstract class EntityMinecartMixins extends Entity {
                 }
             }
             else {
-                this.func_94088_b(this.getMaxSpeed());
+                this.func_94088_b(maxSpeed);
             }
             this.doBlockCollisions();
             self.rotationPitch = 0.0F;
@@ -164,28 +178,22 @@ public abstract class EntityMinecartMixins extends Entity {
             }
             this.setRotation(self.rotationYaw, self.rotationPitch);
             // Still trying to fix parallel track collisions...
-            /*
-            double expandX = 0.0D;
-            double expandZ = 0.0D;
-            switch (YAW_FLAT_DIRECTION8(self.rotationYaw)) {
-                case FLAT_DIRECTION8_NORTH: case FLAT_DIRECTION8_SOUTH:
+            double expandX = 0.05D;
+            double expandZ = 0.05D;
+            switch (((int)MathHelper.floor_double((double)(self.rotationYaw)/45.0D+0.5D)&7)) {
+                case 0: case 4:
                     expandX = 0.2D;
-                    //expandZ = 0.2D;
+                    //expandZ = 0.0D;
                     break;
-                case FLAT_DIRECTION8_EAST: case FLAT_DIRECTION8_WEST:
-                    //expandX = 0.2D;
+                case 2: case 6:
+                    //expandX = 0.0D;
                     expandZ = 0.2D;
-                    break;
             }
-            
             //AddonHandler.logMessage(
                 //YAW_FLAT_DIRECTION8(self.rotationYaw)+" "+self.rotationYaw
             //);
-            
-            
             List<Entity> entityList = self.worldObj.getEntitiesWithinAABBExcludingEntity(self, self.boundingBox.expand(expandX, 0.0D, expandZ));
-            */
-            List<Entity> entityList = self.worldObj.getEntitiesWithinAABBExcludingEntity(self, self.boundingBox.expand(0.2D, 0.0D, 0.2D));
+            //List<Entity> entityList = self.worldObj.getEntitiesWithinAABBExcludingEntity(self, self.boundingBox.expand(0.2D, 0.0D, 0.2D));
             if (
                 entityList != null &&
                 !entityList.isEmpty()
@@ -231,11 +239,10 @@ public abstract class EntityMinecartMixins extends Entity {
             double var2 = entity.posX - this.posX;
             double var4 = entity.posZ - this.posZ;
             double distance = var2 * var2 + var4 * var4;
-            if (distance >= 9.999999747378752E-5D) {
-                distance = Math.sqrt(distance);
-                var2 /= distance;
-                var4 /= distance;
-                double invDistance = 1.0D / distance;
+            if (distance >= 0.0001D) {
+                double invDistance = 1.0D / Math.sqrt(distance);
+                var2 *= invDistance;
+                var4 *= invDistance;
                 if (invDistance > 1.0D) {
                     invDistance = 1.0D;
                 }
@@ -250,66 +257,57 @@ public abstract class EntityMinecartMixins extends Entity {
                 if (entity instanceof EntityMinecart) {
                     Vec3 posVec = this.worldObj.getWorldVec3Pool().getVecFromPool(entity.posX - this.posX, 0.0D, entity.posZ - this.posZ).normalize();
                     Vec3 rotVec = this.worldObj.getWorldVec3Pool().getVecFromPool(MathHelper.cos(((this.rotationYaw)*0.017453292F)), 0.0D, MathHelper.sin(((this.rotationYaw)*0.017453292F))).normalize();
-                    double var16 = Math.abs(posVec.dotProduct(rotVec));
+                    double similarity = Math.abs(posVec.dotProduct(rotVec));
                     /*
                     AddonHandler.logMessage(
                         "    "+this.rotationYaw+" "+entity.rotationYaw+"\n"+
                         "    "+posVec.xCoord+" "+posVec.yCoord+" "+posVec.zCoord+"\n"+
                         "    "+rotVec.xCoord+" "+rotVec.yCoord+" "+rotVec.zCoord+"\n"+
-                        "    "+var16+" "+this.entityId+" "+entity.entityId+"\n"+
+                        "    "+similarity+" "+this.entityId+" "+entity.entityId+"\n"+
                         "Self:  "+this.posX+" "+this.posZ+" "+this.width+" "+this.boundingBox.minX+" "+this.boundingBox.maxX+" "+this.boundingBox.minZ+" "+this.boundingBox.maxZ+"\n"+
                         "Other: "+entity.posX+" "+entity.posZ+" "+entity.width+" "+entity.boundingBox.minX+" "+entity.boundingBox.maxX+" "+entity.boundingBox.minZ+" "+entity.boundingBox.maxZ
                     );
                     */
-                    /*
-                    AddonHandler.logMessage(
-                        this.entityId+" "+entity.entityId+" "+var16+" "+this.rotationYaw+" "+entity.rotationYaw
-                    );
-                    */
+                    //AddonHandler.logMessage(
+                        //this.entityId+" "+entity.entityId+" "+similarity+" "+this.rotationYaw+" "+entity.rotationYaw
+                    //);
                     // There's still an edge case at 0.79
-                    if (var16 < 0.78D) {
+                    if (similarity < 0.7D) {
                         return;
                     }
                     // This seems to make furnace cart shunting work around
-                    // corners, but I absolutely hate the magic number
-                    if (var16 < 0.80D) {
-                        var2 = -var2;
-                        var4 = -var4;
-                    }
+                    // corners, but I absolutely hate the magic number.
+                    // HACK: This is speed dependent, come up with a better solution that
+                    // directly tests angles instead
+                    //if (similarity < 0.84D) {
+                        //var2 = -var2;
+                        //var4 = -var4;
+                    //}
                     if (
                         ((EntityMinecart)entity).getMinecartType() == 2 &&
-                        /*(
-                            ((EntityMinecart)entity).getMinecartType() == MINECART_FURNACE ||
-                            ((EntityMinecartMixins)entity).shuntTime > 0
-                        ) &&*/
                         self.getMinecartType() != 2
                     ) {
+                        //Vec3 motionVec = this.worldObj.getWorldVec3Pool().getVecFromPool(this.motionX, 0.0D, this.motionZ).normalize();
                         this.motionX *= 0.2D;
                         this.motionZ *= 0.2D;
                         this.addVelocity(entity.motionX - var2, 0.0D, entity.motionZ - var4);
                         entity.motionX *= 0.95D;
                         entity.motionZ *= 0.95D;
-                        //AddonHandler.logMessage("ShuntTimesA: "+((EntityMinecartMixins)entity).shuntTime+" "+this.shuntTime);
                     }
                     else if (
                         ((EntityMinecart)entity).getMinecartType() != 2 &&
                         self.getMinecartType() == 2
-                        /*(
-                            self.getMinecartType() == MINECART_FURNACE ||
-                            this.shuntTime > 0
-                        )*/
                     ) {
+                        //Vec3 motionVec = this.worldObj.getWorldVec3Pool().getVecFromPool(entity.motionX, 0.0D, entity.motionZ).normalize();
                         entity.motionX *= 0.2D;
                         entity.motionZ *= 0.2D;
                         entity.addVelocity(this.motionX + var2, 0.0D, this.motionZ + var4);
                         this.motionX *= 0.95D;
                         this.motionZ *= 0.95D;
-                        //AddonHandler.logMessage("ShuntTimesB: "+this.shuntTime+" "+((EntityMinecartMixins)entity).shuntTime);
                     }
                     else {
-                        //AddonHandler.logMessage("ShuntTimesC: "+((EntityMinecartMixins)entity).shuntTime+" "+this.shuntTime);
-                        double var18 = (entity.motionX + this.motionX) / 2.0D;
-                        double var20 = (entity.motionZ + this.motionZ) / 2.0D;
+                        double var18 = (entity.motionX + this.motionX) * 0.5D;
+                        double var20 = (entity.motionZ + this.motionZ) * 0.5D;
                         this.motionX *= 0.2D;
                         this.motionZ *= 0.2D;
                         this.addVelocity(var18 - var2, 0.0D, var20 - var4);

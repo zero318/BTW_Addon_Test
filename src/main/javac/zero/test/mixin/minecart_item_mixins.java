@@ -25,7 +25,7 @@ public abstract class ItemMinecartMixins extends Item {
         super(iItemID);
     }
     
-#if ENABLE_MINECART_FIXES
+#if ENABLE_MINECART_HITBOX_FIXES
     @Overwrite
     public boolean onItemUse(ItemStack itemStack, EntityPlayer entityPlayer, World world, int x, int y, int z, int par7, float par8, float par9, float par10) {
         

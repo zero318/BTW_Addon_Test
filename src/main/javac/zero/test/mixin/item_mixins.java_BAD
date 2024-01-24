@@ -1,0 +1,29 @@
+package zero.test.mixin;
+
+import net.minecraft.src.*
+
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.Shadow;
+
+#include "..\feature_flags.h"
+#include "..\util.h"
+
+@Mixin(Item.class)
+public abstract class ItemMixins {
+#if ENABLE_MINECART_OVEN
+    @Inject(
+        method = "<clinit>()V",
+        at = @At("TAIL")
+    )
+    private static void static_init_inject(CallbackInfo info) {
+        Item.minecartPowered.setUnlocalizedName("minecart_oven");
+    }
+#endif
+}

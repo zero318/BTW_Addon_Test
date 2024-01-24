@@ -990,6 +990,10 @@ MACRO_VOID(
 #define FLAT_DIRECTION_META_BITS 2
 #define POWERED_META_BITS 1
 #define POWER_META_BITS 4
+#define RAIL_SHAPE_META_BITS 3
+
+MACRO_VOID(/* Rail shape is hardcoded to be this offset */)
+#define RAIL_SHAPE_META_OFFSET 0
 
 #define POWERED_META_IS_BOOL 1
 
@@ -1420,6 +1424,8 @@ _OFFSET_DIRECTION_ARGS(X, Y, Z, MACRO_CAT(direction,_OFFSETS))
 #define FLAT_DIRECTION_EAST 1
 #define FLAT_DIRECTION_SOUTH 2
 #define FLAT_DIRECTION_WEST 3
+
+#define OPPOSITE_FLAT_DIRECTION(dir) ((dir)^2)
 
 #define FLAT_DIRECTION_AXIS(dir) ((dir)&1)
 #define FLAT_AXIS_X 0x1

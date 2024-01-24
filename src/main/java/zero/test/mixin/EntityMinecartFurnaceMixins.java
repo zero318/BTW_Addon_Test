@@ -136,8 +136,6 @@ public abstract class EntityMinecartFurnaceMixins extends EntityMinecart impleme
     public abstract boolean isMinecartPowered();
     @Overwrite
     public Block getDefaultDisplayTile() {
-        //EntityMinecartFurnace self = (EntityMinecartFurnace)(Object)this;
-        //return ((IEntityMinecartFurnaceAccessMixins)(Object)this).getFuel() > 0 ? BTWBlocks.burningOven : BTWBlocks.idleOven;
         return this.isMinecartPowered() ? BTWBlocks.burningOven : BTWBlocks.idleOven;
     }
     @Overwrite

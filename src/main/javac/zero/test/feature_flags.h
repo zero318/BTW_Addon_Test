@@ -201,6 +201,12 @@ MC-201621
 */)
 #define ENABLE_MINECART_FIXES 1
 
+MACRO_VOID(/* Prevent minecarts having their clientside hitbox way above the rail */)
+#define ENABLE_MINECART_HITBOX_FIXES 1
+
+MACRO_VOID(/* Allow minecarts to visually rotate 360 degrees */)
+#define ENABLE_MINECART_FULL_ROTATION 0
+
 MACRO_VOID(/* */)
 #define ENABLE_MINECART_LERP_FIXES 0
 
@@ -214,7 +220,7 @@ MACRO_VOID(/* Reskin furnace minecarts to be ovens */)
 #define ENABLE_MINECART_OVEN 1
 
 MACRO_VOID(/* Allow hoppers to add fuel to minecarts */)
-#define ENABLE_HOPPERS_FUELING_CARTS 1
+#define ENABLE_HOPPERS_FUELING_CARTS 0
 
 MACRO_VOID(/* */)
 #define ENABLE_MINECART_BLOCK_DISPENSER 0
@@ -224,12 +230,15 @@ MACRO_VOID(/* Restore activator rails */)
 #define ENABLE_ACTIVATOR_RAILS 1
 #endif
 
-MACRO_VOID(/* */)
+MACRO_VOID(/* Stop the camera spinning wildly in minecarts */)
 #define ENABLE_STABLE_MINECART_CAMERA 1
 
 MACRO_VOID(/* Cheap/slow rails. Admittedly not a very original idea. */)
 #define ENABLE_WOODEN_RAILS 1
 
 #define ENABLE_STEEL_RAILS 0
+
+MACRO_VOID(/* Fixes MC-342, MC-2783, and MC-170907 (all the same bug) */)
+#define ENABLE_FIX_FOR_NETWORK_POSITION_DELTAS 1
 
 #endif

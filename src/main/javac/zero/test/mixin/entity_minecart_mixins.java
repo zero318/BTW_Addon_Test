@@ -15,9 +15,12 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 
+import zero.test.IWorldMixins;
+import zero.test.IBlockMixins;
 import zero.test.IEntityMixins;
 import zero.test.mixin.IEntityMinecartAccessMixins;
 import zero.test.IBaseRailBlockMixins;
+import zero.test.ZeroUtil;
 
 import java.util.List;
 
@@ -42,6 +45,19 @@ public abstract class EntityMinecartMixins extends Entity {
     public EntityMinecartMixins(World world) {
         super(world);
     }
+    
+#if ENABLE_MODERN_REDSTONE_WIRE
+    @Redirect(
+        method = "updateOnTrack(IIIDDII)V",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/src/World;isBlockNormalCube(III)Z"
+        )
+    )
+    private boolean isBlockNormalCube_redirect(World world, int x, int y, int z) {
+        return ((IWorldMixins)world).isBlockRedstoneConductor(x, y, z);
+    }
+#endif
     
 #if ENABLE_MINECART_LERP_FIXES
 /*
@@ -71,6 +87,7 @@ public abstract class EntityMinecartMixins extends Entity {
     
 #if ENABLE_MINECART_FIXES
 
+#if ENABLE_MINECART_HITBOX_FIXES
     @Inject(
         method = "<init>(Lnet/minecraft/src/World;)V",
         at = @At("TAIL")
@@ -84,6 +101,7 @@ public abstract class EntityMinecartMixins extends Entity {
         // Random BS to fix riding being too low
         return 0.125D;
     }
+#endif
 
     @Shadow
     private static int[][][] matrix;
@@ -100,7 +118,7 @@ public abstract class EntityMinecartMixins extends Entity {
     public int shuntTime = 0;
     
     public boolean isShunting() {
-        return this.shuntTime > 0 || ((EntityMinecart)(Object)this).getMinecartType() == MINECART_FURNACE;
+        return this.shuntTime > 0;// || ((EntityMinecart)(Object)this).getMinecartType() == MINECART_FURNACE;
     }
 #endif
 
@@ -214,15 +232,12 @@ public abstract class EntityMinecartMixins extends Entity {
 
             int blockId = self.worldObj.getBlockId(x, var2, z);
 
+            double maxSpeed = this.getMaxSpeed();
             if (BlockRailBase.isRailBlock(blockId)) {
                 int meta = self.worldObj.getBlockMetadata(x, var2, z);
                 this.updateOnTrack(
                     x, var2, z,
-#if ENABLE_WOODEN_RAILS
-                    this.getMaxSpeed() * ((IBaseRailBlockMixins)Block.blocksList[blockId]).getRailMaxSpeedFactor(),
-#else
-                    this.getMaxSpeed(),
-#endif
+                    maxSpeed * ((IBaseRailBlockMixins)Block.blocksList[blockId]).getRailMaxSpeedFactor(),
                     0.0078125D, blockId, meta
                 );
 
@@ -231,7 +246,7 @@ public abstract class EntityMinecartMixins extends Entity {
                 }
             }
             else {
-                this.func_94088_b(this.getMaxSpeed());
+                this.func_94088_b(maxSpeed);
             }
 
             this.doBlockCollisions();
@@ -265,17 +280,16 @@ public abstract class EntityMinecartMixins extends Entity {
             
             // Still trying to fix parallel track collisions...
             /*
-            double expandX = 0.0D;
-            double expandZ = 0.0D;
+            double expandX = 0.05D;
+            double expandZ = 0.05D;
             switch (YAW_FLAT_DIRECTION8(self.rotationYaw)) {
                 case FLAT_DIRECTION8_NORTH: case FLAT_DIRECTION8_SOUTH:
                     expandX = 0.2D;
-                    //expandZ = 0.2D;
+                    //expandZ = 0.0D;
                     break;
                 case FLAT_DIRECTION8_EAST: case FLAT_DIRECTION8_WEST:
-                    //expandX = 0.2D;
+                    //expandX = 0.0D;
                     expandZ = 0.2D;
-                    break;
             }
             
             //AddonHandler.logMessage(
@@ -315,8 +329,6 @@ public abstract class EntityMinecartMixins extends Entity {
             }
         }
     }
-    
-#if 1
 
     public void applyEntityCollision(Entity entity) {
         if (
@@ -340,13 +352,12 @@ public abstract class EntityMinecartMixins extends Entity {
             double var4 = entity.posZ - this.posZ;
             double distance = var2 * var2 + var4 * var4;
 
-            if (distance >= 9.999999747378752E-5D) {
+            if (distance >= 0.0001D) {
                 
-                distance = Math.sqrt(distance);
+                double invDistance = 1.0D / Math.sqrt(distance);
                 
-                var2 /= distance;
-                var4 /= distance;
-                double invDistance = 1.0D / distance;
+                var2 *= invDistance;
+                var4 *= invDistance;
                 if (invDistance > 1.0D) {
                     invDistance = 1.0D;
                 }
@@ -359,54 +370,57 @@ public abstract class EntityMinecartMixins extends Entity {
                 var4 *= (double)(1.0F - this.entityCollisionReduction);
                 var2 *= 0.5D;
                 var4 *= 0.5D;
+                
+#define REWORK_COLLISION_CODE 0
+#define CART_DEBUG_LOGGING 0
 
                 if (entity instanceof EntityMinecart) {
                     Vec3 posVec = this.worldObj.getWorldVec3Pool().getVecFromPool(entity.posX - this.posX, 0.0D, entity.posZ - this.posZ).normalize();
                     Vec3 rotVec = this.worldObj.getWorldVec3Pool().getVecFromPool(MathHelper.cos(RADF(this.rotationYaw)), 0.0D, MathHelper.sin(RADF(this.rotationYaw))).normalize();
-                    double var16 = Math.abs(posVec.dotProduct(rotVec));
-                    
+                    double similarity = Math.abs(posVec.dotProduct(rotVec));
                     /*
                     AddonHandler.logMessage(
                         "    "+this.rotationYaw+" "+entity.rotationYaw+"\n"+
                         "    "+posVec.xCoord+" "+posVec.yCoord+" "+posVec.zCoord+"\n"+
                         "    "+rotVec.xCoord+" "+rotVec.yCoord+" "+rotVec.zCoord+"\n"+
-                        "    "+var16+" "+this.entityId+" "+entity.entityId+"\n"+
+                        "    "+similarity+" "+this.entityId+" "+entity.entityId+"\n"+
                         "Self:  "+this.posX+" "+this.posZ+" "+this.width+" "+this.boundingBox.minX+" "+this.boundingBox.maxX+" "+this.boundingBox.minZ+" "+this.boundingBox.maxZ+"\n"+
                         "Other: "+entity.posX+" "+entity.posZ+" "+entity.width+" "+entity.boundingBox.minX+" "+entity.boundingBox.maxX+" "+entity.boundingBox.minZ+" "+entity.boundingBox.maxZ
                     );
                     */
                     
-                    /*
-                    AddonHandler.logMessage(
-                        this.entityId+" "+entity.entityId+" "+var16+" "+this.rotationYaw+" "+entity.rotationYaw
-                    );
-                    */
+                    
+                    //AddonHandler.logMessage(
+                        //this.entityId+" "+entity.entityId+" "+similarity+" "+this.rotationYaw+" "+entity.rotationYaw
+                    //);
                     
                     
                     // There's still an edge case at 0.79
-                    if (var16 < 0.78D) {
+                    if (similarity < 0.7D) {
                         return;
                     }
                     // This seems to make furnace cart shunting work around
                     // corners, but I absolutely hate the magic number.
                     // HACK: This is speed dependent, come up with a better solution that
                     // directly tests angles instead
-#if ENABLE_DEDICATED_SHUNTING_CODE
-                    if (this.isShunting() || ((EntityMinecartMixins)entity).isShunting())
+                    //if (similarity < 0.84D) {
+                        //var2 = -var2;
+                        //var4 = -var4;
+                    //}
+
+#if CART_DEBUG_LOGGING
+                    double XSA1 = Math.signum(this.motionX);
+                    double ZSA1 = Math.signum(this.motionZ);
+                    double XSB1 = Math.signum(entity.motionX);
+                    double ZSB1 = Math.signum(entity.motionZ);
 #endif
-                    if (var16 < 0.80D) {
-                        var2 = -var2;
-                        var4 = -var4;
-                    }
+
 
                     if (
                         ((EntityMinecart)entity).getMinecartType() == MINECART_FURNACE &&
-                        /*(
-                            ((EntityMinecart)entity).getMinecartType() == MINECART_FURNACE ||
-                            ((EntityMinecartMixins)entity).shuntTime > 0
-                        ) &&*/
                         self.getMinecartType() != MINECART_FURNACE
                     ) {
+                        //Vec3 motionVec = this.worldObj.getWorldVec3Pool().getVecFromPool(this.motionX, 0.0D, this.motionZ).normalize();
                         this.motionX *= 0.2D;
                         this.motionZ *= 0.2D;
                         this.addVelocity(entity.motionX - var2, 0.0D, entity.motionZ - var4);
@@ -415,16 +429,12 @@ public abstract class EntityMinecartMixins extends Entity {
 #endif
                         entity.motionX *= 0.95D;
                         entity.motionZ *= 0.95D;
-                        //AddonHandler.logMessage("ShuntTimesA: "+((EntityMinecartMixins)entity).shuntTime+" "+this.shuntTime);
                     }
                     else if (
                         ((EntityMinecart)entity).getMinecartType() != MINECART_FURNACE &&
                         self.getMinecartType() == MINECART_FURNACE
-                        /*(
-                            self.getMinecartType() == MINECART_FURNACE ||
-                            this.shuntTime > 0
-                        )*/
                     ) {
+                        //Vec3 motionVec = this.worldObj.getWorldVec3Pool().getVecFromPool(entity.motionX, 0.0D, entity.motionZ).normalize();
                         entity.motionX *= 0.2D;
                         entity.motionZ *= 0.2D;
                         entity.addVelocity(this.motionX + var2, 0.0D, this.motionZ + var4);
@@ -433,12 +443,10 @@ public abstract class EntityMinecartMixins extends Entity {
 #endif
                         this.motionX *= 0.95D;
                         this.motionZ *= 0.95D;
-                        //AddonHandler.logMessage("ShuntTimesB: "+this.shuntTime+" "+((EntityMinecartMixins)entity).shuntTime);
                     }
                     else {
-                        //AddonHandler.logMessage("ShuntTimesC: "+((EntityMinecartMixins)entity).shuntTime+" "+this.shuntTime);
-                        double var18 = (entity.motionX + this.motionX) / 2.0D;
-                        double var20 = (entity.motionZ + this.motionZ) / 2.0D;
+                        double var18 = (entity.motionX + this.motionX) * 0.5D;
+                        double var20 = (entity.motionZ + this.motionZ) * 0.5D;
                         this.motionX *= 0.2D;
                         this.motionZ *= 0.2D;
                         this.addVelocity(var18 - var2, 0.0D, var20 - var4);
@@ -446,6 +454,22 @@ public abstract class EntityMinecartMixins extends Entity {
                         entity.motionZ *= 0.2D;
                         entity.addVelocity(var18 + var2, 0.0D, var20 + var4);
                     }
+#if CART_DEBUG_LOGGING
+                    double XSA2 = Math.signum(this.motionX);
+                    double ZSA2 = Math.signum(this.motionZ);
+                    double XSB2 = Math.signum(entity.motionX);
+                    double ZSB2 = Math.signum(entity.motionZ);
+                    if (
+                        XSA1 != XSA2 ||
+                        ZSA1 != ZSA2 ||
+                        XSB1 != XSB2 ||
+                        ZSB1 != ZSB2
+                    ) {
+                        AddonHandler.logMessage(
+                            this.entityId+" "+entity.entityId+" "+similarity+" "+this.rotationYaw+" "+entity.rotationYaw
+                        );
+                    }
+#endif
                 }
                 else {
                     this.addVelocity(-var2, 0.0D, -var4);
@@ -454,7 +478,6 @@ public abstract class EntityMinecartMixins extends Entity {
             }
         }
     }
-#endif
 
 /*
     @Environment(EnvType.CLIENT)
@@ -515,6 +538,7 @@ public abstract class EntityMinecartMixins extends Entity {
     }
 */
 
+#if ENABLE_MINECART_HITBOX_FIXES
     @Overwrite
     public Vec3 getPos(double x, double y, double z) {
         EntityMinecart self = (EntityMinecart)(Object)this;
@@ -577,7 +601,7 @@ public abstract class EntityMinecartMixins extends Entity {
         }
         return null;
     }
-
+#endif
 #endif
 
 #if ENABLE_MINECART_WITH_BLOCK_DISPENSER

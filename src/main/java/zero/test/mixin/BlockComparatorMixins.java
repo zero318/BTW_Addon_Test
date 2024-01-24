@@ -9,6 +9,7 @@ import org.spongepowered.asm.mixin.Implements;
 import zero.test.mixin.IBlockComparatorAccessMixins;
 import zero.test.mixin.IBlockRedstoneLogicAccessMixins;
 import zero.test.IBlockRedstoneLogicMixins;
+import zero.test.IBlockMixins;
 import java.util.Random;
 // Block piston reactions
 @Mixin(BlockComparator.class)
@@ -62,7 +63,6 @@ public abstract class BlockComparatorMixins extends BlockRedstoneLogic {
         }
         return true;
     }
-//#if 0
     // Fixes: More of MC-195351?
     // refreshOutputState
     @Overwrite
@@ -87,7 +87,6 @@ public abstract class BlockComparatorMixins extends BlockRedstoneLogic {
             this.func_94483_i_(world, x, y, z);
         }
     }
-//#endif
     @Override
     public boolean canRotateOnTurntable(IBlockAccess blockAccess, int x, int y, int z) {
         return true;
@@ -144,7 +143,35 @@ public abstract class BlockComparatorMixins extends BlockRedstoneLogic {
     public boolean getWeakChanges(World world, int x, int y, int z, int meta) {
         return true;
     }
-    // Deal with the conductivity change...
+    // Deal with the conductivity change
+    @Overwrite
+    public int getInputStrength(World world, int x, int y, int z, int meta) {
+        int power = super.getInputStrength(world, x, y, z, meta);
+        int direction = (((meta)&3));
+        x += Direction.offsetX[direction];
+        z += Direction.offsetZ[direction];
+        Block block = Block.blocksList[world.getBlockId(x, y, z)];
+        if (!((block)==null)) {
+            if (block.hasComparatorInputOverride()) {
+                power = block.getComparatorInputOverride(world, x, y, z, ((direction)^2));
+            }
+            else if (
+                power < 15 &&
+                ((IBlockMixins)block).isRedstoneConductor(world, x, y, z)
+            ) {
+                x += Direction.offsetX[direction];
+                z += Direction.offsetZ[direction];
+                block = Block.blocksList[world.getBlockId(x, y, z)];
+                if (
+                    !((block)==null) &&
+                    block.hasComparatorInputOverride()
+                ) {
+                    power = block.getComparatorInputOverride(world, x, y, z, ((direction)^2));
+                }
+            }
+        }
+        return power;
+    }
     //@Shadow
     //public abstract boolean getRenderingBaseTextures();
     // Hacky fix for rendering a bottom texture

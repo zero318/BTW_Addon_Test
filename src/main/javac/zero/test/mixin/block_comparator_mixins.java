@@ -13,6 +13,7 @@ import org.spongepowered.asm.mixin.Implements;
 import zero.test.mixin.IBlockComparatorAccessMixins;
 import zero.test.mixin.IBlockRedstoneLogicAccessMixins;
 import zero.test.IBlockRedstoneLogicMixins;
+import zero.test.IBlockMixins;
 
 import java.util.Random;
 
@@ -86,7 +87,6 @@ public abstract class BlockComparatorMixins extends BlockRedstoneLogic {
         return true;
     }
     
-//#if 0
     // Fixes: More of MC-195351?
     // refreshOutputState
     @Overwrite
@@ -115,7 +115,6 @@ public abstract class BlockComparatorMixins extends BlockRedstoneLogic {
             this.func_94483_i_(world, x, y, z);
         }
     }
-//#endif
 
     @Override
     public boolean canRotateOnTurntable(IBlockAccess blockAccess, int x, int y, int z) {
@@ -184,7 +183,38 @@ public abstract class BlockComparatorMixins extends BlockRedstoneLogic {
     }
     
 #if ENABLE_MODERN_REDSTONE_WIRE
-    // Deal with the conductivity change...
+    // Deal with the conductivity change
+    @Overwrite
+    public int getInputStrength(World world, int x, int y, int z, int meta) {
+        int power = super.getInputStrength(world, x, y, z, meta);
+        int direction = READ_META_FIELD(meta, FLAT_DIRECTION);
+        x += Direction.offsetX[direction];
+        z += Direction.offsetZ[direction];
+        Block block = Block.blocksList[world.getBlockId(x, y, z)];
+
+        if (!BLOCK_IS_AIR(block)) {
+            if (block.hasComparatorInputOverride()) {
+                power = block.getComparatorInputOverride(world, x, y, z, OPPOSITE_FLAT_DIRECTION(direction));
+            }
+            else if (
+                power < MAX_REDSTONE_POWER &&
+                ((IBlockMixins)block).isRedstoneConductor(world, x, y, z)
+            ) {
+                x += Direction.offsetX[direction];
+                z += Direction.offsetZ[direction];
+                block = Block.blocksList[world.getBlockId(x, y, z)];
+
+                if (
+                    !BLOCK_IS_AIR(block) &&
+                    block.hasComparatorInputOverride()
+                ) {
+                    power = block.getComparatorInputOverride(world, x, y, z, OPPOSITE_FLAT_DIRECTION(direction));
+                }
+            }
+        }
+
+        return power;
+    }
 #endif
 
     //@Shadow
