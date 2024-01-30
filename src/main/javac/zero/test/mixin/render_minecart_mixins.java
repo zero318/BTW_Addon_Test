@@ -51,6 +51,8 @@ public abstract class RenderMinecartMixins extends Render {
         Vec3 var23 = par1EntityMinecart.func_70489_a(var15, var17, var19);
         float var24 = par1EntityMinecart.prevRotationPitch + (par1EntityMinecart.rotationPitch - par1EntityMinecart.prevRotationPitch) * par9;
 
+        boolean derp = true;
+        boolean isReverse = false;
         if (var23 != null) {
             Vec3 var25 = par1EntityMinecart.func_70495_a(var15, var17, var19, var21);
             Vec3 var26 = par1EntityMinecart.func_70495_a(var15, var17, var19, -var21);
@@ -73,18 +75,21 @@ public abstract class RenderMinecartMixins extends Render {
             if (var27.lengthVector() != 0.0D)
             {
                 var27 = var27.normalize();
-                if (((IEntityMinecartAccessMixins)par1EntityMinecart).getIsInReverse()) {
+                if (isReverse = ((IEntityMinecartAccessMixins)par1EntityMinecart).getIsInReverse()) {
                     yaw = ZeroUtil.angle_rotate_180(yaw);
                 }
-                //yaw = (float)(Math.atan2(var27.zCoord, var27.xCoord) * 180.0D / Math.PI);
-                float newYaw = (float)(Math.atan2(var27.zCoord, var27.xCoord) * 180.0D / Math.PI);
-                //float newYaw = (float)(Math.atan(var27.zCoord / var27.xCoord) * 180.0D / Math.PI);
-                //AddonHandler.logMessage(
-                    //yaw+" "+newYaw
-                //);
+                //yaw = DEGF(Math.atan2(var27.zCoord, var27.xCoord));
+                float newYaw = DEGF(Math.atan2(var27.zCoord, var27.xCoord));
                 yaw = ZeroUtil.angle_diff_abs(yaw, newYaw) <= 90.0F ? newYaw : ZeroUtil.angle_rotate_180(newYaw);
-                //yaw = newYaw;
                 var24 = (float)(Math.atan(var27.yCoord) * 73.0D);
+                if (!isReverse) {
+                    derp = yaw < 0.0f;
+                }
+                else {
+                    if (derp = yaw >= 0.0f) {
+                        var24 = -var24;
+                    }
+                }
             }
         }
 #if ENABLE_MINECART_HITBOX_FIXES
@@ -92,8 +97,14 @@ public abstract class RenderMinecartMixins extends Render {
 #else
         GL11.glTranslatef((float)x, (float)y, (float)z);
 #endif
-        GL11.glRotatef(-var24, 0.0F, 0.0F, 1.0F);
+        // IDK why any of this rotation stuff works
+        if (!derp) {
+            GL11.glRotatef(-var24, 0.0F, 0.0F, 1.0F);
+        }
         GL11.glRotatef(180.0F - yaw, 0.0F, 1.0F, 0.0F);
+        if (derp) {
+            GL11.glRotatef(-var24, 0.0F, 0.0F, 1.0F);
+        }
         float var31 = (float)par1EntityMinecart.getRollingAmplitude() - par9;
         float var32 = (float)par1EntityMinecart.getDamage() - par9;
 

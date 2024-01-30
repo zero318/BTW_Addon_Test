@@ -208,6 +208,12 @@ MACRO_VOID(/* Allow minecarts to visually rotate 360 degrees */)
 #define ENABLE_MINECART_FULL_ROTATION 0
 
 MACRO_VOID(/* */)
+#define ENABLE_BETTER_MINECART_CLIENT_YAW 0
+
+MACRO_VOID(/* */)
+#define ENABLE_VERTICAL_CLIENT_CART_SNAPPING 0
+
+MACRO_VOID(/* */)
 #define ENABLE_MINECART_LERP_FIXES 0
 
 MACRO_VOID(/* Make LAN world sharing suck less */)
@@ -240,5 +246,16 @@ MACRO_VOID(/* Cheap/slow rails. Admittedly not a very original idea. */)
 
 MACRO_VOID(/* Fixes MC-342, MC-2783, and MC-170907 (all the same bug) */)
 #define ENABLE_FIX_FOR_NETWORK_POSITION_DELTAS 1
+
+MACRO_VOID(/* A block that prevents minecarts bouncing off each other */)
+#define ENABLE_RAIL_BUFFER_STOP 0
+
+#define ENABLE_DEBUG_STRING_JANK 0
+
+#if ENABLE_DEBUG_STRING_JANK
+#define DEBUG_PRINT(...) ZeroUtil.debug_print(__VA_ARGS__)
+#else
+#define DEBUG_PRINT(...)
+#endif
 
 #endif

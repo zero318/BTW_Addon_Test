@@ -12,7 +12,8 @@ public class SlimeBlock extends Block {
     public SlimeBlock(int blockId) {
         super(blockId, Material.grass);
         this.slipperiness = 0.8F;
-        this.setHardness(0.0F);
+        this.setHardness(0.7F);
+        this.setResistance(0.0F);
         this.setShovelsEffectiveOn(true);
         this.setLightOpacity(1);
         this.setUnlocalizedName("slime_block");

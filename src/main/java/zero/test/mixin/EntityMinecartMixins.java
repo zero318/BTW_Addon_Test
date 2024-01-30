@@ -164,36 +164,43 @@ public abstract class EntityMinecartMixins extends Entity {
             double xDelta = self.prevPosX - self.posX;
             double zDelta = self.prevPosZ - self.posZ;
             if (xDelta * xDelta + zDelta * zDelta > 0.001D) {
-                self.rotationYaw = (float)(Math.atan2(zDelta, xDelta) * 180.0D / Math.PI);
+                self.rotationYaw = (((float)(Math.atan2(zDelta, xDelta)))*57.29577951F);
                 //if (((IEntityMinecartAccessMixins)self).getIsInReverse()) {
                     //self.rotationYaw += 180.0F;
                 //}
             }
-            double yawDelta = (double)MathHelper.wrapAngleTo180_float(self.rotationYaw - self.prevRotationYaw);
-            if (yawDelta < -170.0D || yawDelta >= 170.0D) {
+            //double yawDelta = (double)MathHelper.wrapAngleTo180_float(self.rotationYaw - self.prevRotationYaw);
+            //float yawDelta = ;
+            //if (yawDelta < -170.0D || yawDelta >= 170.0D) {
+            if (ZeroUtil.angle_diff_abs(self.rotationYaw, self.prevRotationYaw) > 170.0F) {
                 //self.rotationYaw += 180.0F;
                 ((IEntityMinecartAccessMixins)self).setIsInReverse(
                     !((IEntityMinecartAccessMixins)self).getIsInReverse()
                 );
             }
-            this.setRotation(self.rotationYaw, self.rotationPitch);
+            //this.setRotation(self.rotationYaw, self.rotationPitch);
             // Still trying to fix parallel track collisions...
+            /*
             double expandX = 0.05D;
             double expandZ = 0.05D;
-            switch (((int)MathHelper.floor_double((double)(self.rotationYaw)/45.0D+0.5D)&7)) {
-                case 0: case 4:
+            switch (YAW_FLAT_DIRECTION8(self.rotationYaw)) {
+                case FLAT_DIRECTION8_NORTH: case FLAT_DIRECTION8_SOUTH:
                     expandX = 0.2D;
                     //expandZ = 0.0D;
                     break;
-                case 2: case 6:
+                case FLAT_DIRECTION8_EAST: case FLAT_DIRECTION8_WEST:
                     //expandX = 0.0D;
                     expandZ = 0.2D;
             }
+            
             //AddonHandler.logMessage(
                 //YAW_FLAT_DIRECTION8(self.rotationYaw)+" "+self.rotationYaw
             //);
+            
+            
             List<Entity> entityList = self.worldObj.getEntitiesWithinAABBExcludingEntity(self, self.boundingBox.expand(expandX, 0.0D, expandZ));
-            //List<Entity> entityList = self.worldObj.getEntitiesWithinAABBExcludingEntity(self, self.boundingBox.expand(0.2D, 0.0D, 0.2D));
+            */
+            List<Entity> entityList = self.worldObj.getEntitiesWithinAABBExcludingEntity(self, self.boundingBox.expand(0.2D, 0.0D, 0.2D));
             if (
                 entityList != null &&
                 !entityList.isEmpty()
@@ -236,27 +243,27 @@ public abstract class EntityMinecartMixins extends Entity {
             ) {
                 entity.mountEntity(this);
             }
-            double var2 = entity.posX - this.posX;
-            double var4 = entity.posZ - this.posZ;
-            double distance = var2 * var2 + var4 * var4;
+            double xDiff = entity.posX - this.posX;
+            double zDiff = entity.posZ - this.posZ;
+            double distance = xDiff * xDiff + zDiff * zDiff;
             if (distance >= 0.0001D) {
                 double invDistance = 1.0D / Math.sqrt(distance);
-                var2 *= invDistance;
-                var4 *= invDistance;
+                xDiff *= invDistance;
+                zDiff *= invDistance;
                 if (invDistance > 1.0D) {
                     invDistance = 1.0D;
                 }
-                var2 *= invDistance;
-                var4 *= invDistance;
-                var2 *= 0.1D;
-                var4 *= 0.1D;
-                var2 *= (double)(1.0F - this.entityCollisionReduction);
-                var4 *= (double)(1.0F - this.entityCollisionReduction);
-                var2 *= 0.5D;
-                var4 *= 0.5D;
+                xDiff *= invDistance;
+                zDiff *= invDistance;
+                xDiff *= 0.1D;
+                zDiff *= 0.1D;
+                xDiff *= (double)(1.0F - this.entityCollisionReduction);
+                zDiff *= (double)(1.0F - this.entityCollisionReduction);
+                xDiff *= 0.5D;
+                zDiff *= 0.5D;
                 if (entity instanceof EntityMinecart) {
                     Vec3 posVec = this.worldObj.getWorldVec3Pool().getVecFromPool(entity.posX - this.posX, 0.0D, entity.posZ - this.posZ).normalize();
-                    Vec3 rotVec = this.worldObj.getWorldVec3Pool().getVecFromPool(MathHelper.cos(((this.rotationYaw)*0.017453292F)), 0.0D, MathHelper.sin(((this.rotationYaw)*0.017453292F))).normalize();
+                    Vec3 rotVec = this.worldObj.getWorldVec3Pool().getVecFromPool(MathHelper.cos((((float)(this.rotationYaw))*0.017453292F)), 0.0D, MathHelper.sin((((float)(this.rotationYaw))*0.017453292F))).normalize();
                     double similarity = Math.abs(posVec.dotProduct(rotVec));
                     /*
                     AddonHandler.logMessage(
@@ -280,17 +287,16 @@ public abstract class EntityMinecartMixins extends Entity {
                     // HACK: This is speed dependent, come up with a better solution that
                     // directly tests angles instead
                     //if (similarity < 0.84D) {
-                        //var2 = -var2;
-                        //var4 = -var4;
+                        //xDiff = -xDiff;
+                        //zDiff = -zDiff;
                     //}
                     if (
                         ((EntityMinecart)entity).getMinecartType() == 2 &&
                         self.getMinecartType() != 2
                     ) {
-                        //Vec3 motionVec = this.worldObj.getWorldVec3Pool().getVecFromPool(this.motionX, 0.0D, this.motionZ).normalize();
                         this.motionX *= 0.2D;
                         this.motionZ *= 0.2D;
-                        this.addVelocity(entity.motionX - var2, 0.0D, entity.motionZ - var4);
+                        this.addVelocity(entity.motionX - xDiff, 0.0D, entity.motionZ - zDiff);
                         entity.motionX *= 0.95D;
                         entity.motionZ *= 0.95D;
                     }
@@ -298,27 +304,26 @@ public abstract class EntityMinecartMixins extends Entity {
                         ((EntityMinecart)entity).getMinecartType() != 2 &&
                         self.getMinecartType() == 2
                     ) {
-                        //Vec3 motionVec = this.worldObj.getWorldVec3Pool().getVecFromPool(entity.motionX, 0.0D, entity.motionZ).normalize();
                         entity.motionX *= 0.2D;
                         entity.motionZ *= 0.2D;
-                        entity.addVelocity(this.motionX + var2, 0.0D, this.motionZ + var4);
+                        entity.addVelocity(this.motionX + xDiff, 0.0D, this.motionZ + zDiff);
                         this.motionX *= 0.95D;
                         this.motionZ *= 0.95D;
                     }
                     else {
-                        double var18 = (entity.motionX + this.motionX) * 0.5D;
-                        double var20 = (entity.motionZ + this.motionZ) * 0.5D;
+                        double xAverage = (entity.motionX + this.motionX) * 0.5D;
+                        double zAverage = (entity.motionZ + this.motionZ) * 0.5D;
                         this.motionX *= 0.2D;
                         this.motionZ *= 0.2D;
-                        this.addVelocity(var18 - var2, 0.0D, var20 - var4);
+                        this.addVelocity(xAverage - xDiff, 0.0D, zAverage - zDiff);
                         entity.motionX *= 0.2D;
                         entity.motionZ *= 0.2D;
-                        entity.addVelocity(var18 + var2, 0.0D, var20 + var4);
+                        entity.addVelocity(xAverage + xDiff, 0.0D, zAverage + zDiff);
                     }
                 }
                 else {
-                    this.addVelocity(-var2, 0.0D, -var4);
-                    entity.addVelocity(var2 * 0.25D, 0.0D, var4 * 0.25D);
+                    this.addVelocity(-xDiff, 0.0D, -zDiff);
+                    entity.addVelocity(xDiff * 0.25D, 0.0D, zDiff * 0.25D);
                 }
             }
         }

@@ -21,7 +21,7 @@ public class ZeroTestAddon extends BTWAddon {
     private static ZeroTestAddon instance;
 
     private ZeroTestAddon() {
-        super("Zero Test Addon", "0.1.4", "ZeroTest");
+        super("Zero Test Addon", "0.1.5", "ZeroTest");
     }
 
     @Override

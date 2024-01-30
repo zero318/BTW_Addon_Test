@@ -91,7 +91,6 @@ Furnace Minecarts:
 - Changed to be ovens instead of furnaces
 - Move backwards if alt used
 - Stop moving if crouch used
-- Fixed most basic cases where linked carts would separate
 - Fixed MC-10186 and MC-51053
 
 Tile Entities:
@@ -154,3 +153,4 @@ Known Issues
 - Block placers/breakers have lazy texturing
 - Metal spikes don't receive power from repeaters
 - Exploit with platforms
+- Minecart hitboxes obstruct the rail they are placed on

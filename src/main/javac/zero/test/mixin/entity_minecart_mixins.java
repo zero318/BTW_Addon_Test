@@ -46,6 +46,10 @@ public abstract class EntityMinecartMixins extends Entity {
         super(world);
     }
     
+#if ENABLE_RAIL_BUFFER_STOP
+    public int debounce = 0;
+#endif
+    
 #if ENABLE_MODERN_REDSTONE_WIRE
     @Redirect(
         method = "updateOnTrack(IIIDDII)V",
@@ -111,16 +115,6 @@ public abstract class EntityMinecartMixins extends Entity {
     
     @Shadow
     public abstract void func_94088_b(double par1);
-    
-#define ENABLE_DEDICATED_SHUNTING_CODE 0
-    
-#if ENABLE_DEDICATED_SHUNTING_CODE
-    public int shuntTime = 0;
-    
-    public boolean isShunting() {
-        return this.shuntTime > 0;// || ((EntityMinecart)(Object)this).getMinecartType() == MINECART_FURNACE;
-    }
-#endif
 
     public double getMaxSpeed() {
         return 0.4D;
@@ -197,7 +191,16 @@ public abstract class EntityMinecartMixins extends Entity {
 
             self.worldObj.theProfiler.endSection();
         }
+        
+#define USE_SERVER_MOTION_ON_CLIENT 0
 
+#if ENABLE_MINECART_FULL_ROTATION
+        self.prevPosX = self.posX;
+        self.prevPosY = self.posY;
+        self.prevPosZ = self.posZ;
+#endif
+
+#if !USE_SERVER_MOTION_ON_CLIENT
         if (self.worldObj.isRemote) {
             int turn_progress = ((IEntityMinecartAccessMixins)self).getTurnProgress();
             if (turn_progress > 0) {
@@ -206,11 +209,41 @@ public abstract class EntityMinecartMixins extends Entity {
                 double dX = self.posX + (((IEntityMinecartAccessMixins)self).getMinecartX() - self.posX) * dTurn;
                 double dY = self.posY + (((IEntityMinecartAccessMixins)self).getMinecartY() - self.posY) * dTurn;
                 double dZ = self.posZ + (((IEntityMinecartAccessMixins)self).getMinecartZ() - self.posZ) * dTurn;
+#if !(ENABLE_BETTER_MINECART_CLIENT_YAW || ENABLE_MINECART_FULL_ROTATION)
                 double dYaw = MathHelper.wrapAngleTo180_double(((IEntityMinecartAccessMixins)self).getMinecartYaw() - (double)self.rotationYaw);
                 self.rotationYaw = (float)((double)self.rotationYaw + dYaw * dTurn);
+#endif
                 self.rotationPitch = (float)((double)self.rotationPitch + (((IEntityMinecartAccessMixins)self).getMinecartPitch() - (double)self.rotationPitch) * dTurn);
                 ((IEntityMinecartAccessMixins)self).setTurnProgress(turn_progress - 1);
+#if ENABLE_VERTICAL_CLIENT_CART_SNAPPING
+                if (((IEntityMinecartAccessMixins)self).getMinecartY() > dY) {
+                    int x = MathHelper.floor_double(dX);
+                    int y = MathHelper.floor_double(dY);
+                    int z = MathHelper.floor_double(dZ);
+                    if (
+                        !BlockRailBase.isRailBlock(self.worldObj.getBlockId(x, y, z)) &&
+                        BlockRailBase.isRailBlock(self.worldObj.getBlockId(x, y + 1, z))
+                    ) {
+                        dY += 1.0D;
+                    }
+                }
+#endif
                 self.setPosition(dX, dY, dZ);
+#if ENABLE_BETTER_MINECART_CLIENT_YAW || ENABLE_MINECART_FULL_ROTATION
+                double xDelta = self.prevPosX - self.posX;
+                double zDelta = self.prevPosZ - self.posZ;
+                if (xDelta * xDelta + zDelta * zDelta > 0.001D) {
+                    self.prevRotationYaw = self.rotationYaw;
+                    self.rotationYaw = DEGF(Math.atan2(zDelta, xDelta));
+                }
+#if ENABLE_MINECART_FULL_ROTATION
+                if (ZeroUtil.angle_diff_abs(self.rotationYaw, self.prevRotationYaw) > 170.0F) {
+                    ((IEntityMinecartAccessMixins)self).setIsInReverse(
+                        !((IEntityMinecartAccessMixins)self).getIsInReverse()
+                    );
+                }
+#endif
+#endif
             }
             else {
                 self.setPosition(self.posX, self.posY, self.posZ);
@@ -218,9 +251,12 @@ public abstract class EntityMinecartMixins extends Entity {
             this.setRotation(self.rotationYaw, self.rotationPitch);
         }
         else {
+#endif
+#if !ENABLE_MINECART_FULL_ROTATION
             self.prevPosX = self.posX;
             self.prevPosY = self.posY;
             self.prevPosZ = self.posZ;
+#endif
             self.motionY -= 0.03999999910593033D;
             int x = MathHelper.floor_double(self.posX);
             var2 = MathHelper.floor_double(self.posY);
@@ -255,28 +291,27 @@ public abstract class EntityMinecartMixins extends Entity {
             double zDelta = self.prevPosZ - self.posZ;
 
             if (xDelta * xDelta + zDelta * zDelta > 0.001D) {
-                self.rotationYaw = (float)(Math.atan2(zDelta, xDelta) * 180.0D / Math.PI);
+                self.rotationYaw = DEGF(Math.atan2(zDelta, xDelta));
                 //if (((IEntityMinecartAccessMixins)self).getIsInReverse()) {
                     //self.rotationYaw += 180.0F;
                 //}
             }
 
-            double yawDelta = (double)MathHelper.wrapAngleTo180_float(self.rotationYaw - self.prevRotationYaw);
+#if 1
+            //double yawDelta = (double)MathHelper.wrapAngleTo180_float(self.rotationYaw - self.prevRotationYaw);
+            //float yawDelta = ;
 
-            if (yawDelta < -170.0D || yawDelta >= 170.0D) {
+            //if (yawDelta < -170.0D || yawDelta >= 170.0D) {
+            if (ZeroUtil.angle_diff_abs(self.rotationYaw, self.prevRotationYaw) > 170.0F) {
                 //self.rotationYaw += 180.0F;
                 ((IEntityMinecartAccessMixins)self).setIsInReverse(
                     !((IEntityMinecartAccessMixins)self).getIsInReverse()
                 );
             }
-
-            this.setRotation(self.rotationYaw, self.rotationPitch);
-            
-#if ENABLE_DEDICATED_SHUNTING_CODE
-            if (this.shuntTime > 0) {
-                --this.shuntTime;
-            }
 #endif
+            
+
+            //this.setRotation(self.rotationYaw, self.rotationPitch);
             
             // Still trying to fix parallel track collisions...
             /*
@@ -300,6 +335,10 @@ public abstract class EntityMinecartMixins extends Entity {
             List<Entity> entityList = self.worldObj.getEntitiesWithinAABBExcludingEntity(self, self.boundingBox.expand(expandX, 0.0D, expandZ));
             */
             
+#if USE_SERVER_MOTION_ON_CLIENT
+            if (!self.worldObj.isRemote) {
+#endif
+
             List<Entity> entityList = self.worldObj.getEntitiesWithinAABBExcludingEntity(self, self.boundingBox.expand(0.2D, 0.0D, 0.2D));
 
             if (
@@ -348,33 +387,35 @@ public abstract class EntityMinecartMixins extends Entity {
                 entity.mountEntity(this);
             }
 
-            double var2 = entity.posX - this.posX;
-            double var4 = entity.posZ - this.posZ;
-            double distance = var2 * var2 + var4 * var4;
+            double xDiff = entity.posX - this.posX;
+            double zDiff = entity.posZ - this.posZ;
+            double distance = xDiff * xDiff + zDiff * zDiff;
 
             if (distance >= 0.0001D) {
                 
                 double invDistance = 1.0D / Math.sqrt(distance);
                 
-                var2 *= invDistance;
-                var4 *= invDistance;
+                xDiff *= invDistance;
+                zDiff *= invDistance;
                 if (invDistance > 1.0D) {
                     invDistance = 1.0D;
                 }
-                var2 *= invDistance;
-                var4 *= invDistance;
+                xDiff *= invDistance;
+                zDiff *= invDistance;
                 
-                var2 *= 0.1D;
-                var4 *= 0.1D;
-                var2 *= (double)(1.0F - this.entityCollisionReduction);
-                var4 *= (double)(1.0F - this.entityCollisionReduction);
-                var2 *= 0.5D;
-                var4 *= 0.5D;
+                xDiff *= 0.1D;
+                zDiff *= 0.1D;
+                xDiff *= (double)(1.0F - this.entityCollisionReduction);
+                zDiff *= (double)(1.0F - this.entityCollisionReduction);
+                xDiff *= 0.5D;
+                zDiff *= 0.5D;
                 
 #define REWORK_COLLISION_CODE 0
 #define CART_DEBUG_LOGGING 0
 
                 if (entity instanceof EntityMinecart) {
+                    
+#if !REWORK_COLLISION_CODE
                     Vec3 posVec = this.worldObj.getWorldVec3Pool().getVecFromPool(entity.posX - this.posX, 0.0D, entity.posZ - this.posZ).normalize();
                     Vec3 rotVec = this.worldObj.getWorldVec3Pool().getVecFromPool(MathHelper.cos(RADF(this.rotationYaw)), 0.0D, MathHelper.sin(RADF(this.rotationYaw))).normalize();
                     double similarity = Math.abs(posVec.dotProduct(rotVec));
@@ -404,9 +445,60 @@ public abstract class EntityMinecartMixins extends Entity {
                     // HACK: This is speed dependent, come up with a better solution that
                     // directly tests angles instead
                     //if (similarity < 0.84D) {
-                        //var2 = -var2;
-                        //var4 = -var4;
+                        //xDiff = -xDiff;
+                        //zDiff = -zDiff;
                     //}
+#else
+                    double xVec = entity.posX - this.posX;
+                    double zVec = entity.posZ - this.posZ;
+                    //double vecLength = Math.sqrt(xVec * xVec + zVec * zVec)
+                    float posAngle = DEGF((float)Math.atan2(zVec, xVec));
+                    float rotAngle = this.rotationYaw;
+                    
+                    float angleDiff = ZeroUtil.angle_plane_diff(rotAngle, posAngle);
+                    /*
+                    switch (YAW_FLAT_DIRECTION8(rotAngle)) {
+                        default:
+                            if (self.getMinecartType() == MINECART_RIDEABLE) {
+                                AddonHandler.logMessage(
+                                    "A "+xVec+" "+zVec+" "+posAngle+" "+rotAngle+" "+angleDiff
+                                );
+                            } else {
+                                AddonHandler.logMessage(
+                                    "B "+xVec+" "+zVec+" "+posAngle+" "+rotAngle+" "+angleDiff
+                                );
+                            }
+                        case FLAT_DIRECTION8_NORTH: case FLAT_DIRECTION8_SOUTH:
+                        case FLAT_DIRECTION8_EAST: case FLAT_DIRECTION8_WEST:
+                    }
+                    */
+                    
+                    if (angleDiff > 50.0F) {
+                        return;
+                    }
+                    
+                    
+                    /*
+                    float angleDiff = ZeroUtil.angle_plane_diff(rotAngle, posAngle);
+                    double sideways = MathHelper.cos(RADF(posAngle + angleDiff));
+                    if (sideways < 0.0) {
+                        sideways = -sideways;
+                    }
+                    double forwards = MathHelper.sin(RADF(posAngle + angleDiff));
+                    if (forwards < 0.0) {
+                        forwards = -forwards;
+                    }
+                    
+                    AddonHandler.logMessage(
+                        forwards+" "+sideways+" "+angleDiff+" "+posAngle+" "+rotAngle
+                    );
+                    
+                    
+                    if (sideways > forwards) {
+                        return;
+                    }
+                    */
+#endif
 
 #if CART_DEBUG_LOGGING
                     double XSA1 = Math.signum(this.motionX);
@@ -420,13 +512,9 @@ public abstract class EntityMinecartMixins extends Entity {
                         ((EntityMinecart)entity).getMinecartType() == MINECART_FURNACE &&
                         self.getMinecartType() != MINECART_FURNACE
                     ) {
-                        //Vec3 motionVec = this.worldObj.getWorldVec3Pool().getVecFromPool(this.motionX, 0.0D, this.motionZ).normalize();
                         this.motionX *= 0.2D;
                         this.motionZ *= 0.2D;
-                        this.addVelocity(entity.motionX - var2, 0.0D, entity.motionZ - var4);
-#if ENABLE_DEDICATED_SHUNTING_CODE
-                        this.shuntTime = 5;
-#endif
+                        this.addVelocity(entity.motionX - xDiff, 0.0D, entity.motionZ - zDiff);
                         entity.motionX *= 0.95D;
                         entity.motionZ *= 0.95D;
                     }
@@ -434,25 +522,21 @@ public abstract class EntityMinecartMixins extends Entity {
                         ((EntityMinecart)entity).getMinecartType() != MINECART_FURNACE &&
                         self.getMinecartType() == MINECART_FURNACE
                     ) {
-                        //Vec3 motionVec = this.worldObj.getWorldVec3Pool().getVecFromPool(entity.motionX, 0.0D, entity.motionZ).normalize();
                         entity.motionX *= 0.2D;
                         entity.motionZ *= 0.2D;
-                        entity.addVelocity(this.motionX + var2, 0.0D, this.motionZ + var4);
-#if ENABLE_DEDICATED_SHUNTING_CODE
-                        ((EntityMinecartMixins)entity).shuntTime = 5;
-#endif
+                        entity.addVelocity(this.motionX + xDiff, 0.0D, this.motionZ + zDiff);
                         this.motionX *= 0.95D;
                         this.motionZ *= 0.95D;
                     }
                     else {
-                        double var18 = (entity.motionX + this.motionX) * 0.5D;
-                        double var20 = (entity.motionZ + this.motionZ) * 0.5D;
+                        double xAverage = (entity.motionX + this.motionX) * 0.5D;
+                        double zAverage = (entity.motionZ + this.motionZ) * 0.5D;
                         this.motionX *= 0.2D;
                         this.motionZ *= 0.2D;
-                        this.addVelocity(var18 - var2, 0.0D, var20 - var4);
+                        this.addVelocity(xAverage - xDiff, 0.0D, zAverage - zDiff);
                         entity.motionX *= 0.2D;
                         entity.motionZ *= 0.2D;
-                        entity.addVelocity(var18 + var2, 0.0D, var20 + var4);
+                        entity.addVelocity(xAverage + xDiff, 0.0D, zAverage + zDiff);
                     }
 #if CART_DEBUG_LOGGING
                     double XSA2 = Math.signum(this.motionX);
@@ -472,8 +556,8 @@ public abstract class EntityMinecartMixins extends Entity {
 #endif
                 }
                 else {
-                    this.addVelocity(-var2, 0.0D, -var4);
-                    entity.addVelocity(var2 * 0.25D, 0.0D, var4 * 0.25D);
+                    this.addVelocity(-xDiff, 0.0D, -zDiff);
+                    entity.addVelocity(xDiff * 0.25D, 0.0D, zDiff * 0.25D);
                 }
             }
         }

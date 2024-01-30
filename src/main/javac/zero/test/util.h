@@ -1768,13 +1768,34 @@ BLOCK_STATE_LONG_EXTRACT_EXTMETA(state)
 #define BLOCK_STATE_UNPACK_LONG(state,id,meta,extmeta)\
 _BLOCK_STATE_UNPACK_LONG(id,meta,extmeta,BLOCK_STATE_UNPACK_LONG_ARGS(state))
 
-#define RADF(degrees) ((degrees)*0.017453292F)
-#define RAD(degrees) ((degrees)*0.017453292D)
+#define RADF(degrees) (((float)(degrees))*0.017453292F)
+#define RAD(degrees) (((double)(degrees))*0.017453292D)
+#define DEGF(radians) (((float)(radians))*57.29577951F)
+#define DEG(radians) (((double)(radians))*57.29577951D)
+#define RADF_YAW(yaw) (((float)(yaw))*-0.017453292F)
+#define RAD_YAW(yaw) (((double)(yaw))*-0.017453292D)
+#define DEGF_YAW(radians) (((float)(radians))*-57.29577951F)
+#define DEG_YAW(radians) (((double)(radians))*-57.29577951D)
+
+#define RAD_TO_DEG(radians) ((radians)*57.29577951D)
+#define RAD_TO_YAW(radians) ((radians)*-57.29577951D)
+#define DEG_TO_RAD(degrees) ((degrees)*0.017453292D)
+#define DEG_TO_YAW(degrees) (-(degrees))
+#define YAW_TO_RAD(yaw) ((yaw)*-0.017453292D)
+#define YAW_TO_DEG(yaw) (-(yaw))
 
 #define YAW_FLAT_DIRECTION(yaw) ((int)MathHelper.floor_double((double)(yaw)/90.0D+0.5D)&3)
 
 #define YAW_DIRECTION(yaw) (Direction.directionToFacing[YAW_FLAT_DIRECTION(yaw)])
 
 #define YAW_FLAT_DIRECTION8(yaw) ((int)MathHelper.floor_double((double)(yaw)/45.0D+0.5D)&7)
+
+#define sinf(...) (MathHelper.sin((float)(__VA_ARGS__)))
+#define cosf(...) (MathHelper.cos((float)(__VA_ARGS__)))
+
+#define sinf_yaw(...) (MathHelper.sin(((float)(__VA_ARGS__))*-0.017453292F))
+#define cosf_yaw(...) (MathHelper.cos(((float)(__VA_ARGS__))*-0.017453292F))
+
+#define atan2_yaw(z,x) ((float)Math.atan2(-(x),(z)))
 
 #endif

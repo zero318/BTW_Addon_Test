@@ -1,4 +1,5 @@
 package zero.test;
+import btw.AddonHandler;
 // Block piston reactions
 public class ZeroUtil {
     public static int lan_port = 0;
@@ -19,6 +20,29 @@ public class ZeroUtil {
         }
         if (angle > 180.0f) {
             return 360.0f - angle;
+        }
+        return angle;
+    }
+    // Range: [0.0,179.0]
+    public static float angle_plane(float angle) {
+        if (angle < 0.0f) {
+            return angle + 180.0f;
+        }
+        return angle;
+    }
+    // Range: [0.0,90.0]
+    public static float angle_plane_diff(float angle, float value) {
+        if (angle < 0.0f) {
+            angle += 180.0f;
+        }
+        if (value < 0.0f) {
+            value += 180.0f;
+        }
+        if ((angle -= value) < 0.0f) {
+            angle = -angle;
+        }
+        if (angle >= 90.0f) {
+            return 180.0f - angle;
         }
         return angle;
     }

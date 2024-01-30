@@ -18,7 +18,8 @@ import zero.test.sound.ZeroTestSounds;
 public class GlueBlock extends Block {
     public GlueBlock(int blockId) {
         super(blockId, Material.grass);
-        this.setHardness(0.0F);
+        this.setHardness(0.01F);
+        this.setResistance(0.0F);
         this.setUnlocalizedName("glue_block");
         this.setShovelsEffectiveOn(true);
         this.setLightOpacity(1);
