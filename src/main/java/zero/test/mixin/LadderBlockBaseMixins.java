@@ -24,7 +24,7 @@ public class LadderBlockBaseMixins {
     public boolean canAttachToFacing(World world, int x, int y, int z, int direction) {
   if (((direction)>=2)) {
    x += Facing.offsetsXForSide[direction];
-   y += Facing.offsetsZForSide[direction];
+   z += Facing.offsetsZForSide[direction];
             Block block = Block.blocksList[world.getBlockId(x, y, z)];
    return !((block)==null) && block.hasLargeCenterHardPointToFacing(world, x, y, z, ((direction)^1), true);
   }

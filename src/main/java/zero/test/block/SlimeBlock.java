@@ -12,13 +12,18 @@ public class SlimeBlock extends Block {
     public SlimeBlock(int blockId) {
         super(blockId, Material.grass);
         this.slipperiness = 0.8F;
-        this.setHardness(0.7F);
-        this.setResistance(0.0F);
+        this.setHardness(0.01F);
+        this.setResistance(0.0F); // Zero blast resistance is important
         this.setShovelsEffectiveOn(true);
         this.setLightOpacity(1);
         this.setUnlocalizedName("slime_block");
         this.stepSound = ZeroTestSounds.slime_step_sound;
         this.setCreativeTab(CreativeTabs.tabRedstone);
+    }
+    @Override
+    public boolean dropComponentItemsOnBadBreak(World world, int x, int y, int z, int meta, float chance) {
+        dropItemsIndividually(world, x, y, z, Item.slimeBall.itemID, 6, 0, chance);
+        return true;
     }
     public int getMobilityFlag() {
         return 0;

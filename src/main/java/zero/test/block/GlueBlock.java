@@ -1,6 +1,7 @@
 package zero.test.block;
 import net.minecraft.src.*;
 import btw.block.BTWBlocks;
+import btw.item.BTWItems;
 import btw.block.blocks.AestheticOpaqueBlock;
 import btw.AddonHandler;
 import net.fabricmc.api.EnvType;
@@ -11,13 +12,18 @@ import zero.test.sound.ZeroTestSounds;
 public class GlueBlock extends Block {
     public GlueBlock(int blockId) {
         super(blockId, Material.grass);
-        this.setHardness(0.7F);
-        this.setResistance(0.0F);
+        this.setHardness(0.01F);
+        this.setResistance(0.0F); // Zero blast resistance is important
         this.setUnlocalizedName("glue_block");
         this.setShovelsEffectiveOn(true);
         this.setLightOpacity(1);
         this.stepSound = ZeroTestSounds.slime_step_sound;
         this.setCreativeTab(CreativeTabs.tabRedstone);
+    }
+    @Override
+    public boolean dropComponentItemsOnBadBreak(World world, int x, int y, int z, int meta, float chance) {
+        dropItemsIndividually(world, x, y, z, BTWItems.glue.itemID, 3, 0, chance);
+        return true;
     }
     public int getMobilityFlag() {
         return 0;
