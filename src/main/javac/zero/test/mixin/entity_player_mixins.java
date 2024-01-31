@@ -37,7 +37,32 @@ public abstract class EntityPlayerMixins extends EntityLiving {
             callbackInfo.setReturnValue(false);
         }
     }
+
+#if !ENABLE_BLOCK_INTERACTION_DURING_NOCLIP
+    @Inject(
+        method = "canCurrentToolHarvestBlock(III)Z",
+        at = @At("HEAD"),
+        cancellable = true
+    )
+    public void canCurrentToolHarvestBlock_cancel_if_noclip(int x, int y, int z, CallbackInfoReturnable callbackInfo) {
+        if (((EntityPlayer)(Object)this).noClip) {
+            callbackInfo.setReturnValue(false);
+        }
+    }
+    
+    @Inject(
+        method = "canPlayerEdit(IIIILnet/minecraft/src/ItemStack;)Z",
+        at = @At("HEAD"),
+        cancellable = true
+    )
+    public void canPlayerEdit_cancel_if_noclip(int par1, int par2, int par3, int par4, ItemStack par5, CallbackInfoReturnable callbackInfo) {
+        if (((EntityPlayer)(Object)this).noClip) {
+            callbackInfo.setReturnValue(false);
+        }
+    }
 #endif
+#endif
+
 #if ENABLE_STABLE_MINECART_CAMERA
     @Overwrite
     public void updateRidden() {

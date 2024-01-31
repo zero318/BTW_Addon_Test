@@ -10,26 +10,24 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import zero.test.IEntityMixins;
-//import zero.test.mixin.INetClientHandlerAccessMixins;
 // Block piston reactions
-
 @Mixin(NetClientHandler.class)
-public class NetClientHandlerMixins {
+public abstract class NetClientHandlerMixins {
+    @Shadow
+    public abstract Entity getEntityByID(int entityId);
     @Inject(
         method = "handleGameEvent(Lnet/minecraft/src/Packet70GameEvent;)V",
-        at = @At("TAIL"),
-        locals = LocalCapture.CAPTURE_FAILHARD
+        at = @At("TAIL")
     )
-    public void set_noclip_packet(Packet70GameEvent packet, CallbackInfo info, EntityClientPlayerMP player, int event_type, int event_arg) {
-        if (event_type == 318) {
-            switch (event_arg) {
-                case 0: // Disable noclip
-                    player.noClip = false;
-                    break;
-                case 1: // Enable noclip
-                    player.noClip = true;
-                    break;
-            }
+    public void set_noclip_packet(Packet70GameEvent packet, CallbackInfo info) {
+        int eventType;
+        switch (eventType = packet.eventType) {
+            case 318: // Disable noclip
+            case 319: // Enable noclip
+                Entity entity = this.getEntityByID(packet.gameMode);
+                if (entity != null) {
+                    entity.noClip = eventType == 319;
+                }
         }
     }
 }

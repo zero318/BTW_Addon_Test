@@ -56,7 +56,11 @@ public class ServerNoclipCommand extends CommandBase {
                     break;
             }
             if (send_packet) {
+#if !ENABLE_NOCLIP_ALT_IMPLEMENTATION
                 player.playerNetServerHandler.sendPacketToPlayer(new Packet70GameEvent(318, player.noClip ? 1 : 0));
+#else
+                player.playerNetServerHandler.sendPacketToPlayer(new Packet70GameEvent(player.noClip ? 319 : 318, player.entityId));
+#endif
             }
             String translate_key = send_packet
                 ? (player.noClip ? "commands.noclip.turn_on" : "commands.noclip.turn_off")

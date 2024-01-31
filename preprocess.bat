@@ -1,6 +1,7 @@
 @echo off
 setlocal enabledelayedexpansion
 rd /s /q .\src\main\java
+call sync_mod_version.bat
 call make_splashes.bat
 pushd .\src\main\javac\
 set CPP_ERROR=0

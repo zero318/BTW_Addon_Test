@@ -14,13 +14,14 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 
 import zero.test.IEntityMixins;
-//import zero.test.mixin.INetClientHandlerAccessMixins;
 
 #include "..\feature_flags.h"
+#include "..\util.h"
 
 @Mixin(NetClientHandler.class)
-public class NetClientHandlerMixins {
+public abstract class NetClientHandlerMixins {
 #if ENABLE_NOCLIP_COMMAND
+#if !ENABLE_NOCLIP_ALT_IMPLEMENTATION
     @Inject(
         method = "handleGameEvent(Lnet/minecraft/src/Packet70GameEvent;)V",
         at = @At("TAIL"),
@@ -38,6 +39,28 @@ public class NetClientHandlerMixins {
             }
         }
     }
+#else
+    
+    @Shadow
+    public abstract Entity getEntityByID(int entityId);
+    
+    @Inject(
+        method = "handleGameEvent(Lnet/minecraft/src/Packet70GameEvent;)V",
+        at = @At("TAIL")
+    )
+    public void set_noclip_packet(Packet70GameEvent packet, CallbackInfo info) {
+        int eventType;
+        switch (eventType = packet.eventType) {
+            case 318: // Disable noclip
+            case 319: // Enable noclip
+                Entity entity = this.getEntityByID(packet.gameMode);
+                if (entity != null) {
+                    entity.noClip = eventType == 319;
+                }
+        }
+    }
+    
+#endif
 #endif
 
 #if ENABLE_MINECART_LERP_FIXES

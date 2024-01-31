@@ -4,10 +4,14 @@ import btw.block.blocks.BuddyBlock;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 // Block piston reactions
+//#define onNeighborBlockChange(...) method_408(__VA_ARGS__)
 @Mixin(BuddyBlock.class)
-public class BuddyBlockMixins {
-    @Overwrite(remap=false)
-    public void method_408(World world, int x, int y, int z, int neighborId) {
+public class BuddyBlockMixins extends Block {
+    public BuddyBlockMixins(int par1, Material par2Material) {
+        super(par1, par2Material);
+    }
+    @Overwrite//(remap=false)
+    public void onNeighborBlockChange(World world, int x, int y, int z, int neighborId) {
         BuddyBlock self = (BuddyBlock)(Object)this;
         if (!self.isRedstoneOn(world, x, y, z)) {
             Block neighborBlock = Block.blocksList[neighborId];

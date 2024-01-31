@@ -16,12 +16,13 @@ import zero.test.item.SlimeBlockItem;
 
 #include "ids.h"
 #include "feature_flags.h"
+#include "_VERSION.h"
 
 public class ZeroTestAddon extends BTWAddon {
     private static ZeroTestAddon instance;
 
     private ZeroTestAddon() {
-        super("Zero Test Addon", "0.1.5", "ZeroTest");
+        super("Zero Test Addon", MACRO_STR(MOD_VERSION), "ZeroTest");
     }
 
     @Override
