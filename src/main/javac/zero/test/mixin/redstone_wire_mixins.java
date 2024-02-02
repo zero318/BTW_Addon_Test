@@ -138,14 +138,16 @@ public class RedstoneWireMixins implements IBlockRedstoneWireMixins {
                     !forRendering ||
                     // These conditions only affect rendering of vertical
                     // connections, primarily to prevent floating dust.
-                    block.hasCenterHardPointToFacing(blockAccess, nextX, y, nextZ, OPPOSITE_DIRECTION(direction), true) ||
-                    block.isNormalCube(blockAccess, nextX, y, nextZ) // dangerous stinky hack to make more things show up
+                    (!BLOCK_IS_AIR(block) && (
+                        block.hasCenterHardPointToFacing(blockAccess, nextX, y, nextZ, OPPOSITE_DIRECTION(direction), true) ||
+                        block.isNormalCube(blockAccess, nextX, y, nextZ) // dangerous stinky hack to make more things show up
+                    ))
                 ) {
                     connections += UP_CONNECTION;
 #if ENABLE_MODERN_SUPPORT_LOGIC != MODERN_SUPPORT_LOGIC_DISABLED
                     if (
                         forRendering &&
-                        block.shouldRenderNeighborFullFaceSide(blockAccess, nextX, y, nextZ, OPPOSITE_DIRECTION(direction))
+                        !BLOCK_IS_AIR(block) && block.shouldRenderNeighborFullFaceSide(blockAccess, nextX, y, nextZ, OPPOSITE_DIRECTION(direction))
                     ) {
                         connections += UP_CONNECTION_RENDER_BACK;
                     }

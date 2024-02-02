@@ -10,8 +10,6 @@ import org.spongepowered.asm.mixin.Overwrite;
 #include "..\feature_flags.h"
 #include "..\util.h"
 
-//#define onNeighborBlockChange(...) method_408(__VA_ARGS__)
-
 #define POWERED_META_OFFSET 0
 #define DIRECTION_META_OFFSET 1
 
@@ -23,7 +21,7 @@ public class BuddyBlockMixins extends Block {
     }
     
 #if ENABLE_BETTER_BUDDY_DETECTION
-    @Overwrite//(remap=false)
+    @Overwrite
     public void onNeighborBlockChange(World world, int x, int y, int z, int neighborId) {
         BuddyBlock self = (BuddyBlock)(Object)this;
         if (!self.isRedstoneOn(world, x, y, z)) {

@@ -94,8 +94,20 @@ public class BlockPistonMovingMixins extends BlockPistonMoving {
     public AxisAlignedBB getBlockBoundsFromPoolBasedOnState(IBlockAccess blockAccess, int x, int y, int z) {
         TileEntity tileEntity = blockAccess.getBlockTileEntity(x, y, z);
         if (tileEntity instanceof TileEntityPiston) {
-            return ((IBlockEntityPistonMixins)(Object)tileEntity).getBlockBoundsFromPoolBasedOnState();
+            AxisAlignedBB boundingBox = ((IBlockEntityPistonMixins)(Object)tileEntity).getBlockBoundsFromPoolBasedOnState();
+            if (boundingBox != null) {
+                return boundingBox;
+            }
         }
-        return null;
+        // If the tile entity isn't loaded somehow on the client
+        // then returning null from this can cause a crash
+        // since some code directly uses the output of getBlockBoundsFromPoolBasedOnState
+        // without a null check. This situation shouldn't be possible,
+        // but sock had a crash that is *likely* this.
+        //
+        // TODO: Remove the warning message once it's confirmed
+        // whether or not this was a freak accident
+        AddonHandler.logMessage("ZASSERT: Moving piston entity not loaded at "+x+" "+y+" "+z+", block bounds incorrect");
+        return super.getBlockBoundsFromPoolBasedOnState(blockAccess, x, y, z);
     }
 }

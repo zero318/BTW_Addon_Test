@@ -249,23 +249,27 @@ public class BlockEntityPistonMixins extends TileEntity implements IBlockEntityP
     public AxisAlignedBB getBlockBoundsFromPoolBasedOnState() {
         TileEntityPiston self = (TileEntityPiston)(Object)this;
         
-        AxisAlignedBB boundingBox = Block.blocksList[self.getStoredBlockID()].getAsPistonMovingBoundingBox(self.worldObj, self.xCoord, self.yCoord, self.zCoord);
+        Block storedBlock = Block.blocksList[self.getStoredBlockID()];
+        AxisAlignedBB boundingBox = null;
+        if (storedBlock != null) {
+            boundingBox = storedBlock.getAsPistonMovingBoundingBox(self.worldObj, self.xCoord, self.yCoord, self.zCoord);
         
-        if (!this.isRetractingBase()) {
-            double progress = (double)((IBlockEntityPistonAccessMixins)self).getProgress();
-            double directionOffset = self.isExtending() ? progress - 1.0D : 1.0D - progress;
-            
-            int direction = self.getPistonOrientation();
-            double dX = (double)Facing.offsetsXForSide[direction] * directionOffset;
-            double dY = (double)Facing.offsetsYForSide[direction] * directionOffset;
-            double dZ = (double)Facing.offsetsZForSide[direction] * directionOffset;
-            
-            boundingBox.minX += dX;
-            boundingBox.minY += dY;
-            boundingBox.minZ += dZ;
-            boundingBox.maxX += dX;
-            boundingBox.maxY += dY;
-            boundingBox.maxZ += dZ;
+            if (!this.isRetractingBase()) {
+                double progress = (double)((IBlockEntityPistonAccessMixins)self).getProgress();
+                double directionOffset = self.isExtending() ? progress - 1.0D : 1.0D - progress;
+                
+                int direction = self.getPistonOrientation();
+                double dX = (double)Facing.offsetsXForSide[direction] * directionOffset;
+                double dY = (double)Facing.offsetsYForSide[direction] * directionOffset;
+                double dZ = (double)Facing.offsetsZForSide[direction] * directionOffset;
+                
+                boundingBox.minX += dX;
+                boundingBox.minY += dY;
+                boundingBox.minZ += dZ;
+                boundingBox.maxX += dX;
+                boundingBox.maxY += dY;
+                boundingBox.maxZ += dZ;
+            }
         }
         return boundingBox;
     }

@@ -13,21 +13,21 @@ import zero.test.IEntityMixins;
 // Block piston reactions
 @Mixin(NetClientHandler.class)
 public abstract class NetClientHandlerMixins {
-    @Shadow
-    public abstract Entity getEntityByID(int entityId);
     @Inject(
         method = "handleGameEvent(Lnet/minecraft/src/Packet70GameEvent;)V",
-        at = @At("TAIL")
+        at = @At("TAIL"),
+        locals = LocalCapture.CAPTURE_FAILHARD
     )
-    public void set_noclip_packet(Packet70GameEvent packet, CallbackInfo info) {
-        int eventType;
-        switch (eventType = packet.eventType) {
-            case 318: // Disable noclip
-            case 319: // Enable noclip
-                Entity entity = this.getEntityByID(packet.gameMode);
-                if (entity != null) {
-                    entity.noClip = eventType == 319;
-                }
+    public void set_noclip_packet(Packet70GameEvent packet, CallbackInfo info, EntityClientPlayerMP player, int event_type, int event_arg) {
+        if (event_type == 318) {
+            switch (event_arg) {
+                case 0: // Disable noclip
+                    player.noClip = false;
+                    break;
+                case 1: // Enable noclip
+                    player.noClip = true;
+                    break;
+            }
         }
     }
 }
