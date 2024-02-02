@@ -22,8 +22,8 @@ MACRO_VOID(
 MACRO_VOID(/* Fix how most BTW blocks receive power */)
 #define ENABLE_LESS_CRAP_BTW_BLOCK_POWERING 1
 
-MACRO_VOID(/* Allow block dispensers to respond to short pulses */)
-#define ENABLE_LESS_CRAP_BLOCK_DISPENSER 1
+MACRO_VOID(/* Prevent block dispensers getting powered from their output face */)
+#define ENABLE_BETTER_BLOCK_DISPENSER_POWERING 1
 
 MACRO_VOID(/* Block Breaker and Block Placer */)
 #define ENABLE_BLOCK_DISPENSER_VARIANTS 1
@@ -253,6 +253,9 @@ MACRO_VOID(/* Fixes MC-342, MC-2783, and MC-170907 (all the same bug) */)
 
 MACRO_VOID(/* A block that prevents minecarts bouncing off each other */)
 #define ENABLE_RAIL_BUFFER_STOP 0
+
+MACRO_VOID(/* Reduce the cost of a soap block to 4 soap */)
+#define ENABLE_CHEAPER_SOAP_BLOCK 1
 
 #define ENABLE_DEBUG_STRING_JANK 0
 

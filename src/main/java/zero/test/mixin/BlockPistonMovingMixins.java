@@ -28,37 +28,55 @@ public class BlockPistonMovingMixins extends BlockPistonMoving {
     public BlockPistonMovingMixins(int block_id) {
         super(block_id);
     }
+    // TODO: Make this depend on the block being moved somehow
+/*
+#if ENABLE_BETTER_BUDDY_DETECTION
     @Override
     public boolean triggersBuddy() {
         return false;
     }
+    
+#if 0
+    public boolean triggersBuddy(World world, int x, int y, int z) {
+        TileEntity tileEntity;
+        if ((tileEntity = world.getBlockTileEntity(x, y, z)) instanceof TileEntityPiston) {
+            Block storedBlock = Block.blocksList[((TileEntityPiston)tileEntity).getStoredBlockID()];
+            if (storedBlock != null) {
+                return storedBlock.triggersBuddy();
+            }
+        }
+        return true;
+    }
+#endif
+#endif
+*/
     @Override
     public void addCollisionBoxesToList(World world, int x, int y, int z, AxisAlignedBB maskBox, List list, Entity entity) {
-        TileEntity tileEntity = world.getBlockTileEntity(x, y, z);
-        if (tileEntity instanceof TileEntityPiston) {
+        TileEntity tileEntity;
+        if ((tileEntity = world.getBlockTileEntity(x, y, z)) instanceof TileEntityPiston) {
             ((IBlockEntityPistonMixins)(Object)tileEntity).getCollisionList(maskBox, list, entity);
         }
     }
     @Override
     public boolean hasSmallCenterHardPointToFacing(IBlockAccess blockAccess, int x, int y, int z, int direction, boolean ignoreTransparency) {
-        TileEntity tileEntity = blockAccess.getBlockTileEntity(x, y, z);
-        if (tileEntity instanceof TileEntityPiston) {
+        TileEntity tileEntity;
+        if ((tileEntity = blockAccess.getBlockTileEntity(x, y, z)) instanceof TileEntityPiston) {
             return ((IBlockEntityPistonMixins)(Object)tileEntity).hasSmallCenterHardPointToFacing(x, y, z, direction, ignoreTransparency);
         }
         return false;
     }
     @Override
     public boolean hasCenterHardPointToFacing(IBlockAccess blockAccess, int x, int y, int z, int direction, boolean ignoreTransparency) {
-        TileEntity tileEntity = blockAccess.getBlockTileEntity(x, y, z);
-        if (tileEntity instanceof TileEntityPiston) {
+        TileEntity tileEntity;
+        if ((tileEntity = blockAccess.getBlockTileEntity(x, y, z)) instanceof TileEntityPiston) {
             return ((IBlockEntityPistonMixins)(Object)tileEntity).hasCenterHardPointToFacing(x, y, z, direction, ignoreTransparency);
         }
         return false;
     }
     @Override
     public boolean hasLargeCenterHardPointToFacing(IBlockAccess blockAccess, int x, int y, int z, int direction, boolean ignoreTransparency) {
-        TileEntity tileEntity = blockAccess.getBlockTileEntity(x, y, z);
-        if (tileEntity instanceof TileEntityPiston) {
+        TileEntity tileEntity;
+        if ((tileEntity = blockAccess.getBlockTileEntity(x, y, z)) instanceof TileEntityPiston) {
             return ((IBlockEntityPistonMixins)(Object)tileEntity).hasLargeCenterHardPointToFacing(x, y, z, direction, ignoreTransparency);
         }
         return false;
@@ -92,8 +110,8 @@ public class BlockPistonMovingMixins extends BlockPistonMoving {
     // to not derp out and extend behind the base.
     @Overwrite
     public AxisAlignedBB getBlockBoundsFromPoolBasedOnState(IBlockAccess blockAccess, int x, int y, int z) {
-        TileEntity tileEntity = blockAccess.getBlockTileEntity(x, y, z);
-        if (tileEntity instanceof TileEntityPiston) {
+        TileEntity tileEntity;
+        if ((tileEntity = blockAccess.getBlockTileEntity(x, y, z)) instanceof TileEntityPiston) {
             AxisAlignedBB boundingBox = ((IBlockEntityPistonMixins)(Object)tileEntity).getBlockBoundsFromPoolBasedOnState();
             if (boundingBox != null) {
                 return boundingBox;

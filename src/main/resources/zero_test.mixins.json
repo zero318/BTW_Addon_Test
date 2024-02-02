@@ -62,7 +62,8 @@
     "ItemMinecartMixins",
     "IEntityPlayerAccessMixins",
     "EntityBatMixins",
-    "EntityTrackerEntryMixins"
+    "EntityTrackerEntryMixins",
+    "BlockDispenserBlockMixins"
   ],
   "client": [
     "ComparatorBlockMixins",

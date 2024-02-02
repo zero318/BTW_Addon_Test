@@ -41,7 +41,7 @@ Block Placer:
 
 Wooden Rails:
 - Cheap rails that are half speed
-- Crafted with planks/moulding instead of nuggets
+- Crafted with planks/moulding instead of nuggets and two string
 - Flammable
 
 /noclip Command:
@@ -65,10 +65,14 @@ Cistern:
 
 Soap Blocks:
 - Given the properties of glazed terracotta
+- Crafting changed to 4 soap instead of 9
 
 Metal Spikes:
 - Conduct power into the block they're attached to
 - (This uses the 4th metadata bit)
+
+Block Dispensers:
+- No longer receive redstone power through their front face (maintains previous behaviors with power rule changes)
 
 Platforms:
 - Connect to other platforms when moved by pistons

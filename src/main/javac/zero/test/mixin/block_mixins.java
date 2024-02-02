@@ -25,7 +25,7 @@ import java.util.List;
 #include "..\util.h"
 
 @Mixin(Block.class)
-public class BlockMixins implements IBlockMixins {
+public abstract class BlockMixins implements IBlockMixins {
 
     @Overwrite
     public boolean hasLargeCenterHardPointToFacing(IBlockAccess blockAccess, int x, int y, int z, int direction, boolean ignoreTransparency) {
@@ -161,20 +161,6 @@ public class BlockMixins implements IBlockMixins {
 
 
 #if ENABLE_ACTIVATOR_RAILS
-/*
-    @Redirect(
-        method = "<clinit>()V",
-        at = @At(
-            value = "NEW",
-            target = "btw/block/blocks/StubBlock",
-            ordinal = 3
-        )
-    )
-    private static StubBlock activator_rail_redirect(int id) {
-        //return (StubBlock)(Object)((new ActivatorRailShim(id)).setPicksEffectiveOn().setHardness(0.7F).setStepSound(Block.soundMetalFootstep));
-    }
-*/
-
     @Inject(
         method = "<clinit>()V",
         at = @At("TAIL")
@@ -185,4 +171,15 @@ public class BlockMixins implements IBlockMixins {
         Block.railActivator = (new ActivatorRailShim(157)).setPicksEffectiveOn().setHardness(0.7F).setStepSound(Block.soundMetalFootstep).setUnlocalizedName("activatorRail");
     }
 #endif
+
+/*
+#if ENABLE_BETTER_BUDDY_DETECTION
+    @Shadow
+    public abstract boolean triggersBuddy();
+
+    public boolean triggersBuddy(World world, int x, int y, int z) {
+        return this.triggersBuddy();
+    }
+#endif
+*/
 }

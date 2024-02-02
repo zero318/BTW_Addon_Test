@@ -5,9 +5,11 @@ import net.minecraft.src.*;
 import btw.AddonHandler;
 import btw.BTWAddon;
 import btw.block.BTWBlocks;
+import btw.block.blocks.*;
 import btw.item.BTWItems;
 import btw.crafting.recipe.RecipeManager;
 import btw.inventory.util.InventoryUtils;
+import btw.crafting.manager.*;
 
 import zero.test.block.*;
 import zero.test.command.*;
@@ -79,16 +81,16 @@ public class ZeroTestAddon extends BTWAddon {
         
 #if ENABLE_DIRECTIONAL_UPDATES
         // Observer recipe
-		RecipeManager.addSoulforgeRecipe(
+        RecipeManager.addSoulforgeRecipe(
             new ItemStack(ZeroTestBlocks.observer_block, 1),
             new Object[] {
-				"##X#",
-				"XYY#",
-				"#YYX",
-				"#X##",
-				'#', new ItemStack(BTWItems.stoneBrick, 1, InventoryUtils.IGNORE_METADATA),
-				'X', BTWItems.redstoneEye,
-				'Y', Item.netherQuartz
+                "##X#",
+                "XYY#",
+                "#YYX",
+                "#X##",
+                '#', new ItemStack(BTWItems.stoneBrick, 1, InventoryUtils.IGNORE_METADATA),
+                'X', BTWItems.redstoneEye,
+                'Y', Item.netherQuartz
             }
         );
 #endif
@@ -132,9 +134,9 @@ public class ZeroTestAddon extends BTWAddon {
         RecipeManager.addRecipe(
             new ItemStack(Block.railActivator, 6),
             new Object[] {
-                "XDX", 
-                "XSX", 
-                "XRX", 
+                "XDX",
+                "XSX",
+                "XRX",
                 'X', BTWItems.ironNugget,
                 'S', Item.stick,
                 'R', BTWItems.redstoneLatch,
@@ -154,8 +156,8 @@ public class ZeroTestAddon extends BTWAddon {
         RecipeManager.removeVanillaRecipe(
             new ItemStack(Item.minecartPowered, 1),
             new Object[] {
-                "A", 
-                "B", 
+                "A",
+                "B",
                 'A', Block.furnaceIdle, 
                 'B', Item.minecartEmpty
             }
@@ -163,8 +165,8 @@ public class ZeroTestAddon extends BTWAddon {
         RecipeManager.addRecipe(
             new ItemStack(Item.minecartPowered, 1),
             new Object[] {
-                "A", 
-                "B", 
+                "A",
+                "B",
                 'A', BTWBlocks.idleOven, 
                 'B', Item.minecartEmpty
             }
@@ -175,22 +177,111 @@ public class ZeroTestAddon extends BTWAddon {
         RecipeManager.addRecipe(
             new ItemStack(ZeroTestBlocks.wooden_rail, 12),
             new Object[] {
-                "X X", 
-                "XSX", 
-                "X X", 
+                "XSX",
+                "XIX",
+                "XSX",
                 'X', Block.planks,
-                'S', Item.stick
+                'I', Item.stick,
+                'S', Item.silk
             }
         );
         RecipeManager.addRecipe(
             new ItemStack(ZeroTestBlocks.wooden_rail, 12),
             new Object[] {
-                "X X", 
-                "XSX", 
-                "X X", 
-                'X', new ItemStack(BTWItems.woodMouldingStubID, 1, InventoryUtils.IGNORE_METADATA),
-                'S', Item.stick
+                "XSX",
+                "XIX",
+                "XSX",
+                'X', Block.planks,
+                'I', Item.stick,
+                'S',BTWItems.sinew
             }
+        );
+        RecipeManager.addRecipe(
+            new ItemStack(ZeroTestBlocks.wooden_rail, 12),
+            new Object[] {
+                "XSX",
+                "XIX",
+                "XSX",
+                'X', Block.planks,
+                'I', Item.stick,
+                'S', BTWItems.hempFibers
+            }
+        );
+        RecipeManager.addRecipe(
+            new ItemStack(ZeroTestBlocks.wooden_rail, 12),
+            new Object[] {
+                "XSX",
+                "XIX",
+                "XSX",
+                'X', new ItemStack(BTWItems.woodMouldingStubID, 1, InventoryUtils.IGNORE_METADATA),
+                'I', Item.stick,
+                'S', Item.silk
+            }
+        );
+        RecipeManager.addRecipe(
+            new ItemStack(ZeroTestBlocks.wooden_rail, 12),
+            new Object[] {
+                "XSX",
+                "XIX",
+                "XSX",
+                'X', new ItemStack(BTWItems.woodMouldingStubID, 1, InventoryUtils.IGNORE_METADATA),
+                'I', Item.stick,
+                'S', BTWItems.sinew
+            }
+        );
+        RecipeManager.addRecipe(
+            new ItemStack(ZeroTestBlocks.wooden_rail, 12),
+            new Object[] {
+                "XSX",
+                "XIX",
+                "XSX",
+                'X', new ItemStack(BTWItems.woodMouldingStubID, 1, InventoryUtils.IGNORE_METADATA),
+                'I', Item.stick,
+                'S', BTWItems.hempFibers
+            }
+        );
+#endif
+
+#if ENABLE_CHEAPER_SOAP_BLOCK
+        RecipeManager.removeVanillaRecipe(
+            new ItemStack(BTWBlocks.aestheticOpaque, 1, AestheticOpaqueBlock.SUBTYPE_SOAP),
+            new Object[] {
+                "###",
+                "###",
+                "###",
+                '#', BTWItems.soap
+            }
+        );
+        RecipeManager.removeVanillaShapelessRecipe(
+            new ItemStack(BTWItems.soap, 9),
+            new Object[] {
+                new ItemStack(BTWBlocks.aestheticOpaque, 1, AestheticOpaqueBlock.SUBTYPE_SOAP)
+            }
+        );
+        PistonPackingCraftingManager.instance.removeRecipe(
+            BTWBlocks.aestheticOpaque, AestheticOpaqueBlock.SUBTYPE_SOAP,
+            new ItemStack[] {
+                new ItemStack(BTWItems.soap, 9)
+            }
+        );
+        
+        RecipeManager.addRecipe(
+            new ItemStack(BTWBlocks.aestheticOpaque, 1, AestheticOpaqueBlock.SUBTYPE_SOAP),
+            new Object[] {
+                "##",
+                "##",
+                '#', BTWItems.soap
+            }
+        );
+        RecipeManager.addShapelessRecipe(
+            new ItemStack(BTWItems.soap, 4),
+            new Object[] {
+                new ItemStack(BTWBlocks.aestheticOpaque, 1, AestheticOpaqueBlock.SUBTYPE_SOAP)
+            }
+        );
+        RecipeManager.addPistonPackingRecipe(
+            BTWBlocks.aestheticOpaque, AestheticOpaqueBlock.SUBTYPE_SOAP,
+            new ItemStack(BTWItems.soap, 4)
         );
 #endif
     }

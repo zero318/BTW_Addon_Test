@@ -3,9 +3,11 @@ import net.minecraft.src.*;
 import btw.AddonHandler;
 import btw.BTWAddon;
 import btw.block.BTWBlocks;
+import btw.block.blocks.*;
 import btw.item.BTWItems;
 import btw.crafting.recipe.RecipeManager;
 import btw.inventory.util.InventoryUtils;
+import btw.crafting.manager.*;
 import zero.test.block.*;
 import zero.test.command.*;
 import zero.test.block.ZeroTestBlocks;
@@ -15,7 +17,7 @@ import zero.test.item.SlimeBlockItem;
 public class ZeroTestAddon extends BTWAddon {
     private static ZeroTestAddon instance;
     private ZeroTestAddon() {
-        super("Zero Test Addon", "0.1.6", "ZeroTest");
+        super("Zero Test Addon", "0.1.7", "ZeroTest");
     }
     @Override
     public void initialize() {
@@ -53,16 +55,16 @@ public class ZeroTestAddon extends BTWAddon {
             }
         );
         // Observer recipe
-  RecipeManager.addSoulforgeRecipe(
+        RecipeManager.addSoulforgeRecipe(
             new ItemStack(ZeroTestBlocks.observer_block, 1),
             new Object[] {
-    "##X#",
-    "XYY#",
-    "#YYX",
-    "#X##",
-    '#', new ItemStack(BTWItems.stoneBrick, 1, InventoryUtils.IGNORE_METADATA),
-    'X', BTWItems.redstoneEye,
-    'Y', Item.netherQuartz
+                "##X#",
+                "XYY#",
+                "#YYX",
+                "#X##",
+                '#', new ItemStack(BTWItems.stoneBrick, 1, InventoryUtils.IGNORE_METADATA),
+                'X', BTWItems.redstoneEye,
+                'Y', Item.netherQuartz
             }
         );
         // Slime block
@@ -115,22 +117,107 @@ public class ZeroTestAddon extends BTWAddon {
         RecipeManager.addRecipe(
             new ItemStack(ZeroTestBlocks.wooden_rail, 12),
             new Object[] {
-                "X X",
                 "XSX",
-                "X X",
+                "XIX",
+                "XSX",
                 'X', Block.planks,
-                'S', Item.stick
+                'I', Item.stick,
+                'S', Item.silk
             }
         );
         RecipeManager.addRecipe(
             new ItemStack(ZeroTestBlocks.wooden_rail, 12),
             new Object[] {
-                "X X",
                 "XSX",
-                "X X",
-                'X', new ItemStack(BTWItems.woodMouldingStubID, 1, InventoryUtils.IGNORE_METADATA),
-                'S', Item.stick
+                "XIX",
+                "XSX",
+                'X', Block.planks,
+                'I', Item.stick,
+                'S',BTWItems.sinew
             }
+        );
+        RecipeManager.addRecipe(
+            new ItemStack(ZeroTestBlocks.wooden_rail, 12),
+            new Object[] {
+                "XSX",
+                "XIX",
+                "XSX",
+                'X', Block.planks,
+                'I', Item.stick,
+                'S', BTWItems.hempFibers
+            }
+        );
+        RecipeManager.addRecipe(
+            new ItemStack(ZeroTestBlocks.wooden_rail, 12),
+            new Object[] {
+                "XSX",
+                "XIX",
+                "XSX",
+                'X', new ItemStack(BTWItems.woodMouldingStubID, 1, InventoryUtils.IGNORE_METADATA),
+                'I', Item.stick,
+                'S', Item.silk
+            }
+        );
+        RecipeManager.addRecipe(
+            new ItemStack(ZeroTestBlocks.wooden_rail, 12),
+            new Object[] {
+                "XSX",
+                "XIX",
+                "XSX",
+                'X', new ItemStack(BTWItems.woodMouldingStubID, 1, InventoryUtils.IGNORE_METADATA),
+                'I', Item.stick,
+                'S', BTWItems.sinew
+            }
+        );
+        RecipeManager.addRecipe(
+            new ItemStack(ZeroTestBlocks.wooden_rail, 12),
+            new Object[] {
+                "XSX",
+                "XIX",
+                "XSX",
+                'X', new ItemStack(BTWItems.woodMouldingStubID, 1, InventoryUtils.IGNORE_METADATA),
+                'I', Item.stick,
+                'S', BTWItems.hempFibers
+            }
+        );
+        RecipeManager.removeVanillaRecipe(
+            new ItemStack(BTWBlocks.aestheticOpaque, 1, AestheticOpaqueBlock.SUBTYPE_SOAP),
+            new Object[] {
+                "###",
+                "###",
+                "###",
+                '#', BTWItems.soap
+            }
+        );
+        RecipeManager.removeVanillaShapelessRecipe(
+            new ItemStack(BTWItems.soap, 9),
+            new Object[] {
+                new ItemStack(BTWBlocks.aestheticOpaque, 1, AestheticOpaqueBlock.SUBTYPE_SOAP)
+            }
+        );
+        PistonPackingCraftingManager.instance.removeRecipe(
+            BTWBlocks.aestheticOpaque, AestheticOpaqueBlock.SUBTYPE_SOAP,
+            new ItemStack[] {
+                new ItemStack(BTWItems.soap, 9)
+            }
+        );
+        RecipeManager.addRecipe(
+            new ItemStack(BTWBlocks.aestheticOpaque, 1, AestheticOpaqueBlock.SUBTYPE_SOAP),
+            new Object[] {
+                "##",
+                "##",
+                '#', BTWItems.soap
+            }
+        );
+        RecipeManager.addShapelessRecipe(
+            new ItemStack(BTWItems.soap, 4),
+            new Object[] {
+                new ItemStack(BTWBlocks.aestheticOpaque, 1, AestheticOpaqueBlock.SUBTYPE_SOAP)
+            }
+        );
+        RecipeManager.addPistonPackingRecipe(
+            BTWBlocks.aestheticOpaque, AestheticOpaqueBlock.SUBTYPE_SOAP,
+            new ItemStack(BTWItems.soap, 4)
         );
     }
     // Is this important?

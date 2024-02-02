@@ -17,7 +17,7 @@ import zero.test.block.ActivatorRailShim;
 import java.util.List;
 // Block piston reactions
 @Mixin(Block.class)
-public class BlockMixins implements IBlockMixins {
+public abstract class BlockMixins implements IBlockMixins {
     @Overwrite
     public boolean hasLargeCenterHardPointToFacing(IBlockAccess blockAccess, int x, int y, int z, int direction, boolean ignoreTransparency) {
         // Skip the extra block lookup from chaining through world
@@ -127,4 +127,14 @@ public class BlockMixins implements IBlockMixins {
         Block self = (Block)(Object)this;
   return self.isNormalCube(blockAccess, x, y, z) || self.hasSmallCenterHardPointToFacing(blockAccess, x, y, z, facing, true);
  }
+/*
+#if ENABLE_BETTER_BUDDY_DETECTION
+    @Shadow
+    public abstract boolean triggersBuddy();
+
+    public boolean triggersBuddy(World world, int x, int y, int z) {
+        return this.triggersBuddy();
+    }
+#endif
+*/
 }

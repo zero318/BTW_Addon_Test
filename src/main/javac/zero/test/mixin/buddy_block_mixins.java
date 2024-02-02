@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.Overwrite;
 #define DIRECTION_META_OFFSET 1
 
 @Mixin(BuddyBlock.class)
-public class BuddyBlockMixins extends Block {
+public abstract class BuddyBlockMixins extends Block {
     
     public BuddyBlockMixins(int par1, Material par2Material) {
         super(par1, par2Material);

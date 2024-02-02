@@ -17,6 +17,11 @@ public interface IBlockMixins {
     }
     //default public void updateIndirectNeighbourShapes(World world, int x, int y, int z) {
     //}
+/*
+#if ENABLE_BETTER_BUDDY_DETECTION
+    public boolean triggersBuddy(World world, int x, int y, int z);
+#endif
+*/
     public int getMobilityFlag(World world, int x, int y, int z);
     // The direction argument is intended to allow for
     // blocks that are only sticky on specific faces

@@ -1,8 +1,8 @@
 ; Stats tracked as of version 0.0.9
-TotalBuilds=571
-TotalRuns=530
-SuccessRuns=420
-FailedRuns=110
-TotalReleases=41
-SuccessReleases=38
+TotalBuilds=588
+TotalRuns=546
+SuccessRuns=426
+FailedRuns=120
+TotalReleases=42
+SuccessReleases=39
 FailedReleases=3
