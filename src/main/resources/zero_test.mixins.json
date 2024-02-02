@@ -63,7 +63,10 @@
     "IEntityPlayerAccessMixins",
     "EntityBatMixins",
     "EntityTrackerEntryMixins",
-    "BlockDispenserBlockMixins"
+    "BlockDispenserBlockMixins",
+    "PistonPackingCraftingManagerMixins",
+    "PistonPackingRecipeMixins",
+    "IPistonPackingRecipeAccessMixins"
   ],
   "client": [
     "ComparatorBlockMixins",
