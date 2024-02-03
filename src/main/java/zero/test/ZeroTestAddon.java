@@ -17,7 +17,7 @@ import zero.test.item.SlimeBlockItem;
 public class ZeroTestAddon extends BTWAddon {
     private static ZeroTestAddon instance;
     private ZeroTestAddon() {
-        super("Zero Test Addon", "0.1.7", "ZeroTest");
+        super("Zero Test Addon", "0.1.8", "ZeroTest");
     }
     @Override
     public void initialize() {
@@ -42,6 +42,8 @@ public class ZeroTestAddon extends BTWAddon {
         Item.itemsList[1326] = new ItemBlock(1326 -256);
         ZeroTestBlocks.wooden_rail = new WoodenRailBlock(1327);
         Item.itemsList[1327] = new ItemBlock(1327 -256);
+        ZeroTestBlocks.buffer_stop = new BufferStopBlock(1329);
+        Item.itemsList[1329] = new ItemBlock(1329 -256);
     }
     @Override
     public void postInitialize() {
@@ -95,6 +97,24 @@ public class ZeroTestAddon extends BTWAddon {
                 new ItemStack(ZeroTestBlocks.block_placer, 1, 0)
             },
             BTWBlocks.blockDispenser
+        );
+        RecipeManager.addRecipe(
+            new ItemStack(Block.railActivator, 6),
+            new Object[] {
+                "XDX",
+                "XSX",
+                "XRX",
+                'X', BTWItems.ironNugget,
+                'S', Item.stick,
+                'R', BTWItems.redstoneLatch,
+                'D', Item.redstone
+            }
+        );
+        RecipeManager.addStokedCrucibleRecipe(
+            new ItemStack(BTWItems.ironNugget, 1),
+            new ItemStack[] {
+                new ItemStack(Block.railActivator)
+            }
         );
         RecipeManager.removeVanillaRecipe(
             new ItemStack(Item.minecartPowered, 1),
@@ -218,6 +238,17 @@ public class ZeroTestAddon extends BTWAddon {
         RecipeManager.addPistonPackingRecipe(
             BTWBlocks.aestheticOpaque, AestheticOpaqueBlock.SUBTYPE_SOAP,
             new ItemStack(BTWItems.soap, 4)
+        );
+        RecipeManager.addRecipe(
+            new ItemStack(ZeroTestBlocks.buffer_stop, 1, 0),
+            new Object[] {
+                "NMN",
+                "M M",
+                "BBB",
+                'N', BTWItems.ironNugget,
+                'M', new ItemStack(BTWItems.woodMouldingStubID, 1, InventoryUtils.IGNORE_METADATA),
+                'B', new ItemStack(BTWItems.stoneBrick, 1, InventoryUtils.IGNORE_METADATA)
+            }
         );
     }
     // Is this important?

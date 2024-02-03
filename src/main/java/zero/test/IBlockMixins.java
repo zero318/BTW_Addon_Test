@@ -1,8 +1,11 @@
 package zero.test;
 import btw.AddonHandler;
+import net.minecraft.src.Icon;
 import net.minecraft.src.Block;
 import net.minecraft.src.World;
 import net.minecraft.src.IBlockAccess;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import java.util.List;
 // Block piston reactions
 

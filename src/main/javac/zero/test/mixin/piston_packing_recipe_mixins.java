@@ -37,6 +37,7 @@ public abstract class PistonPackingRecipeMixins {
     @Shadow
     public abstract boolean matchesInputs(ItemStack[] inputToMatch);
     
+    // TODO: Why does this one need remap=false?
     @Overwrite(remap=false)
     public boolean matchesRecipe(PistonPackingRecipe recipe) {
         return this.output.blockID == ((IPistonPackingRecipeAccessMixins)recipe).getOutput().blockID &&

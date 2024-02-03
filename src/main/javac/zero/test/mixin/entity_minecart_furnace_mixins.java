@@ -84,6 +84,25 @@ public abstract class EntityMinecartFurnaceMixins extends EntityMinecart impleme
 #endif
 
 #if ENABLE_MINECART_OVEN
+
+#if ENABLE_ACTIVATOR_RAILS
+    public long prevActivationCoord = BLOCK_POS_HASH_IMPOSSIBLE;
+
+    @Override
+    public void onActivatorRailPass(int x, int y, int z, boolean powered) {
+        if (powered) {
+            long posHash = BLOCK_POS_HASH_PACK(x, y, z);
+            if (posHash != this.prevActivationCoord) {
+                this.prevActivationCoord = posHash;
+                EntityMinecartFurnace self = (EntityMinecartFurnace)(Object)this;
+                self.pushX = -self.pushX;
+                self.pushZ = -self.pushZ;
+            }
+        } else {
+            prevActivationCoord = BLOCK_POS_HASH_IMPOSSIBLE;
+        }
+    }
+#endif
     
     @Overwrite
     public void killMinecart(DamageSource damageSource) {

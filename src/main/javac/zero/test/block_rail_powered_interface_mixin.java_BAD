@@ -1,0 +1,16 @@
+package zero.test;
+
+import net.minecraft.src.*;
+
+#include "feature_flags.h"
+#include "util.h"
+
+public interface IBlockRailPoweredMixins {
+    public void setSpeedBoost(double value);
+    public void setSlowdown(double value);
+    
+    public boolean canPropelCarts();
+    public boolean canSlowCarts();
+    public double cartPropelAmount(int meta);
+    public double cartSlowdownAmount(int meta);
+}

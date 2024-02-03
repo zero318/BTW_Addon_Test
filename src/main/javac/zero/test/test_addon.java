@@ -64,6 +64,10 @@ public class ZeroTestAddon extends BTWAddon {
         ZeroTestBlocks.wooden_rail = new WoodenRailBlock(WOODEN_RAIL_ID);
         Item.itemsList[WOODEN_RAIL_ID] = new ItemBlock(WOODEN_RAIL_ID-256);
 #endif
+#if ENABLE_RAIL_BUFFER_STOP
+        ZeroTestBlocks.buffer_stop = new BufferStopBlock(BUFFER_STOP_ID);
+        Item.itemsList[BUFFER_STOP_ID] = new ItemBlock(BUFFER_STOP_ID-256);
+#endif
     }
     
     @Override
@@ -282,6 +286,21 @@ public class ZeroTestAddon extends BTWAddon {
         RecipeManager.addPistonPackingRecipe(
             BTWBlocks.aestheticOpaque, AestheticOpaqueBlock.SUBTYPE_SOAP,
             new ItemStack(BTWItems.soap, 4)
+        );
+#endif
+
+
+#if ENABLE_RAIL_BUFFER_STOP
+        RecipeManager.addRecipe(
+            new ItemStack(ZeroTestBlocks.buffer_stop, 1, 0),
+            new Object[] {
+                "NMN",
+                "M M",
+                "BBB",
+                'N', BTWItems.ironNugget,
+                'M', new ItemStack(BTWItems.woodMouldingStubID, 1, InventoryUtils.IGNORE_METADATA),
+                'B', new ItemStack(BTWItems.stoneBrick, 1, InventoryUtils.IGNORE_METADATA)
+            }
         );
 #endif
     }

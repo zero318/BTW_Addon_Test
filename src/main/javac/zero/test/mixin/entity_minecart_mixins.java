@@ -40,16 +40,19 @@ import java.util.List;
 #define getPos(...) func_70489_a(__VA_ARGS__)
 #define getPosOffs(...) func_70495_a(__VA_ARGS__)
 
+// For rails
+#define POWERED_META_OFFSET 3
+
+// For buffer stops
+#define FLAT_DIRECTION_META_OFFSET 0
+
 @Mixin(EntityMinecart.class)
 public abstract class EntityMinecartMixins extends Entity {
     public EntityMinecartMixins(World world) {
         super(world);
     }
     
-#if ENABLE_RAIL_BUFFER_STOP
-    public int debounce = 0;
-#endif
-    
+/*
 #if ENABLE_MODERN_REDSTONE_WIRE
     @Redirect(
         method = "updateOnTrack(IIIDDII)V",
@@ -59,9 +62,25 @@ public abstract class EntityMinecartMixins extends Entity {
         )
     )
     private boolean isBlockNormalCube_redirect(World world, int x, int y, int z) {
+#if !ENABLE_RAIL_BUFFER_STOP
         return ((IWorldMixins)world).isBlockRedstoneConductor(x, y, z);
+#else
+        int blockId = world.getBlockId(x, y, z);
+        if (blockId != BUFFER_STOP_ID) {
+            Block block = Block.blocksList[blockId];
+            if (
+                BLOCK_IS_AIR(block) ||
+                !((IBlockMixins)block).isRedstoneConductor(world, x, y, z)
+            ) {
+                return false;
+            }
+        }
+        return true;
+        
+#endif
     }
 #endif
+*/
     
 #if ENABLE_MINECART_LERP_FIXES
 /*
@@ -110,8 +129,8 @@ public abstract class EntityMinecartMixins extends Entity {
     @Shadow
     private static int[][][] matrix;
     
-    @Shadow
-    public abstract void updateOnTrack(int par1, int par2, int par3, double par4, double par6, int par8, int par9);
+    //@Shadow
+    //public abstract void updateOnTrack(int x, int y, int z, double maxSpeed, double slopeSpeed, int blockId, int meta);
     
     @Shadow
     public abstract void func_94088_b(double par1);
@@ -119,6 +138,74 @@ public abstract class EntityMinecartMixins extends Entity {
     public double getMaxSpeed() {
         return 0.4D;
     }
+    
+#if ENABLE_RAIL_BUFFER_STOP
+    
+#define DEBOUNCE_TIME 5
+
+#define DEBOUNCE_MOTION_THRESHOLD 0.001D
+
+    public int debounce = 0;
+    
+    private static final int[] exit_directions_buffer_checks = new int[] {
+        FLAT_DIRECTION_SOUTH, FLAT_DIRECTION_NORTH,
+        FLAT_DIRECTION_EAST, FLAT_DIRECTION_WEST,
+        FLAT_DIRECTION_EAST, FLAT_DIRECTION_WEST,
+        FLAT_DIRECTION_EAST, FLAT_DIRECTION_WEST,
+        FLAT_DIRECTION_SOUTH, FLAT_DIRECTION_NORTH,
+        FLAT_DIRECTION_SOUTH, FLAT_DIRECTION_NORTH,
+        FLAT_DIRECTION_NORTH, FLAT_DIRECTION_WEST,
+        FLAT_DIRECTION_NORTH, FLAT_DIRECTION_EAST,
+        FLAT_DIRECTION_SOUTH, FLAT_DIRECTION_EAST,
+        FLAT_DIRECTION_SOUTH, FLAT_DIRECTION_WEST
+    };
+    
+    /*
+    @Inject(
+        method = "updateOnTrack(IIIDDII)V",
+        at = @At("TAIL")
+    )
+    public void updateOnTrack_buffer_inject(int x, int y, int z, double maxSpeed, double slopeSpeed, int blockId, int meta, CallbackInfo info) {
+        EntityMinecart self = (EntityMinecart)(Object)this;
+        int[][] exits = matrix[meta];
+        meta += meta;
+        int x2 = x + exits[0][0];
+        int y2 = y + exits[0][1];
+        int z2 = z + exits[0][2];
+        int debounceTime = (this.motionX * this.motionX + this.motionZ * this.motionZ) <= DEBOUNCE_MOTION_THRESHOLD ? DEBOUNCE_TIME : -DEBOUNCE_TIME;
+        
+        if (
+            self.worldObj.getBlockId(x2, y2, z2) == BUFFER_STOP_ID &&
+            READ_META_FIELD(self.worldObj.getBlockMetadata(x2, y2, z2), FLAT_DIRECTION) == exit_directions_buffer_checks[meta]
+        ) {
+            debounce = debounceTime;
+        }
+        else {
+            x2 = x + exits[1][0];
+            y2 = y + exits[1][1];
+            z2 = z + exits[1][2];
+            if (
+                self.worldObj.getBlockId(x2, y2, z2) == BUFFER_STOP_ID &&
+                READ_META_FIELD(self.worldObj.getBlockMetadata(x2, y2, z2), FLAT_DIRECTION) == exit_directions_buffer_checks[meta + 1]
+            ) {
+                debounce = debounceTime;
+            }
+        }
+    }
+    
+    @Redirect(
+        method = "updateOnTrack(IIIDDII)V",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/src/Entity;moveEntity(DDD)V"
+        )
+    )
+    public void moveEntity_redirect_debounce(double moveX, double moveY, double moveZ) {
+        
+        this.moveEntity(moveX, moveY, moveZ);
+    }
+    */
+#endif
     
     @Overwrite
     public void onUpdate() {
@@ -142,23 +229,20 @@ public abstract class EntityMinecartMixins extends Entity {
             this.kill();
         }
 
-        int var2;
-
         if (
             !self.worldObj.isRemote &&
             self.worldObj instanceof WorldServer
         ) {
             self.worldObj.theProfiler.startSection("portal");
-            MinecraftServer var1 = ((WorldServer)self.worldObj).getMinecraftServer();
-            var2 = self.getMaxInPortalTime();
+            int maxPortalTime = self.getMaxInPortalTime();
 
             if (this.inPortal) {
-                if (var1.getAllowNether()) {
+                if (((WorldServer)self.worldObj).getMinecraftServer().getAllowNether()) {
                     if (
                         self.ridingEntity == null &&
-                        this.field_82153_h++ >= var2
+                        this.field_82153_h++ >= maxPortalTime
                     ) {
-                        this.field_82153_h = var2;
+                        this.field_82153_h = maxPortalTime;
                         self.timeUntilPortal = self.getPortalCooldown();
                         byte var3;
 
@@ -259,26 +343,35 @@ public abstract class EntityMinecartMixins extends Entity {
 #endif
             self.motionY -= 0.03999999910593033D;
             int x = MathHelper.floor_double(self.posX);
-            var2 = MathHelper.floor_double(self.posY);
+            int y = MathHelper.floor_double(self.posY);
             int z = MathHelper.floor_double(self.posZ);
 
-            if (BlockRailBase.isRailBlockAt(self.worldObj, x, var2 - 1, z)) {
-                --var2;
+            if (BlockRailBase.isRailBlockAt(self.worldObj, x, y - 1, z)) {
+                --y;
             }
+            
+#if ENABLE_RAIL_BUFFER_STOP
+            if (this.debounce > 0) {
+                --this.debounce;
+            }
+            if (this.debounce < 0) {
+                ++this.debounce;
+            }
+#endif
 
-            int blockId = self.worldObj.getBlockId(x, var2, z);
+            int blockId = self.worldObj.getBlockId(x, y, z);
 
             double maxSpeed = this.getMaxSpeed();
             if (BlockRailBase.isRailBlock(blockId)) {
-                int meta = self.worldObj.getBlockMetadata(x, var2, z);
+                int meta = self.worldObj.getBlockMetadata(x, y, z);
                 this.updateOnTrack(
-                    x, var2, z,
+                    x, y, z,
                     maxSpeed * ((IBaseRailBlockMixins)Block.blocksList[blockId]).getRailMaxSpeedFactor(),
                     0.0078125D, blockId, meta
                 );
 
                 if (blockId == Block.railActivator.blockID) {
-                    self.onActivatorRailPass(x, var2, z, (meta & 8) != 0);
+                    self.onActivatorRailPass(x, y, z, READ_META_FIELD(meta, POWERED));
                 }
             }
             else {
@@ -498,6 +591,25 @@ public abstract class EntityMinecartMixins extends Entity {
                         return;
                     }
                     */
+#endif
+
+#if ENABLE_RAIL_BUFFER_STOP
+                    if (this.debounce < 0 || ((EntityMinecartMixins)entity).debounce < 0) {
+                        ((EntityMinecartMixins)entity).debounce = this.debounce = -DEBOUNCE_TIME;
+                    } else {
+                        double selfMotionSquared = this.motionX * this.motionX + this.motionZ * this.motionZ;
+                        double otherMotionSquared = entity.motionX * entity.motionX + entity.motionZ * entity.motionZ;
+                        if (
+                            (
+                                this.debounce > 0 && selfMotionSquared <= DEBOUNCE_MOTION_THRESHOLD ||
+                                ((EntityMinecartMixins)entity).debounce > 0 && otherMotionSquared <= DEBOUNCE_MOTION_THRESHOLD
+                            ) &&
+                            !self.boundingBox.intersectsWith(entity.boundingBox) // Not expanded
+                        ) {
+                            ((EntityMinecartMixins)entity).debounce = this.debounce = DEBOUNCE_TIME;
+                            return;
+                        }
+                    }
 #endif
 
 #if CART_DEBUG_LOGGING
@@ -728,4 +840,227 @@ public abstract class EntityMinecartMixins extends Entity {
         return true;
 	}
 #endif
+
+    @Shadow
+    public abstract void applyDrag();
+
+    @Overwrite
+    public void updateOnTrack(int x, int y, int z, double maxSpeed, double slopeSpeed, int blockId, int meta) {
+        this.fallDistance = 0.0F;
+        Vec3 startingRailPos = this.getPos(this.posX, this.posY, this.posZ);
+        this.posY = (double)y;
+        
+        Block railBlock = Block.blocksList[blockId];
+        
+        double boostRatio = ((IBaseRailBlockMixins)railBlock).cartBoostRatio(meta);
+        double slowdownRatio = ((IBaseRailBlockMixins)railBlock).cartSlowdownRatio(meta);
+
+        if (((BlockRailBase)railBlock).isPowered()) {
+            meta &= 7;
+        }
+
+        if (RAIL_IS_ASCENDING(meta)) {
+            this.posY += 1.0D;
+            switch (meta) {
+                case RAIL_ASCENDING_EAST:
+                    this.motionX -= slopeSpeed;
+                    break;
+                case RAIL_ASCENDING_WEST:
+                    this.motionX += slopeSpeed;
+                    break;
+                case RAIL_ASCENDING_NORTH:
+                    this.motionZ += slopeSpeed;
+                    break;
+                case RAIL_ASCENDING_SOUTH:
+                    this.motionZ -= slopeSpeed;
+                    break;
+            }
+        }
+
+        int[][] exitPair = matrix[meta];
+        double xDiff = (double)(exitPair[1][0] - exitPair[0][0]);
+        double zDiff = (double)(exitPair[1][2] - exitPair[0][2]);
+
+        if (this.motionX * xDiff + this.motionZ * zDiff < 0.0D) {
+            xDiff = -xDiff;
+            zDiff = -zDiff;
+        }
+
+        double speed = Math.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
+
+        if (speed > 2.0D) {
+            speed = 2.0D;
+        }
+        double distDiff = Math.sqrt(xDiff * xDiff + zDiff * zDiff);
+
+        this.motionX = speed * xDiff / distDiff;
+        this.motionZ = speed * zDiff / distDiff;
+
+        if (
+            this.riddenByEntity instanceof EntityPlayer &&
+            (this.riddenByEntity.motionX * this.riddenByEntity.motionX + this.riddenByEntity.motionZ * this.riddenByEntity.motionZ) > 1.0E-4D &&
+            (this.motionX * this.motionX + this.motionZ * this.motionZ) < 0.01D
+        ) {
+            this.motionX += this.riddenByEntity.motionX * 0.1D;
+            this.motionZ += this.riddenByEntity.motionZ * 0.1D;
+        }
+        else if (slowdownRatio < 1.0D) {
+            this.motionY = 0.0D;
+            if (Math.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ) < 0.03D) {
+                this.motionX = 0.0D;
+                this.motionZ = 0.0D;
+            }
+            else {
+                this.motionX *= slowdownRatio;
+                this.motionZ *= slowdownRatio;
+            }
+        }
+
+        double firstX = (double)x + 0.5D + (double)exitPair[0][0] * 0.5D;
+        double firstZ = (double)z + 0.5D + (double)exitPair[0][2] * 0.5D;
+        double diffX = ((double)x + 0.5D + (double)exitPair[1][0] * 0.5D) - firstX;
+        double diffZ = ((double)z + 0.5D + (double)exitPair[1][2] * 0.5D) - firstZ;
+
+        double diffScale;
+        if (diffX == 0.0D) {
+            //this.posX = (double)x + 0.5D;
+            diffScale = this.posZ - (double)z;
+        }
+        else if (diffZ == 0.0D) {
+            //this.posZ = (double)z + 0.5D;
+            diffScale = this.posX - (double)x;
+        }
+        else {
+            diffScale = ((this.posX - firstX) * diffX + (this.posZ - firstZ) * diffZ) * 2.0D;
+        }
+
+        this.posX = firstX + diffX * diffScale;
+        this.posZ = firstZ + diffZ * diffScale;
+        this.setPosition(this.posX, this.posY + (double)this.yOffset, this.posZ);
+        
+        double moveX = this.motionX;
+        double moveZ = this.motionZ;
+
+        if (this.riddenByEntity != null) {
+            moveX *= 0.75D;
+            moveZ *= 0.75D;
+        }
+
+        if (moveX < -maxSpeed) {
+            moveX = -maxSpeed;
+        }
+
+        if (moveX > maxSpeed) {
+            moveX = maxSpeed;
+        }
+
+        if (moveZ < -maxSpeed) {
+            moveZ = -maxSpeed;
+        }
+
+        if (moveZ > maxSpeed) {
+            moveZ = maxSpeed;
+        }
+
+        this.moveEntity(moveX, 0.0D, moveZ);
+
+        if (
+            exitPair[0][1] != 0 &&
+            MathHelper.floor_double(this.posX) - x == exitPair[0][0] &&
+            MathHelper.floor_double(this.posZ) - z == exitPair[0][2]
+        ) {
+            this.setPosition(this.posX, this.posY + (double)exitPair[0][1], this.posZ);
+        }
+        else if (
+            exitPair[1][1] != 0 &&
+            MathHelper.floor_double(this.posX) - x == exitPair[1][0] &&
+            MathHelper.floor_double(this.posZ) - z == exitPair[1][2]
+        ) {
+            this.setPosition(this.posX, this.posY + (double)exitPair[1][1], this.posZ);
+        }
+
+        this.applyDrag();
+        Vec3 endingRailPos = this.getPos(this.posX, this.posY, this.posZ);
+
+        if (
+            endingRailPos != null &&
+            startingRailPos != null
+        ) {
+            double var39 = (startingRailPos.yCoord - endingRailPos.yCoord) * 0.05D;
+            speed = Math.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
+
+            if (speed > 0.0D) {
+                speed = (speed + var39) / speed;
+                this.motionX *= speed;
+                this.motionZ *= speed;
+            }
+
+            this.setPosition(this.posX, endingRailPos.yCoord, this.posZ);
+        }
+
+        int newX = MathHelper.floor_double(this.posX);
+        int newZ = MathHelper.floor_double(this.posZ);
+
+        if (newX != x || newZ != z) {
+            speed = Math.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
+            this.motionX = speed * (double)(newX - x);
+            this.motionZ = speed * (double)(newZ - z);
+        }
+
+        if (boostRatio > 0.0D) {
+            if (this.debounce > 0) {
+                this.debounce = -DEBOUNCE_TIME;
+            }
+            
+            speed = Math.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
+            
+#if ENABLE_MODERN_REDSTONE_WIRE
+#define RAIL_END_TEST(...) (((IWorldMixins)this.worldObj).isBlockRedstoneConductor(__VA_ARGS__))
+#else
+#define RAIL_END_TEST(...) (this.worldObj.isBlockNormalCube(__VA_ARGS__))
+#endif
+
+            if (speed > 0.01D) {
+                this.motionX += this.motionX / speed * boostRatio;
+                this.motionZ += this.motionZ / speed * boostRatio;
+            }
+            else if (meta == RAIL_EAST_WEST) {
+                if (RAIL_END_TEST(x - 1, y, z)) {
+                    this.motionX = 0.02D;
+                }
+                else if (RAIL_END_TEST(x + 1, y, z)) {
+                    this.motionX = -0.02D;
+                }
+            }
+            else if (meta == RAIL_NORTH_SOUTH) {
+                if (RAIL_END_TEST(x, y, z - 1)) {
+                    this.motionZ = 0.02D;
+                }
+                else if (RAIL_END_TEST(x, y, z + 1)) {
+                    this.motionZ = -0.02D;
+                }
+            }
+        } else if ((this.motionX * this.motionX + this.motionZ * this.motionZ) <= DEBOUNCE_MOTION_THRESHOLD) {
+            meta += meta;
+            int x2 = x + exitPair[0][0];
+            int y2 = y + exitPair[0][1];
+            int z2 = z + exitPair[0][2];
+            if (
+                this.worldObj.getBlockId(x2, y2, z2) == BUFFER_STOP_ID &&
+                READ_META_FIELD(this.worldObj.getBlockMetadata(x2, y2, z2), FLAT_DIRECTION) == exit_directions_buffer_checks[meta]
+            ) {
+                debounce = DEBOUNCE_TIME;
+            } else {
+                x2 = x + exitPair[1][0];
+                y2 = y + exitPair[1][1];
+                z2 = z + exitPair[1][2];
+                if (
+                    this.worldObj.getBlockId(x2, y2, z2) == BUFFER_STOP_ID &&
+                    READ_META_FIELD(this.worldObj.getBlockMetadata(x2, y2, z2), FLAT_DIRECTION) == exit_directions_buffer_checks[meta + 1]
+                ) {
+                    debounce = DEBOUNCE_TIME;
+                }
+            }
+        }
+    }
 }

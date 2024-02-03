@@ -63,6 +63,21 @@ public abstract class EntityMinecartFurnaceMixins extends EntityMinecart impleme
         }
         self.motionY = 0.0D;
     }
+    public long prevActivationCoord = 137438953472L;
+    @Override
+    public void onActivatorRailPass(int x, int y, int z, boolean powered) {
+        if (powered) {
+            long posHash = ((long)(z)<<12 +26^(long)(x)<<12^(y));
+            if (posHash != this.prevActivationCoord) {
+                this.prevActivationCoord = posHash;
+                EntityMinecartFurnace self = (EntityMinecartFurnace)(Object)this;
+                self.pushX = -self.pushX;
+                self.pushZ = -self.pushZ;
+            }
+        } else {
+            prevActivationCoord = 137438953472L;
+        }
+    }
     @Overwrite
     public void killMinecart(DamageSource damageSource) {
         super.killMinecart(damageSource);

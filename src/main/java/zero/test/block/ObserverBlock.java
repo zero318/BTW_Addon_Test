@@ -67,7 +67,7 @@ public class ObserverBlock extends BuddyBlock {
         return false;
     }
     public boolean canRedstoneConnectToSide(IBlockAccess blockAccess, int x, int y, int z, int flatDirection) {
-        return (((((blockAccess.getBlockMetadata(x, y, z))>>>1)))^1) == Direction.directionToFacing[flatDirection];
+        return (((blockAccess.getBlockMetadata(x, y, z))>>>1)) == (((net.minecraft.src.Direction.directionToFacing[flatDirection])^1));
     }
     // This just gets rid of the clicking sound
     // TODO: Remove override now that the code

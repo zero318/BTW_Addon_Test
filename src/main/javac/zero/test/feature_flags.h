@@ -235,7 +235,7 @@ MACRO_VOID(/* Allow hoppers to add fuel to minecarts */)
 MACRO_VOID(/* */)
 #define ENABLE_MINECART_BLOCK_DISPENSER 0
 
-#if ENABLE_MINECART_BLOCK_DISPENSER
+#if ENABLE_MINECART_OVEN || ENABLE_MINECART_BLOCK_DISPENSER
 MACRO_VOID(/* Restore activator rails */)
 #define ENABLE_ACTIVATOR_RAILS 1
 #endif
@@ -251,8 +251,10 @@ MACRO_VOID(/* Cheap/slow rails. Admittedly not a very original idea. */)
 MACRO_VOID(/* Fixes MC-342, MC-2783, and MC-170907 (all the same bug) */)
 #define ENABLE_FIX_FOR_NETWORK_POSITION_DELTAS 1
 
+#define ENABLE_TEXTURED_BOX 0
+
 MACRO_VOID(/* A block that prevents minecarts bouncing off each other */)
-#define ENABLE_RAIL_BUFFER_STOP 0
+#define ENABLE_RAIL_BUFFER_STOP 1
 
 MACRO_VOID(/* Reduce the cost of a soap block to 4 soap */)
 #define ENABLE_CHEAPER_SOAP_BLOCK 1

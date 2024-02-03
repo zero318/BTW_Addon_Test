@@ -11,9 +11,13 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.gen.Invoker;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import zero.test.IBlockMixins;
 import zero.test.IWorldMixins;
+//import zero.test.IBlockRailPoweredMixins;
 import zero.test.block.ActivatorRailShim;
+import zero.test.block.PoweredRailBlock;
 import java.util.List;
 // Block piston reactions
 @Mixin(Block.class)
@@ -127,6 +131,18 @@ public abstract class BlockMixins implements IBlockMixins {
         Block self = (Block)(Object)this;
   return self.isNormalCube(blockAccess, x, y, z) || self.hasSmallCenterHardPointToFacing(blockAccess, x, y, z, facing, true);
  }
+    @Inject(
+        method = "<clinit>()V",
+        at = @At("TAIL")
+    )
+    private static void static_init_inject(CallbackInfo info) {
+        Block.railActivator = null;
+        Block.blocksList[157] = null;
+        Block.railActivator = (new ActivatorRailShim(157)).setPicksEffectiveOn().setHardness(0.7F).setStepSound(Block.soundMetalFootstep).setUnlocalizedName("activatorRail");
+        Block.railPowered = null;
+        Block.blocksList[27] = null;
+        Block.railPowered = new PoweredRailBlock(27);
+    }
 /*
 #if ENABLE_BETTER_BUDDY_DETECTION
     @Shadow

@@ -1,0 +1,46 @@
+package zero.test.mixin;
+
+import net.minecraft.src.*;
+
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Overwrite;
+
+import zero.test.IBaseRailBlockMixins;
+
+#include "..\util.h"
+#include "..\feature_flags.h"
+
+#define POWERED_META_OFFSET 3
+
+@Mixin(BlockRailPowered.class)
+public abstract class BlockRailPoweredMixins extends BlockRailBase implements IBaseRailBlockMixins {
+    public BlockRailPoweredMixins(int par1) {
+        super(par1, true);
+    }
+    
+    public boolean hasSpeedBoost = false;
+    public boolean hasSlowdown = false;
+    public double speedBoost = 0.0D;
+    public double slowDown = 1.0D;
+    
+    public void setBoostRatioBase(double value) {
+        this.hasSpeedBoost = (this.speedBoost = value) != 0.0D;
+    }
+    public void setSlowdownRatioBase(double value) {
+        this.hasSlowdown = (this.slowDown = value) != 0.0D;
+    }
+    
+    public boolean canBoostCarts() {
+        return this.hasSpeedBoost;
+    }
+    public boolean canSlowCarts() {
+        return this.hasSlowdown;
+    }
+    public double cartBoostRatio(int meta) {
+        if (READ_META_FIELD(meta, POWERED))
+    }
+    public double cartSlowdownRatio(int meta) {
+        return 1.0D;
+    }
+}

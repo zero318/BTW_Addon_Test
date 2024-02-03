@@ -95,7 +95,7 @@ public class ObserverBlock extends BuddyBlock {
 
 #if ENABLE_BETTER_REDSTONE_WIRE_CONNECTIONS
     public boolean canRedstoneConnectToSide(IBlockAccess blockAccess, int x, int y, int z, int flatDirection) {
-        return OPPOSITE_DIRECTION(READ_META_FIELD(blockAccess.getBlockMetadata(x, y, z), DIRECTION)) == Direction.directionToFacing[flatDirection];
+        return READ_META_FIELD(blockAccess.getBlockMetadata(x, y, z), DIRECTION) == FLAT_DIRECTION_TO_DIRECTION(flatDirection);
     }
 #endif
     

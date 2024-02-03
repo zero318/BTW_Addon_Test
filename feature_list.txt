@@ -44,6 +44,13 @@ Wooden Rails:
 - Crafted with planks/moulding instead of nuggets and two string
 - Flammable
 
+Buffer Stop:
+- Crafted with 3 stone bricks, 3 wood moulding, and 2 iron nuggets
+- Prevents minecarts that run into it bouncing off of each other until moved by a powered rail
+
+Activator Rails:
+- Re-enabled from vanilla to be used with oven carts
+
 /noclip Command:
 - Sort of like spectator mode, but worse
 - Make sure you're already flying in creative mode or you'll just fall into the void
@@ -95,6 +102,7 @@ Furnace Minecarts:
 - Changed to be ovens instead of furnaces
 - Move backwards if alt used
 - Stop moving if crouch used
+- Automatically reverse directions when passing a powered activator rail
 - Fixed MC-10186 and MC-51053
 
 Tile Entities:

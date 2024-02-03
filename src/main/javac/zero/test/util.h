@@ -990,10 +990,12 @@ MACRO_VOID(
 #define FLAT_DIRECTION_META_BITS 2
 #define POWERED_META_BITS 1
 #define POWER_META_BITS 4
-#define RAIL_SHAPE_META_BITS 3
+#define RAIL_SHAPE_META_BITS 4
+#define RAIL_NOCURVE_SHAPE_META_BITS 3
 
 MACRO_VOID(/* Rail shape is hardcoded to be this offset */)
 #define RAIL_SHAPE_META_OFFSET 0
+#define RAIL_NOCURVE_SHAPE_META_OFFSET 0
 
 #define POWERED_META_IS_BOOL 1
 
@@ -1433,6 +1435,8 @@ _OFFSET_DIRECTION_ARGS(X, Y, Z, MACRO_CAT(direction,_OFFSETS))
 
 #define FLAT_DIRECTION_AXES_MATCH(dirA,dirB) ((((dirA)^(dirB))&1)==0)
 
+#define FLAT_DIRECTION_TO_DIRECTION(dir) (OPPOSITE_DIRECTION(net.minecraft.src.Direction.directionToFacing[dir]))
+
 #define FLAT_DIRECTION8_NORTH 0
 #define FLAT_DIRECTION8_NORTH_EAST 1
 #define FLAT_DIRECTION8_EAST 2
@@ -1666,6 +1670,9 @@ MACRO_VOID(
 #define BLOCK_COORD_TYPE int
 #define BLOCK_POS_PACK_TYPE long
 
+MACRO_VOID(/* This value corresponds to an out-of-bounds block */)
+#define BLOCK_POS_HASH_IMPOSSIBLE 137438953472L
+
 #define BLOCK_POS_HASH_PACK(X,Y,Z)\
 ((BLOCK_POS_PACK_TYPE)(Z)<<WORLD_HEIGHT_BITS+WORLD_WIDTH_BITS^(BLOCK_POS_PACK_TYPE)(X)<<WORLD_HEIGHT_BITS^(Y))
 
@@ -1768,6 +1775,10 @@ BLOCK_STATE_LONG_EXTRACT_EXTMETA(state)
 #define BLOCK_STATE_UNPACK_LONG(state,id,meta,extmeta)\
 _BLOCK_STATE_UNPACK_LONG(id,meta,extmeta,BLOCK_STATE_UNPACK_LONG_ARGS(state))
 
+MACRO_VOID(
+/// Angle stuff
+)
+
 #define RADF(degrees) (((float)(degrees))*0.017453292F)
 #define RAD(degrees) (((double)(degrees))*0.017453292D)
 #define DEGF(radians) (((float)(radians))*57.29577951F)
@@ -1797,5 +1808,24 @@ _BLOCK_STATE_UNPACK_LONG(id,meta,extmeta,BLOCK_STATE_UNPACK_LONG_ARGS(state))
 #define cosf_yaw(...) (MathHelper.cos(((float)(__VA_ARGS__))*-0.017453292F))
 
 #define atan2_yaw(z,x) ((float)Math.atan2(-(x),(z)))
+
+MACRO_VOID(
+/// Texturing
+)
+    
+#define CULL_DIRECTION_DOWN DIRECTION_DOWN
+#define CULL_DIRECTION_UP DIRECTION_UP
+#define CULL_DIRECTION_NORTH DIRECTION_NORTH
+#define CULL_DIRECTION_SOUTH DIRECTION_SOUTH
+#define CULL_DIRECTION_WEST DIRECTION_WEST
+#define CULL_DIRECTION_EAST DIRECTION_EAST
+#define CULL_DIRECTION_NONE 6
+#define CULL_DIRECTION_ALL 7
+
+MACRO_VOID(/* TODO: Check the 90/270 values */)
+#define TEXTURE_ROTATION_NONE 0
+#define TEXTURE_ROTATION_90 1
+#define TEXTURE_ROTATION_180 3
+#define TEXTURE_ROTATION_270 2
 
 #endif
