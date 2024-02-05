@@ -71,6 +71,12 @@ public interface IBlockMixins {
 #endif
 #endif
 
+#if ENABLE_MORE_RAIL_PLACEMENTS
+    default public boolean canSupportRails(World world, int x, int y, int z) {
+        return ((Block)(Object)this).hasLargeCenterHardPointToFacing(world, x, y, z, DIRECTION_UP);
+    }
+#endif
+
 #if ENABLE_MODERN_REDSTONE_WIRE
     // Default to the old behavior for conductivity testing
     default public boolean isRedstoneConductor(IBlockAccess blockAccess, int x, int y, int z) {

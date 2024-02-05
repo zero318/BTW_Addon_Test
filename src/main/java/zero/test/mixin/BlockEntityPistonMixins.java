@@ -156,7 +156,7 @@ public class BlockEntityPistonMixins extends TileEntity implements IBlockEntityP
         AxisAlignedBB boundingBox = null;
         if (storedBlock != null) {
             boundingBox = storedBlock.getAsPistonMovingBoundingBox(self.worldObj, self.xCoord, self.yCoord, self.zCoord);
-            if (!this.isRetractingBase()) {
+            if (boundingBox != null && !this.isRetractingBase()) {
                 double progress = (double)((IBlockEntityPistonAccessMixins)self).getProgress();
                 double directionOffset = self.isExtending() ? progress - 1.0D : 1.0D - progress;
                 int direction = self.getPistonOrientation();

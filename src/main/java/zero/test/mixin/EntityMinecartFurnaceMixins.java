@@ -36,10 +36,9 @@ public abstract class EntityMinecartFurnaceMixins extends EntityMinecart impleme
             (push = self.pushX * self.pushX + self.pushZ * self.pushZ) > 1.0E-4D &&
             (motion = self.motionX * self.motionX + self.motionZ * self.motionZ) > 0.001D
         ) {
-            motion = Math.sqrt(motion);
-            push = Math.sqrt(push);
-            self.pushX = self.motionX / motion * push;
-            self.pushZ = self.motionZ / motion * push;
+            double temp = Math.sqrt(push) / Math.sqrt(motion);
+            self.pushX = self.motionX * temp;
+            self.pushZ = self.motionZ * temp;
         }
     }
     // Fix MC-10186

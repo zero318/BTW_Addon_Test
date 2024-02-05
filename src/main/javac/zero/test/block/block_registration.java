@@ -26,6 +26,9 @@ public class ZeroTestBlocks {
 #if ENABLE_WOODEN_RAILS
     public static Block wooden_rail;
 #endif
+#if ENABLE_STEEL_RAILS
+    public static Block steel_rail;
+#endif
 #if ENABLE_RAIL_BUFFER_STOP
     public static Block buffer_stop;
 #endif

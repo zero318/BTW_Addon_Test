@@ -9,9 +9,15 @@ public interface IWorldMixins {
     public int updateFromNeighborShapes(int x, int y, int z, int blockId, int blockMeta);
     public int getBlockStrongPowerInputExceptFacing(int x, int y, int z, int facing);
     public int getBlockWeakPowerInputExceptFacing(int x, int y, int z, int facing);
+    default public boolean doesBlockSupportRails(int x, int y, int z) {
+        World self = (World)(Object)this;
+        Block block = Block.blocksList[self.getBlockId(x, y, z)];
+        return !((block)==null) && ((IBlockMixins)block).canSupportRails(self, x, y, z);
+    }
     default public boolean isBlockRedstoneConductor(int x, int y, int z) {
         World self = (World)(Object)this;
         Block block = Block.blocksList[self.getBlockId(x, y, z)];
         return !((block)==null) && ((IBlockMixins)block).isRedstoneConductor(self, x, y, z);
     }
+    public boolean isRailBlockWithExitTowards(int x, int y, int z, int direction);
 }

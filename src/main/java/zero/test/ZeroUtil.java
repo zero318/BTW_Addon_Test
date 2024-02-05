@@ -2,6 +2,30 @@ package zero.test;
 import btw.AddonHandler;
 // Block piston reactions
 public class ZeroUtil {
+    public static final int[] rail_exit_directions = new int[] {
+        3, 2,
+        5, 4,
+        5, 4,
+        5, 4,
+        3, 2,
+        3, 2,
+        2, 4,
+        2, 5,
+        3, 5,
+        3, 4
+    };
+    public static final int[] rail_exit_flat_directions = new int[] {
+        2, 0,
+        1, 3,
+        1, 3,
+        1, 3,
+        2, 0,
+        2, 0,
+        0, 3,
+        0, 1,
+        2, 1,
+        2, 3
+    };
     public static int lan_port = 0;
     // Range: (-180.0,180.0]
     public static float angle_diff(float angle, float value) {

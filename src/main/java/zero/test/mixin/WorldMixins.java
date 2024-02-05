@@ -16,6 +16,7 @@ import org.spongepowered.asm.mixin.Overwrite;
 import zero.test.IBlockMixins;
 import zero.test.IWorldMixins;
 import zero.test.IEntityMixins;
+import zero.test.ZeroUtil;
 import java.util.List;
 // Block piston reactions
 //#define getInputSignal(...) func_94482_f(__VA_ARGS__)
@@ -333,7 +334,7 @@ public class WorldMixins implements IWorldMixins {
                     x + Facing.offsetsXForSide[direction],
                     y + Facing.offsetsYForSide[direction],
                     z + Facing.offsetsZForSide[direction],
-                    ((direction)^1)
+                    direction
                 ));
                 if (power >= 15) {
                     break;
@@ -352,7 +353,7 @@ public class WorldMixins implements IWorldMixins {
                     x + Facing.offsetsXForSide[direction],
                     y + Facing.offsetsYForSide[direction],
                     z + Facing.offsetsZForSide[direction],
-                    ((direction)^1)
+                    direction
                 ));
                 if (power >= 15) {
                     break;
@@ -488,5 +489,19 @@ public class WorldMixins implements IWorldMixins {
     )
     public int floor_double_maxZ_redirect(double value) {
         return MathHelper.floor_double(value) + 1;
+    }
+    public boolean isRailBlockWithExitTowards(int x, int y, int z, int direction) {
+        World self = (World)(Object)this;
+        Block block = Block.blocksList[self.getBlockId(x, y, z)];
+        if (block instanceof BlockRailBase) {
+            BlockRailBase railBlock = (BlockRailBase)block;
+            int meta = self.getBlockMetadata(x, y, z);
+            if (railBlock.isPowered()) {
+                meta &= 7;
+            }
+            meta += meta;
+            return ZeroUtil.rail_exit_directions[meta] == direction || ZeroUtil.rail_exit_directions[meta + 1] == direction;
+        }
+        return false;
     }
 }

@@ -47,6 +47,9 @@ public interface IBlockMixins {
     default public boolean permanentlySupportsMortarBlocks(World world, int x, int y, int z, int direction) {
         return false;
     }
+    default public boolean canSupportRails(World world, int x, int y, int z) {
+        return ((Block)(Object)this).hasLargeCenterHardPointToFacing(world, x, y, z, 1);
+    }
     // Default to the old behavior for conductivity testing
     default public boolean isRedstoneConductor(IBlockAccess blockAccess, int x, int y, int z) {
         //return ((Block)(Object)this).isNormalCube(world, x, y, z);

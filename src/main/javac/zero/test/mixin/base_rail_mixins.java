@@ -8,6 +8,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
@@ -71,6 +72,19 @@ public abstract class BlockRailBaseMixins extends Block implements IBaseRailBloc
     
     public int adjustMetadataForPlatformMove(int meta) {
         return ((BlockRailBase)(Object)this).isPowered() ? MERGE_META_FIELD(meta, POWERED, false) : meta;
+    }
+#endif
+
+#if ENABLE_MORE_RAIL_PLACEMENTS
+    @Redirect(
+        method = { "canPlaceBlockAt(Lnet/minecraft/src/World;III)Z", "onNeighborBlockChange(Lnet/minecraft/src/World;IIII)V" },
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/src/World;doesBlockHaveSolidTopSurface(III)Z"
+        )
+    )
+    public boolean doesBlockHaveSolidTopSurface_redirect(World world, int x, int y, int z) {
+        return ((IWorldMixins)world).doesBlockSupportRails(x, y, z);
     }
 #endif
 }

@@ -25,6 +25,9 @@ MACRO_VOID(/* Fix how most BTW blocks receive power */)
 MACRO_VOID(/* Prevent block dispensers getting powered from their output face */)
 #define ENABLE_BETTER_BLOCK_DISPENSER_POWERING 1
 
+MACRO_VOID(/* Make block dispensers prioritize the nearest entity */)
+#define ENABLE_BLOCK_DISPENSER_NEAREST_ENTITY_PRIORITY 1
+
 MACRO_VOID(/* Block Breaker and Block Placer */)
 #define ENABLE_BLOCK_DISPENSER_VARIANTS 1
 
@@ -246,11 +249,13 @@ MACRO_VOID(/* Stop the camera spinning wildly in minecarts */)
 MACRO_VOID(/* Cheap/slow rails. Admittedly not a very original idea. */)
 #define ENABLE_WOODEN_RAILS 1
 
-#define ENABLE_STEEL_RAILS 0
+MACRO_VOID(/* Expensive/fast rails */)
+#define ENABLE_STEEL_RAILS 1
 
 MACRO_VOID(/* Fixes MC-342, MC-2783, and MC-170907 (all the same bug) */)
 #define ENABLE_FIX_FOR_NETWORK_POSITION_DELTAS 1
 
+MACRO_VOID(/* BROKEN */)
 #define ENABLE_TEXTURED_BOX 0
 
 MACRO_VOID(/* A block that prevents minecarts bouncing off each other */)
@@ -258,6 +263,9 @@ MACRO_VOID(/* A block that prevents minecarts bouncing off each other */)
 
 MACRO_VOID(/* Reduce the cost of a soap block to 4 soap */)
 #define ENABLE_CHEAPER_SOAP_BLOCK 1
+
+MACRO_VOID(/* Allow rails to be placed on hoppers */)
+#define ENABLE_MORE_RAIL_PLACEMENTS 1
 
 #define ENABLE_DEBUG_STRING_JANK 0
 

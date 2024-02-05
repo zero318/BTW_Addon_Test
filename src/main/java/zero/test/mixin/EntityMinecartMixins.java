@@ -78,18 +78,6 @@ public abstract class EntityMinecartMixins extends Entity {
         return 0.4D;
     }
     public int debounce = 0;
-    private static final int[] exit_directions_buffer_checks = new int[] {
-        2, 0,
-        1, 3,
-        1, 3,
-        1, 3,
-        2, 0,
-        2, 0,
-        0, 3,
-        0, 1,
-        2, 1,
-        2, 3
-    };
     /*
     @Inject(
         method = "updateOnTrack(IIIDDII)V",
@@ -106,7 +94,7 @@ public abstract class EntityMinecartMixins extends Entity {
         
         if (
             self.worldObj.getBlockId(x2, y2, z2) == BUFFER_STOP_ID &&
-            READ_META_FIELD(self.worldObj.getBlockMetadata(x2, y2, z2), FLAT_DIRECTION) == exit_directions_buffer_checks[meta]
+            READ_META_FIELD(self.worldObj.getBlockMetadata(x2, y2, z2), FLAT_DIRECTION) == ZeroUtil.rail_exit_flat_directions[meta]
         ) {
             debounce = debounceTime;
         }
@@ -116,7 +104,7 @@ public abstract class EntityMinecartMixins extends Entity {
             z2 = z + exits[1][2];
             if (
                 self.worldObj.getBlockId(x2, y2, z2) == BUFFER_STOP_ID &&
-                READ_META_FIELD(self.worldObj.getBlockMetadata(x2, y2, z2), FLAT_DIRECTION) == exit_directions_buffer_checks[meta + 1]
+                READ_META_FIELD(self.worldObj.getBlockMetadata(x2, y2, z2), FLAT_DIRECTION) == ZeroUtil.rail_exit_flat_directions[meta + 1]
             ) {
                 debounce = debounceTime;
             }
@@ -566,6 +554,11 @@ public abstract class EntityMinecartMixins extends Entity {
                     break;
             }
         }
+        else if (((meta)>5)) {
+            if (maxSpeed > 0.675D) {
+                maxSpeed = 0.675D;
+            }
+        }
         int[][] exitPair = matrix[meta];
         double xDiff = (double)(exitPair[1][0] - exitPair[0][0]);
         double zDiff = (double)(exitPair[1][2] - exitPair[0][2]);
@@ -703,20 +696,21 @@ public abstract class EntityMinecartMixins extends Entity {
             int x2 = x + exitPair[0][0];
             int y2 = y + exitPair[0][1];
             int z2 = z + exitPair[0][2];
+            int buffer_meta;
             if (
                 this.worldObj.getBlockId(x2, y2, z2) == 1329 &&
-                (((this.worldObj.getBlockMetadata(x2, y2, z2))&3)) == exit_directions_buffer_checks[meta]
+                (((buffer_meta = this.worldObj.getBlockMetadata(x2, y2, z2))&3)) == ZeroUtil.rail_exit_flat_directions[meta]
             ) {
-                debounce = 5;
+                debounce = !((((buffer_meta)>7))) ? 5 : -5;
             } else {
                 x2 = x + exitPair[1][0];
                 y2 = y + exitPair[1][1];
                 z2 = z + exitPair[1][2];
                 if (
                     this.worldObj.getBlockId(x2, y2, z2) == 1329 &&
-                    (((this.worldObj.getBlockMetadata(x2, y2, z2))&3)) == exit_directions_buffer_checks[meta + 1]
+                    (((buffer_meta = this.worldObj.getBlockMetadata(x2, y2, z2))&3)) == ZeroUtil.rail_exit_flat_directions[meta + 1]
                 ) {
-                    debounce = 5;
+                    debounce = !((((buffer_meta)>7))) ? 5 : -5;
                 }
             }
         }

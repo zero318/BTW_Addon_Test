@@ -7,6 +7,8 @@ import net.fabricmc.api.Environment;
 import java.util.List;
 import zero.test.block.model.BufferStopModel;
 // Block piston reactions
+// Yes, this is offset 3 just so it can share
+// preprocessor code with rail powered state
 public class BufferStopBlock extends Block {
     public BufferStopBlock(int blockId) {
         super(blockId, Material.circuits);
@@ -66,6 +68,13 @@ public class BufferStopBlock extends Block {
         return ((int)MathHelper.floor_double((double)(entity.rotationYaw)/90.0D+0.5D)&3);
     }
     @Override
+    public void onNeighborBlockChange(World world, int x, int y, int z, int neighborId) {
+        int meta = world.getBlockMetadata(x, y, z);
+        if (((((meta)>7))) != world.isBlockIndirectlyGettingPowered(x, y, z)) {
+            world.setBlockMetadataWithNotify(x, y, z, ((meta)^8), 0x01 | 0x02);
+        }
+    }
+    @Override
     public void addCollisionBoxesToList(World world, int x, int y, int z, AxisAlignedBB intersectBox, List list, Entity entity) {
         AABBPool pool = AxisAlignedBB.getAABBPool();
         double dX = (double)x;
@@ -97,11 +106,11 @@ public class BufferStopBlock extends Block {
     @Override
     public MovingObjectPosition collisionRayTrace(World world, int x, int y, int z, Vec3 startRay, Vec3 endRay) {
         RayTraceUtils rayTrace = new RayTraceUtils(world, x, y, z, startRay, endRay);
-        getTransformedModelForMetadata(model, world.getBlockMetadata(x, y, z)).addToRayTrace(rayTrace);
+        getTransformedModelForMetadata((((net.minecraft.src.Direction.directionToFacing[(((world.getBlockMetadata(x, y, z))&3))])^1))).addToRayTrace(rayTrace);
         return rayTrace.getFirstIntersection();
     }
-    private BlockModel getTransformedModelForMetadata(BlockModel model, int meta) {
-        (transformedModel = model.makeTemporaryCopy()).rotateAroundYToFacing((((net.minecraft.src.Direction.directionToFacing[(((meta)&3))])^1)));
+    private BlockModel getTransformedModelForMetadata(int direction) {
+        (transformedModel = model.makeTemporaryCopy()).rotateAroundYToFacing(direction);
         return transformedModel;
     }
     @Environment(EnvType.CLIENT)
@@ -129,14 +138,17 @@ public class BufferStopBlock extends Block {
     }
     @Override
     @Environment(EnvType.CLIENT)
-    public boolean renderBlock(RenderBlocks renderBlocks, int x, int y, int z) {
-  //BlockModel transformedModel = ;
-  return getTransformedModelForMetadata(model, renderBlocks.blockAccess.getBlockMetadata(x, y, z)).renderAsBlock/* WithColorMultiplier */(renderBlocks, this, x, y, z);
+    public boolean shouldSideBeRendered(IBlockAccess blockAccess, int neighborX, int neighborY, int neighborZ, int side) {
+        return currentBlockRenderer.shouldSideBeRenderedBasedOnCurrentBounds(neighborX, neighborY, neighborZ, side);
     }
-    /*
+    @Override
     @Environment(EnvType.CLIENT)
-    private boolean renderBlockBufferStop(RenderBlocks renderBlocks, int x, int y, int z) {
-        
+    public boolean renderBlock(RenderBlocks renderBlocks, int x, int y, int z) {
+        return getTransformedModelForMetadata((((net.minecraft.src.Direction.directionToFacing[(((renderBlocks.blockAccess.getBlockMetadata(x, y, z))&3))])^1))).renderAsBlockWithColorMultiplier(renderBlocks, this, x, y, z);
     }
-    */
+    @Override
+    @Environment(EnvType.CLIENT)
+    public void renderBlockAsItem(RenderBlocks renderBlocks, int damage, float brightness) {
+        getTransformedModelForMetadata(3).renderAsItemBlock(renderBlocks, this, damage);
+    }
 }

@@ -1474,6 +1474,34 @@ _OFFSET_DIRECTION_ARGS(X, Y, Z, MACRO_CAT(direction,_OFFSETS))
 #define UPDATE_DIRECTION_FORCE 0xD
 
 MACRO_VOID(
+/// Block pixel values
+)
+
+#define PIXELFRAC_0  0.0
+#define PIXELFRAC_1  0.0625
+#define PIXELFRAC_2  0.125
+#define PIXELFRAC_3  0.1875
+#define PIXELFRAC_4  0.25
+#define PIXELFRAC_5  0.3125
+#define PIXELFRAC_6  0.375
+#define PIXELFRAC_7  0.4375
+#define PIXELFRAC_8  0.5
+#define PIXELFRAC_9  0.5625
+#define PIXELFRAC_10 0.625
+#define PIXELFRAC_11 0.6875
+#define PIXELFRAC_12 0.75
+#define PIXELFRAC_13 0.8125
+#define PIXELFRAC_14 0.875
+#define PIXELFRAC_15 0.9375
+#define PIXELFRAC_16 1.0
+
+#define BLOCK_PIXEL_FLOAT(v)\
+(MACRO_CATW(PIXELFRAC_,v,F))
+
+#define BLOCK_PIXEL_DOUBLE(v)\
+(MACRO_CATW(PIXELFRAC_,v,D))
+
+MACRO_VOID(
 /// Data Watcher Types
 )
 

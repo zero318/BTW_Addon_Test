@@ -16,7 +16,10 @@ import zero.test.block.model.BufferStopModel;
 #include "..\feature_flags.h"
 
 #define FLAT_DIRECTION_META_OFFSET 0
-#define POWERED_META_OFFSET 2
+
+// Yes, this is offset 3 just so it can share
+// preprocessor code with rail powered state
+#define POWERED_META_OFFSET 3
 
 public class BufferStopBlock extends Block {
     public BufferStopBlock(int blockId) {
@@ -93,6 +96,14 @@ public class BufferStopBlock extends Block {
     }
     
     @Override
+    public void onNeighborBlockChange(World world, int x, int y, int z, int neighborId) {
+        int meta = world.getBlockMetadata(x, y, z);
+        if (READ_META_FIELD(meta, POWERED) != world.isBlockIndirectlyGettingPowered(x, y, z)) {
+            world.setBlockMetadataWithNotify(x, y, z, TOGGLE_META_FIELD(meta, POWERED), UPDATE_NEIGHBORS | UPDATE_CLIENTS);
+        }
+    }
+    
+    @Override
     public void addCollisionBoxesToList(World world, int x, int y, int z, AxisAlignedBB intersectBox, List list, Entity entity) {
         AABBPool pool = AxisAlignedBB.getAABBPool();
         double dX = (double)x;
@@ -126,13 +137,13 @@ public class BufferStopBlock extends Block {
     public MovingObjectPosition collisionRayTrace(World world, int x, int y, int z, Vec3 startRay, Vec3 endRay) {
         RayTraceUtils rayTrace = new RayTraceUtils(world, x, y, z, startRay, endRay);
         
-        getTransformedModelForMetadata(model, world.getBlockMetadata(x, y, z)).addToRayTrace(rayTrace);
+        getTransformedModelForMetadata(FLAT_DIRECTION_TO_DIRECTION(READ_META_FIELD(world.getBlockMetadata(x, y, z), FLAT_DIRECTION))).addToRayTrace(rayTrace);
         
         return rayTrace.getFirstIntersection();
     }
 
-    private BlockModel getTransformedModelForMetadata(BlockModel model, int meta) {
-        (transformedModel = model.makeTemporaryCopy()).rotateAroundYToFacing(FLAT_DIRECTION_TO_DIRECTION(READ_META_FIELD(meta, FLAT_DIRECTION)));
+    private BlockModel getTransformedModelForMetadata(int direction) {
+        (transformedModel = model.makeTemporaryCopy()).rotateAroundYToFacing(direction);
         return transformedModel;
     }
     
@@ -179,20 +190,23 @@ public class BufferStopBlock extends Block {
         }
     }
 #endif
+
+    @Override
+    @Environment(EnvType.CLIENT)
+    public boolean shouldSideBeRendered(IBlockAccess blockAccess, int neighborX, int neighborY, int neighborZ, int side) {
+        return currentBlockRenderer.shouldSideBeRenderedBasedOnCurrentBounds(neighborX, neighborY, neighborZ, side);
+    }
     
     @Override
     @Environment(EnvType.CLIENT)
     public boolean renderBlock(RenderBlocks renderBlocks, int x, int y, int z) {
-		//BlockModel transformedModel = ;
-		
-		return getTransformedModelForMetadata(model, renderBlocks.blockAccess.getBlockMetadata(x, y, z)).renderAsBlock/* WithColorMultiplier */(renderBlocks, this, x, y, z);
+        return getTransformedModelForMetadata(FLAT_DIRECTION_TO_DIRECTION(READ_META_FIELD(renderBlocks.blockAccess.getBlockMetadata(x, y, z), FLAT_DIRECTION))).renderAsBlockWithColorMultiplier(renderBlocks, this, x, y, z);
     }
     
-    /*
+    @Override
     @Environment(EnvType.CLIENT)
-    private boolean renderBlockBufferStop(RenderBlocks renderBlocks, int x, int y, int z) {
-        
+    public void renderBlockAsItem(RenderBlocks renderBlocks, int damage, float brightness) {
+        getTransformedModelForMetadata(DIRECTION_SOUTH).renderAsItemBlock(renderBlocks, this, damage);
     }
-    */
 #endif
 }

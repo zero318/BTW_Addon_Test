@@ -42,6 +42,8 @@ public class ZeroTestAddon extends BTWAddon {
         Item.itemsList[1326] = new ItemBlock(1326 -256);
         ZeroTestBlocks.wooden_rail = new WoodenRailBlock(1327);
         Item.itemsList[1327] = new ItemBlock(1327 -256);
+        ZeroTestBlocks.steel_rail = new SteelRailBlock(1328);
+        Item.itemsList[1328] = new ItemBlock(1328 -256);
         ZeroTestBlocks.buffer_stop = new BufferStopBlock(1329);
         Item.itemsList[1329] = new ItemBlock(1329 -256);
     }
@@ -198,6 +200,22 @@ public class ZeroTestAddon extends BTWAddon {
                 'X', new ItemStack(BTWItems.woodMouldingStubID, 1, InventoryUtils.IGNORE_METADATA),
                 'I', Item.stick,
                 'S', BTWItems.hempFibers
+            }
+        );
+        RecipeManager.addRecipe(
+            new ItemStack(ZeroTestBlocks.steel_rail, 12),
+            new Object[] {
+                "X X",
+                "XIX",
+                "X X",
+                'X', BTWItems.steelNugget,
+                'I', Item.stick
+            }
+        );
+        RecipeManager.addStokedCrucibleRecipe(
+            new ItemStack(BTWItems.steelNugget, 1),
+            new ItemStack[] {
+                new ItemStack(ZeroTestBlocks.steel_rail, 2)
             }
         );
         RecipeManager.removeVanillaRecipe(

@@ -147,19 +147,6 @@ public abstract class EntityMinecartMixins extends Entity {
 
     public int debounce = 0;
     
-    private static final int[] exit_directions_buffer_checks = new int[] {
-        FLAT_DIRECTION_SOUTH, FLAT_DIRECTION_NORTH,
-        FLAT_DIRECTION_EAST, FLAT_DIRECTION_WEST,
-        FLAT_DIRECTION_EAST, FLAT_DIRECTION_WEST,
-        FLAT_DIRECTION_EAST, FLAT_DIRECTION_WEST,
-        FLAT_DIRECTION_SOUTH, FLAT_DIRECTION_NORTH,
-        FLAT_DIRECTION_SOUTH, FLAT_DIRECTION_NORTH,
-        FLAT_DIRECTION_NORTH, FLAT_DIRECTION_WEST,
-        FLAT_DIRECTION_NORTH, FLAT_DIRECTION_EAST,
-        FLAT_DIRECTION_SOUTH, FLAT_DIRECTION_EAST,
-        FLAT_DIRECTION_SOUTH, FLAT_DIRECTION_WEST
-    };
-    
     /*
     @Inject(
         method = "updateOnTrack(IIIDDII)V",
@@ -176,7 +163,7 @@ public abstract class EntityMinecartMixins extends Entity {
         
         if (
             self.worldObj.getBlockId(x2, y2, z2) == BUFFER_STOP_ID &&
-            READ_META_FIELD(self.worldObj.getBlockMetadata(x2, y2, z2), FLAT_DIRECTION) == exit_directions_buffer_checks[meta]
+            READ_META_FIELD(self.worldObj.getBlockMetadata(x2, y2, z2), FLAT_DIRECTION) == ZeroUtil.rail_exit_flat_directions[meta]
         ) {
             debounce = debounceTime;
         }
@@ -186,7 +173,7 @@ public abstract class EntityMinecartMixins extends Entity {
             z2 = z + exits[1][2];
             if (
                 self.worldObj.getBlockId(x2, y2, z2) == BUFFER_STOP_ID &&
-                READ_META_FIELD(self.worldObj.getBlockMetadata(x2, y2, z2), FLAT_DIRECTION) == exit_directions_buffer_checks[meta + 1]
+                READ_META_FIELD(self.worldObj.getBlockMetadata(x2, y2, z2), FLAT_DIRECTION) == ZeroUtil.rail_exit_flat_directions[meta + 1]
             ) {
                 debounce = debounceTime;
             }
@@ -843,6 +830,8 @@ public abstract class EntityMinecartMixins extends Entity {
 
     @Shadow
     public abstract void applyDrag();
+    
+#define SAFE_CORNERING_SPEED 0.65D
 
     @Overwrite
     public void updateOnTrack(int x, int y, int z, double maxSpeed, double slopeSpeed, int blockId, int meta) {
@@ -874,6 +863,11 @@ public abstract class EntityMinecartMixins extends Entity {
                 case RAIL_ASCENDING_SOUTH:
                     this.motionZ -= slopeSpeed;
                     break;
+            }
+        }
+        else if (RAIL_IS_CURVED(meta)) {
+            if (maxSpeed > SAFE_CORNERING_SPEED) {
+                maxSpeed = SAFE_CORNERING_SPEED;
             }
         }
 
@@ -1045,20 +1039,21 @@ public abstract class EntityMinecartMixins extends Entity {
             int x2 = x + exitPair[0][0];
             int y2 = y + exitPair[0][1];
             int z2 = z + exitPair[0][2];
+            int buffer_meta;
             if (
                 this.worldObj.getBlockId(x2, y2, z2) == BUFFER_STOP_ID &&
-                READ_META_FIELD(this.worldObj.getBlockMetadata(x2, y2, z2), FLAT_DIRECTION) == exit_directions_buffer_checks[meta]
+                READ_META_FIELD(buffer_meta = this.worldObj.getBlockMetadata(x2, y2, z2), FLAT_DIRECTION) == ZeroUtil.rail_exit_flat_directions[meta]
             ) {
-                debounce = DEBOUNCE_TIME;
+                debounce = !READ_META_FIELD(buffer_meta, POWERED) ? DEBOUNCE_TIME : -DEBOUNCE_TIME;
             } else {
                 x2 = x + exitPair[1][0];
                 y2 = y + exitPair[1][1];
                 z2 = z + exitPair[1][2];
                 if (
                     this.worldObj.getBlockId(x2, y2, z2) == BUFFER_STOP_ID &&
-                    READ_META_FIELD(this.worldObj.getBlockMetadata(x2, y2, z2), FLAT_DIRECTION) == exit_directions_buffer_checks[meta + 1]
+                    READ_META_FIELD(buffer_meta = this.worldObj.getBlockMetadata(x2, y2, z2), FLAT_DIRECTION) == ZeroUtil.rail_exit_flat_directions[meta + 1]
                 ) {
-                    debounce = DEBOUNCE_TIME;
+                    debounce = !READ_META_FIELD(buffer_meta, POWERED) ? DEBOUNCE_TIME : -DEBOUNCE_TIME;
                 }
             }
         }

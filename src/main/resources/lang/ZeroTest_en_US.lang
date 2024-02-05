@@ -8,6 +8,7 @@ tile.dead_coral_fan.name=Dead Coral Fan
 tile.block_breaker.name=Block Breaker
 tile.block_placer.name=Block Placer
 tile.wooden_rail.name=Wooden Rail
+tile.steel_rail.name=Steel Rail
 tile.buffer_stop.name=Buffer Stop
 item.minecartFurnace.name=Minecart with Oven
 item.minecart_oven.name=Minecart with Oven
