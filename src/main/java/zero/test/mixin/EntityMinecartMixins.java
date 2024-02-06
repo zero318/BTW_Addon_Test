@@ -555,8 +555,8 @@ public abstract class EntityMinecartMixins extends Entity {
             }
         }
         else if (((meta)>5)) {
-            if (maxSpeed > 0.675D) {
-                maxSpeed = 0.675D;
+            if (maxSpeed > 0.65D) {
+                maxSpeed = 0.65D;
             }
         }
         int[][] exitPair = matrix[meta];

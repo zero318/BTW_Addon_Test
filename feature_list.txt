@@ -44,6 +44,9 @@ Wooden Rails:
 - Crafted with planks/moulding instead of nuggets and two string
 - Flammable
 
+Steel Rails:
+- Expensive rails that are double speed
+
 Buffer Stop:
 - Crafted with 3 stone bricks, 3 wood moulding, and 2 iron nuggets
 - Prevents minecarts that run into it bouncing off of each other until moved by a powered rail
@@ -80,6 +83,7 @@ Metal Spikes:
 
 Block Dispensers:
 - No longer receive redstone power through their front face (maintains previous behaviors with power rule changes)
+- Prioritize the entity closest to the center of the block in front of them
 
 Platforms:
 - Connect to other platforms when moved by pistons
@@ -163,6 +167,5 @@ Known Issues
 - The CUD block recipe sucks
 - Sloped rails don't flatten out when the rail they're connected to is moved down by a piston
 - Block placers/breakers have lazy texturing
-- Metal spikes don't receive power from repeaters
 - Exploit with platforms
 - Minecart hitboxes obstruct the rail they are placed on

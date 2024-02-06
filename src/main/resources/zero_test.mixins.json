@@ -67,7 +67,8 @@
     "PistonPackingCraftingManagerMixins",
     "PistonPackingRecipeMixins",
     "IPistonPackingRecipeAccessMixins",
-    "HopperBlockMixins"
+    "HopperBlockMixins",
+    "RedstoneRepeaterBlockMixins"
   ],
   "client": [
     "ComparatorBlockMixins",
