@@ -577,39 +577,40 @@ public abstract class PistonMixins extends BlockPistonBase {
             // Set x,y,z to position of ejection destination block in shovel list
             packedPos = pushed_blocks[i];
             {(x)=((int)((packedPos)<<26>>(64)-26));(z)=((int)((packedPos)>>(64)-26));(y)=((int)(packedPos)<<(32)-12>>(32)-12);};
+            Block targetBlock = Block.blocksList[world.getBlockId(x, y, z)];
             blockState = data_list[i];
             {(blockId)=((blockState)&0xFFFF);(blockMeta)=((blockState)>>>16);};
             block = Block.blocksList[blockId];
             blockMeta = block.adjustMetadataForPistonMove(blockMeta);
             int ejectDirection = data_list[i + SHOVEL_DIRECTION_LIST_OFFSET];
             if (
-                ((block)==null) ||
-                block.getMobilityFlag() == 1
+                ((targetBlock)==null) ||
+                targetBlock.getMobilityFlag() == 1
             ) {
                 onShovelEjectIntoBlock(world, x, y, z);
                 world.setBlock(x, y, z, Block.pistonMoving.blockID, blockMeta, 0x04);
                 world.setBlockTileEntity(x, y, z, PistonBlockMoving.getShoveledTileEntity(blockId, blockMeta, ejectDirection));
             }
-            else if (!world.isRemote) {
-                block = Block.blocksList[blockId]; // Get shoveled block
-                if (!((block)==null)) {
-                    // BUG: Some blocks don't seem to be returning the correct
-                    // items when called like this, particularly packed earth.
-                    int itemId = block.idDropped(blockMeta, world.rand, 0);
-                    if (itemId != 0) {
-                        ItemUtils.ejectStackFromBlockTowardsFacing(
-                            world,
-                            // x,y,z contain the position of the ejection
-                            // target and not the block being shoveled,
-                            // so index backwards to spawn the item at
-                            // the correct location
-                            x - Facing.offsetsXForSide[ejectDirection],
-                            y - Facing.offsetsYForSide[ejectDirection],
-                            z - Facing.offsetsZForSide[ejectDirection],
-                            new ItemStack(itemId, block.quantityDropped(world.rand), block.damageDropped(blockMeta)),
-                            ejectDirection
-                        );
-                    }
+            else if (
+                !world.isRemote &&
+                !((block)==null)
+            ) {
+                // BUG: Some blocks don't seem to be returning the correct
+                // items when called like this, particularly packed earth.
+                int itemId = block.idDropped(blockMeta, world.rand, 0);
+                if (itemId != 0) {
+                    ItemUtils.ejectStackFromBlockTowardsFacing(
+                        world,
+                        // x,y,z contain the position of the ejection
+                        // target and not the block being shoveled,
+                        // so index backwards to spawn the item at
+                        // the correct location
+                        x - Facing.offsetsXForSide[ejectDirection],
+                        y - Facing.offsetsYForSide[ejectDirection],
+                        z - Facing.offsetsZForSide[ejectDirection],
+                        new ItemStack(itemId, block.quantityDropped(world.rand), block.damageDropped(blockMeta)),
+                        ejectDirection
+                    );
                 }
             }
         }

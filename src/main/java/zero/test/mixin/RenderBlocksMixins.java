@@ -337,6 +337,8 @@ public class RenderBlocksMixins implements IRenderBlocksMixins {
     public void renderBlockComparator_inject(BlockComparator block, int x, int y, int z, CallbackInfoReturnable info) {
         ((IBlockRedstoneLogicMixins)block).setRenderingBaseTextures(false);
     }
+    @Shadow
+    public Icon overrideBlockTexture;
     // Replacement torch rendering that skips the unnecessary
     // XZ offset calculations and prevents torches clipping
     // into the base of the block.
@@ -349,7 +351,7 @@ public class RenderBlocksMixins implements IRenderBlocksMixins {
             if ((meta & 4) != 0) {
                 y -= 0.125D;
             }
-            texture = ((IRenderBlocksAccessMixins)self).getOverrideBlockTexture();
+            texture = this.overrideBlockTexture;
         }
         double minU = (double)texture.getInterpolatedU(7.0D);
         double minV = (double)texture.getInterpolatedV(6.0D);

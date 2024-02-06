@@ -27,6 +27,8 @@ public abstract class EntityPlayerMixins extends EntityLiving {
             callbackInfo.setReturnValue(false);
         }
     }
+    @Shadow
+    public abstract void addMountedMovementStat(double par1, double par3, double par5);
     @Overwrite
     public void updateRidden() {
         EntityPlayer self = (EntityPlayer)(Object)this;
@@ -38,7 +40,7 @@ public abstract class EntityPlayerMixins extends EntityLiving {
         super.updateRidden();
         self.prevCameraYaw = self.cameraYaw;
         self.cameraYaw = 0.0F;
-        ((IEntityPlayerAccessMixins)this).callAddMountedMovementStat(this.posX - var1, this.posY - var3, this.posZ - var5);
+        this.addMountedMovementStat(this.posX - var1, this.posY - var3, this.posZ - var5);
         this.rotationPitch = var8;
         this.rotationYaw = var7;
         if (this.ridingEntity instanceof EntityPig) {

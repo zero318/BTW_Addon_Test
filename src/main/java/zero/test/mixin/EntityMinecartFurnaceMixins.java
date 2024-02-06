@@ -84,6 +84,8 @@ public abstract class EntityMinecartFurnaceMixins extends EntityMinecart impleme
             this.entityDropItem(new ItemStack(BTWBlocks.idleOven, 1), 0.0F);
         }
     }
+    @Shadow
+    public int fuel;
     // Copied from OvenTileEntity
     private static int maxFuelBurnTime = 14200;
     public int attemptToAddFuel(ItemStack stack) {
@@ -92,8 +94,7 @@ public abstract class EntityMinecartFurnaceMixins extends EntityMinecart impleme
             Item item = stack.getItem();
             int itemDamage = stack.getItemDamage();
             if (item.getCanBeFedDirectlyIntoBrickOven(itemDamage)) {
-                EntityMinecartFurnace self = (EntityMinecartFurnace)(Object)this;
-                int currentFuel = ((IEntityMinecartFurnaceAccessMixins)self).getFuel();
+                int currentFuel = this.fuel;
                 int possibleBurnTime = maxFuelBurnTime - currentFuel;
                 if (possibleBurnTime > 0) {
                     // Multiplier calculated from OvenTileEntity and TileEntityFurnace
@@ -106,7 +107,7 @@ public abstract class EntityMinecartFurnaceMixins extends EntityMinecart impleme
                         if (burnCount > stack.stackSize) {
                             burnCount = stack.stackSize;
                         }
-                        ((IEntityMinecartFurnaceAccessMixins)self).setFuel(currentFuel + burnCount * itemBurnTime);
+                        this.fuel = currentFuel + burnCount * itemBurnTime;
                     }
                 }
             }
@@ -122,9 +123,8 @@ public abstract class EntityMinecartFurnaceMixins extends EntityMinecart impleme
         ) {
             entityPlayer.inventory.setInventorySlotContents(entityPlayer.inventory.currentItem, (ItemStack)null);
         }
-        EntityMinecartFurnace self = (EntityMinecartFurnace)(Object)this;
         // Fix MC-163375
-        if (((IEntityMinecartFurnaceAccessMixins)self).getFuel() > 0) {
+        if (this.fuel > 0) {
             double newPushX;
             double newPushZ;
             if (entityPlayer.isSneaking()) {
@@ -132,13 +132,14 @@ public abstract class EntityMinecartFurnaceMixins extends EntityMinecart impleme
                 newPushZ = 0.0D;
             }
             else {
-                newPushX = self.posX - entityPlayer.posX;
-                newPushZ = self.posZ - entityPlayer.posZ;
+                newPushX = this.posX - entityPlayer.posX;
+                newPushZ = this.posZ - entityPlayer.posZ;
                 if (entityPlayer.isUsingSpecialKey()) {
                     newPushX = -newPushX;
                     newPushZ = -newPushZ;
                 }
             }
+            EntityMinecartFurnace self = (EntityMinecartFurnace)(Object)this;
             self.pushX = newPushX;
             self.pushZ = newPushZ;
             return true;

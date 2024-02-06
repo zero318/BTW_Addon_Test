@@ -9,24 +9,41 @@ import zero.test.mixin.IBlockBaseRailLogicAccessMixins;
 import java.util.List;
 // Block piston reactions
 @Mixin(BlockBaseRailLogic.class)
-public class BlockBaseRailLogicMixins {
+public abstract class BlockBaseRailLogicMixins {
+    @Shadow
+    public World logicWorld;
+    @Shadow
+    public int railX;
+    @Shadow
+    public int railY;
+    @Shadow
+    public int railZ;
+    @Shadow
+    public boolean isStraightRail;
+    @Shadow
+    public List<ChunkPosition> railChunkPosition;
+    @Shadow
+    public abstract boolean canConnectFrom(int x, int y, int z);
+    @Shadow
+    public abstract void setBasicRail(int par1);
+    @Shadow
+    public abstract BlockBaseRailLogic getRailLogic(ChunkPosition chunkPosition);
     @Overwrite
     public void func_94511_a(boolean is_powered, boolean par2) {
-        IBlockBaseRailLogicAccessMixins self = (IBlockBaseRailLogicAccessMixins)(Object)this;
-        World world = self.getLogicWorld();
-        int selfX = self.getRailX();
-        int selfY = self.getRailY();
-        int selfZ = self.getRailZ();
-        boolean is_straight_rail = self.getIsStraightRail();
+        World world = this.logicWorld;
+        int selfX = this.railX;
+        int selfY = this.railY;
+        int selfZ = this.railZ;
+        boolean is_straight_rail = this.isStraightRail;
         int meta = world.getBlockMetadata(selfX, selfY, selfZ);
         int previous_shape = meta;
         if (is_straight_rail) {
             previous_shape &= 7;
         }
-        boolean has_north_connect = self.hasNeighborRail(selfX, selfY, selfZ - 1);
-        boolean has_south_connect = self.hasNeighborRail(selfX, selfY, selfZ + 1);
-        boolean has_west_connect = self.hasNeighborRail(selfX - 1, selfY, selfZ);
-        boolean has_east_connect = self.hasNeighborRail(selfX + 1, selfY, selfZ);
+        boolean has_north_connect = this.canConnectFrom(selfX, selfY, selfZ - 1);
+        boolean has_south_connect = this.canConnectFrom(selfX, selfY, selfZ + 1);
+        boolean has_west_connect = this.canConnectFrom(selfX - 1, selfY, selfZ);
+        boolean has_east_connect = this.canConnectFrom(selfX + 1, selfY, selfZ);
         int rail_shape = -1;
         if (
             (has_north_connect | has_south_connect) &
@@ -133,7 +150,7 @@ public class BlockBaseRailLogicMixins {
         if (rail_shape == -1) {
             rail_shape = previous_shape;
         }
-        self.updateConnections(rail_shape);
+        this.setBasicRail(rail_shape);
         int new_rail_shape = rail_shape;
         if (is_straight_rail) {
             new_rail_shape = meta & 8 | rail_shape;
@@ -141,9 +158,9 @@ public class BlockBaseRailLogicMixins {
         //if (!world.isRemote) AddonHandler.logMessage("Rail metas "+meta+" "+previous_shape+" "+rail_shape+" "+new_rail_shape);
         if (par2 || meta != new_rail_shape) {
             world.setBlockMetadataWithNotify(selfX, selfY, selfZ, new_rail_shape, 0x01 | 0x02);
-            List<ChunkPosition> position_list = self.getRailChunkPosition();
+            List<ChunkPosition> position_list = this.railChunkPosition;
             for (ChunkPosition position : position_list) {
-                IBlockBaseRailLogicAccessMixins rail_logic = (IBlockBaseRailLogicAccessMixins)self.getRail(position);
+                IBlockBaseRailLogicAccessMixins rail_logic = (IBlockBaseRailLogicAccessMixins)this.getRailLogic(position);
                 if (rail_logic != null) {
                     rail_logic.removeSoftConnections();
                     if (rail_logic.callCanConnectTo((BlockBaseRailLogic)(Object)this)) {

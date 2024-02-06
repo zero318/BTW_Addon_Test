@@ -14,7 +14,7 @@ import java.util.Random;
 // Block piston reactions
 @Mixin(BlockComparator.class)
 public abstract class BlockComparatorMixins extends BlockRedstoneLogic {
-    BlockComparatorMixins(int par1, boolean par2) {
+    public BlockComparatorMixins(int par1, boolean par2) {
         super(par1, par2);
     }
     @Override
@@ -58,8 +58,7 @@ public abstract class BlockComparatorMixins extends BlockRedstoneLogic {
             !world.isRemote && // MC-10653
             !world.isUpdateScheduledForBlock(x, y, z, this.blockID) // MC-8911
         ) {
-            ((IBlockComparatorAccessMixins)this).callFunc_96476_c(world, x, y, z, world.rand);
-            //this.func_96476_c(world, x, y, z, world.rand);
+            this.func_96476_c(world, x, y, z, world.rand);
         }
         return true;
     }

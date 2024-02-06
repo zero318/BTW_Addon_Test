@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import zero.test.IWorldMixins;
 import zero.test.mixin.IPistonBaseAccessMixins;
 import zero.test.IBlockEntityPistonMixins;
-import zero.test.mixin.IBlockEntityPistonAccessMixins;
+//import zero.test.mixin.IBlockEntityPistonAccessMixins;
 import zero.test.IBlockMixins;
 import zero.test.IEntityMixins;
 import btw.block.BTWBlocks;
@@ -33,16 +33,30 @@ import java.util.List;
 // Enabling the cache creates rendering
 // bugs when pushing double chests.
 @Mixin(TileEntityPiston.class)
-public class BlockEntityPistonMixins extends TileEntity implements IBlockEntityPistonMixins {
+public abstract class BlockEntityPistonMixins extends TileEntity implements IBlockEntityPistonMixins {
     public long lastTicked;
+    @Shadow
+    public List pushedObjects;
+    @Shadow
+    public float progress;
+    @Shadow
+    public float lastProgress;
+    @Shadow
+    public boolean shouldHeadBeRendered;
+    @Shadow
+    public abstract boolean destroyAndDropIfShoveled();
+    @Shadow
+    public abstract void preBlockPlaced();
+    @Shadow
+    public abstract void attemptToPackItems();
     public boolean hasSmallCenterHardPointToFacing(int x, int y, int z, int direction, boolean ignoreTransparency) {
-        TileEntityPiston self = (TileEntityPiston)(Object)this;
         if (
             // Treat retracting bases as a stationary block
             this.isRetractingBase() ||
             // Treat blocks that're about to stop moving as stationary
-            ((IBlockEntityPistonAccessMixins)self).getProgress() >= 1.0F
+            this.progress >= 1.0F
         ) {
+            TileEntityPiston self = (TileEntityPiston)(Object)this;
             Block storedBlock = Block.blocksList[self.getStoredBlockID()];
             if (!((storedBlock)==null)) {
                 return storedBlock.hasSmallCenterHardPointToFacing(self.worldObj, x, y, z, direction, ignoreTransparency);
@@ -51,13 +65,13 @@ public class BlockEntityPistonMixins extends TileEntity implements IBlockEntityP
         return false;
     }
     public boolean hasCenterHardPointToFacing(int x, int y, int z, int direction, boolean ignoreTransparency) {
-        TileEntityPiston self = (TileEntityPiston)(Object)this;
         if (
             // Treat retracting bases as a stationary block
             this.isRetractingBase() ||
             // Treat blocks that're about to stop moving as stationary
-            ((IBlockEntityPistonAccessMixins)self).getProgress() >= 1.0F
+            this.progress >= 1.0F
         ) {
+            TileEntityPiston self = (TileEntityPiston)(Object)this;
             Block storedBlock = Block.blocksList[self.getStoredBlockID()];
             if (!((storedBlock)==null)) {
                 return storedBlock.hasCenterHardPointToFacing(self.worldObj, x, y, z, direction, ignoreTransparency);
@@ -66,13 +80,13 @@ public class BlockEntityPistonMixins extends TileEntity implements IBlockEntityP
         return false;
     }
     public boolean hasLargeCenterHardPointToFacing(int x, int y, int z, int direction, boolean ignoreTransparency) {
-        TileEntityPiston self = (TileEntityPiston)(Object)this;
         if (
             // Treat retracting bases as a stationary block
             this.isRetractingBase() ||
             // Treat blocks that're about to stop moving as stationary
-            ((IBlockEntityPistonAccessMixins)self).getProgress() >= 1.0F
+            this.progress >= 1.0F
         ) {
+            TileEntityPiston self = (TileEntityPiston)(Object)this;
             Block storedBlock = Block.blocksList[self.getStoredBlockID()];
             if (!((storedBlock)==null)) {
                 return storedBlock.hasLargeCenterHardPointToFacing(self.worldObj, x, y, z, direction, ignoreTransparency);
@@ -121,21 +135,19 @@ public class BlockEntityPistonMixins extends TileEntity implements IBlockEntityP
     }
     @Overwrite
     public void clearPistonTileEntity() {
-        TileEntityPiston self = (TileEntityPiston)(Object)this;
         if (
-            ((IBlockEntityPistonAccessMixins)self).getLastProgress() < 1.0F &&
-            self.worldObj != null
+            this.lastProgress < 1.0F &&
+            this.worldObj != null
         ) {
-            ((IBlockEntityPistonAccessMixins)self).setProgress(1.0F);
-            ((IBlockEntityPistonAccessMixins)self).setLastProgress(1.0F);
-            self.worldObj.removeBlockTileEntity(self.xCoord, self.yCoord, self.zCoord);
-            self.invalidate();
+            this.lastProgress = this.progress = 1.0F;
+            this.worldObj.removeBlockTileEntity(this.xCoord, this.yCoord, this.zCoord);
+            this.invalidate();
             if (
-                self.worldObj.getBlockId(self.xCoord, self.yCoord, self.zCoord) == Block.pistonMoving.blockID &&
-                !((IBlockEntityPistonAccessMixins)self).callDestroyAndDropIfShoveled()
+                this.worldObj.getBlockId(this.xCoord, this.yCoord, this.zCoord) == Block.pistonMoving.blockID &&
+                !this.destroyAndDropIfShoveled()
             ) {
-                ((IBlockEntityPistonAccessMixins)self).callPreBlockPlaced();
-                self.restoreStoredBlock();
+                this.preBlockPlaced();
+                this.restoreStoredBlock();
             }
         }
     }
@@ -146,8 +158,7 @@ public class BlockEntityPistonMixins extends TileEntity implements IBlockEntityP
         this.lastTicked = time;
     }
     public boolean isRetractingBase() {
-        TileEntityPiston self = (TileEntityPiston)(Object)this;
-        return !self.isExtending() && ((IBlockEntityPistonAccessMixins)self).getShouldHeadBeRendered();
+        return !((TileEntityPiston)(Object)this).isExtending() && this.shouldHeadBeRendered;
     }
     private static final ThreadLocal<Integer> NOCLIP_DIRECTION = ThreadLocal.withInitial(() -> -1);
     public AxisAlignedBB getBlockBoundsFromPoolBasedOnState() {
@@ -157,7 +168,7 @@ public class BlockEntityPistonMixins extends TileEntity implements IBlockEntityP
         if (storedBlock != null) {
             boundingBox = storedBlock.getAsPistonMovingBoundingBox(self.worldObj, self.xCoord, self.yCoord, self.zCoord);
             if (boundingBox != null && !this.isRetractingBase()) {
-                double progress = (double)((IBlockEntityPistonAccessMixins)self).getProgress();
+                double progress = (double)this.progress;
                 double directionOffset = self.isExtending() ? progress - 1.0D : 1.0D - progress;
                 int direction = self.getPistonOrientation();
                 double dX = (double)Facing.offsetsXForSide[direction] * directionOffset;
@@ -239,7 +250,7 @@ public class BlockEntityPistonMixins extends TileEntity implements IBlockEntityP
                 List<AxisAlignedBB> collisionBoxes = new ArrayList();
                 block.addCollisionBoxesToList(self.worldObj, x, y, z, fakeMask, collisionBoxes, entity);
                 if (!collisionBoxes.isEmpty()) {
-                    double progress = (double)((IBlockEntityPistonAccessMixins)self).getProgress();
+                    double progress = (double)this.progress;
                     double directionOffset = isExtending ? progress - 1.0D : 1.0D - progress;
                     double dX = (double)Facing.offsetsXForSide[direction] * directionOffset;
                     double dY = (double)Facing.offsetsYForSide[direction] * directionOffset;
@@ -525,10 +536,9 @@ public class BlockEntityPistonMixins extends TileEntity implements IBlockEntityP
         }
     }
     protected void ejectEntityFromPistonBase(Entity entity, AxisAlignedBB entityBox, int direction, double idkOffset, AxisAlignedBB box) {
-        TileEntityPiston self = (TileEntityPiston)(Object)this;
-        box.maxX = (box.minX = (double)self.xCoord) + 1.0D;
-        box.maxY = (box.minY = (double)self.yCoord) + 1.0D;
-        box.maxZ = (box.minZ = (double)self.zCoord) + 1.0D;
+        box.maxX = (box.minX = (double)this.xCoord) + 1.0D;
+        box.maxY = (box.minY = (double)this.yCoord) + 1.0D;
+        box.maxZ = (box.minZ = (double)this.zCoord) + 1.0D;
         if (entityBox.intersectsWith(box)) {
             double newDistanceA;
             double newDistanceB;
@@ -576,31 +586,29 @@ public class BlockEntityPistonMixins extends TileEntity implements IBlockEntityP
     @Overwrite
     public void updateEntity() {
         this.lastTicked = this.worldObj.getTotalWorldTime();
-        TileEntityPiston self = (TileEntityPiston)(Object)this;
-        IBlockEntityPistonAccessMixins self_access = (IBlockEntityPistonAccessMixins)self;
-        float currentProgress = self_access.getProgress();
-        self_access.setLastProgress(currentProgress);
+        float currentProgress = this.progress;
+        this.lastProgress = currentProgress;
         if (currentProgress >= 1.0F) {
             // FCMOD: Added
-            self_access.callAttemptToPackItems();
+            this.attemptToPackItems();
             // END FCMOD
-            self.worldObj.removeBlockTileEntity(self.xCoord, self.yCoord, self.zCoord);
-            self.invalidate();
+            this.worldObj.removeBlockTileEntity(this.xCoord, this.yCoord, this.zCoord);
+            this.invalidate();
             if (
-                self.worldObj.getBlockId(self.xCoord, self.yCoord, self.zCoord) == Block.pistonMoving.blockID &&
-                !self_access.callDestroyAndDropIfShoveled()
+                this.worldObj.getBlockId(this.xCoord, this.yCoord, this.zCoord) == Block.pistonMoving.blockID &&
+                !this.destroyAndDropIfShoveled()
             ) {
-                self_access.callPreBlockPlaced();
-                self.restoreStoredBlock();
+                this.preBlockPlaced();
+                this.restoreStoredBlock();
             }
             return;
         }
         float nextProgress = currentProgress + 0.5F;
-        self_access.callUpdatePushedObjects(nextProgress, currentProgress);
+        this.updatePushedObjects(nextProgress, currentProgress);
         if (nextProgress >= 1.0F) {
             nextProgress = 1.0F;
         }
-        self_access.setProgress(nextProgress);
+        this.progress = nextProgress;
     }
     @Inject(
         method = "readFromNBT(Lnet/minecraft/src/NBTTagCompound;)V",
@@ -608,7 +616,7 @@ public class BlockEntityPistonMixins extends TileEntity implements IBlockEntityP
     )
     public void readFromNBT_inject(NBTTagCompound compound, CallbackInfo info) {
         if (compound.hasKey("source")) {
-            ((IBlockEntityPistonAccessMixins)this).setShouldHeadBeRendered(compound.getBoolean("source"));
+            this.shouldHeadBeRendered = compound.getBoolean("source");
         }
     }
     @Inject(
@@ -616,6 +624,6 @@ public class BlockEntityPistonMixins extends TileEntity implements IBlockEntityP
         at = @At("TAIL")
     )
     public void writeToNBT_inject(NBTTagCompound compound, CallbackInfo info) {
-        compound.setBoolean("source", ((IBlockEntityPistonAccessMixins)this).getShouldHeadBeRendered());
+        compound.setBoolean("source", this.shouldHeadBeRendered);
     }
 }

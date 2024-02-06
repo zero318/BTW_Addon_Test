@@ -273,23 +273,35 @@ public class RedstoneWireMixins implements IBlockRedstoneWireMixins {
         }
         return LINE_TEXTURE_INDEX;
     }
+    
+    @Environment(EnvType.CLIENT)
+    @Shadow
+    public Icon field_94413_c;
+    @Environment(EnvType.CLIENT)
+    @Shadow
+    public Icon field_94410_cO;
+    @Environment(EnvType.CLIENT)
+    @Shadow
+    public Icon field_94411_cP;
+    @Environment(EnvType.CLIENT)
+    @Shadow
+    public Icon field_94412_cQ;
 
     @Environment(EnvType.CLIENT)
     public Icon get_texture_by_index(int icon_index) {
-        IRedstoneWireAccessMixins self = (IRedstoneWireAccessMixins)this;
         switch (icon_index) {
             case LINE_TEXTURE_INDEX:
                 // Line Texture
-                return self.getField_94410_cO();
+                return this.field_94410_cO;
             case LINE_OVERLAY_TEXTURE_INDEX:
                 // Line Overlay
-                return self.getField_94412_cQ();
+                return this.field_94412_cQ;
             case CROSS_TEXTURE_INDEX:
                 // Cross Texture
-                return self.getField_94413_c();
+                return this.field_94413_c;
             default: // CROSS_OVERLAY_TEXTURE_INDEX
                 // Cross Overlay
-                return self.getField_94411_cP();
+                return this.field_94411_cP;
         }
     }
 #endif

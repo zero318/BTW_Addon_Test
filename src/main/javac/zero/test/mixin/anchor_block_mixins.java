@@ -42,8 +42,15 @@ import java.util.Random;
 #endif
 
 @Mixin(AnchorBlock.class)
-public class AnchorBlockMixins {
+public abstract class AnchorBlockMixins extends Block {
+    public AnchorBlockMixins(int blockId, Material material) {
+        super(blockId, material);
+    }
+    
 #if ENABLE_PLATFORM_EXTENSIONS
+
+    @Shadow
+    public abstract void convertAnchorToEntity(World world, int i, int j, int k, PulleyTileEntity attachedTileEntityPulley, int iMovementDirection);
 
 #pragma push_macro("PLATFORM_LIFT_LIMIT")
 #undef PLATFORM_LIFT_LIMIT
@@ -240,14 +247,14 @@ public class AnchorBlockMixins {
         /*
     	--y;
         
-        Block target_block = Block.blocksList[world.getBlockId(X, Y, Z)];
+        Block target_block = Block.blocksList[world.getBlockId(x, y, z)];
         if (
             !BLOCK_IS_AIR(target_block) &&
-            ((IBlockMixins)target_block).getPlatformMobilityFlag(world, X, Y, Z) == PLATFORM_MAIN_SUPPORT
+            ((IBlockMixins)target_block).getPlatformMobilityFlag(world, x, y, z) == PLATFORM_MAIN_SUPPORT
         ) {
             ((PlatformBlock)BTWBlocks.platform).covertToEntitiesFromThisPlatform(
 				world,
-                X, Y, Z,
+                x, y, z,
                 associatedAnchorEntity
             );
         }
@@ -255,26 +262,26 @@ public class AnchorBlockMixins {
     }
     
     @Overwrite(remap=false)
-    public boolean notifyAnchorBlockOfAttachedPulleyStateChange(PulleyTileEntity tileEntityPulley, World world, int X, int Y, int Z){
+    public boolean notifyAnchorBlockOfAttachedPulleyStateChange(PulleyTileEntity tileEntityPulley, World world, int x, int y, int z){
 		int iMovementDirection = 0;
 		
 		if (tileEntityPulley.isRaising()) {
-			if (world.getBlockId(X, Y + 1, Z) == BTWBlocks.ropeBlock.blockID) {
+			if (world.getBlockId(x, y + 1, z) == BTWBlocks.ropeBlock.blockID) {
 				iMovementDirection = 1;
 			}
 		}
 		else if (tileEntityPulley.isLowering()) {
-            Block block = Block.blocksList[world.getBlockId(X, Y - 1, Z)];
+            Block block = Block.blocksList[world.getBlockId(x, y - 1, z)];
             if (
                 BLOCK_IS_AIR(block) ||
-                ((IBlockMixins)block).getPlatformMobilityFlag(world, X, Y - 1, Z) == PLATFORM_MAIN_SUPPORT
+                ((IBlockMixins)block).getPlatformMobilityFlag(world, x, y - 1, z) == PLATFORM_MAIN_SUPPORT
             ) {
                 iMovementDirection = -1;
             }
 		}
 		
 		if (iMovementDirection != 0) {
-			((IAnchorBlockAccessMixins)this).callConvertAnchorToEntity(world, X, Y, Z, tileEntityPulley, iMovementDirection);
+			this.callConvertAnchorToEntity(world, x, y, z, tileEntityPulley, iMovementDirection);
 			
 			return true;
 		}

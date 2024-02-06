@@ -26,5 +26,8 @@ import zero.test.mixin.IAnchorBlockAccessMixins;
 import java.util.Random;
 // Block piston reactions
 @Mixin(AnchorBlock.class)
-public class AnchorBlockMixins {
+public abstract class AnchorBlockMixins extends Block {
+    public AnchorBlockMixins(int blockId, Material material) {
+        super(blockId, material);
+    }
 }

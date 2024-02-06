@@ -349,6 +349,7 @@ MACRO_VOID(
 MACRO_VOID(
 //#define printf(...) System.out.printf(__VA_ARGS__)
 )
+#define DEBUG_PRINTF btw.AddonHandler.logMessage
 
 #define UseBothUnsafes 1
 

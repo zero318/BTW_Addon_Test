@@ -56,6 +56,22 @@ public abstract class EntityMinecartMixins extends Entity {
     }
 #endif
 */
+    @Shadow
+    public int turnProgress;
+    @Shadow
+    public double minecartX;
+    @Shadow
+    public double minecartY;
+    @Shadow
+    public double minecartZ;
+    @Shadow
+    public double minecartYaw;
+    @Shadow
+    public double minecartPitch;
+    @Shadow
+    public IUpdatePlayerListBox field_82344_g;
+    @Shadow
+    public boolean isInReverse;
     @Inject(
         method = "<init>(Lnet/minecraft/src/World;)V",
         at = @At("TAIL")
@@ -126,9 +142,8 @@ public abstract class EntityMinecartMixins extends Entity {
     @Overwrite
     public void onUpdate() {
         EntityMinecart self = (EntityMinecart)(Object)this;
-        IUpdatePlayerListBox field_82344_g_thing = ((IEntityMinecartAccessMixins)self).getField_82344_g();
-        if (field_82344_g_thing != null) {
-            field_82344_g_thing.update();
+        if (this.field_82344_g != null) {
+            this.field_82344_g.update();
         }
         if (self.getRollingAmplitude() > 0) {
             self.setRollingAmplitude(self.getRollingAmplitude() - 1);
@@ -136,31 +151,31 @@ public abstract class EntityMinecartMixins extends Entity {
         if (self.getDamage() > 0) {
             self.setDamage(self.getDamage() - 1);
         }
-        if (self.posY < -64.0D) {
+        if (this.posY < -64.0D) {
             this.kill();
         }
         if (
-            !self.worldObj.isRemote &&
-            self.worldObj instanceof WorldServer
+            !this.worldObj.isRemote &&
+            this.worldObj instanceof WorldServer
         ) {
-            self.worldObj.theProfiler.startSection("portal");
-            int maxPortalTime = self.getMaxInPortalTime();
+            this.worldObj.theProfiler.startSection("portal");
+            int maxPortalTime = this.getMaxInPortalTime();
             if (this.inPortal) {
-                if (((WorldServer)self.worldObj).getMinecraftServer().getAllowNether()) {
+                if (((WorldServer)this.worldObj).getMinecraftServer().getAllowNether()) {
                     if (
-                        self.ridingEntity == null &&
+                        this.ridingEntity == null &&
                         this.field_82153_h++ >= maxPortalTime
                     ) {
                         this.field_82153_h = maxPortalTime;
-                        self.timeUntilPortal = self.getPortalCooldown();
+                        this.timeUntilPortal = this.getPortalCooldown();
                         byte var3;
-                        if (self.worldObj.provider.dimensionId == -1) {
+                        if (this.worldObj.provider.dimensionId == -1) {
                             var3 = 0;
                         }
                         else {
                             var3 = -1;
                         }
-                        self.travelToDimension(var3);
+                        this.travelToDimension(var3);
                     }
                     this.inPortal = false;
                 }
@@ -173,39 +188,39 @@ public abstract class EntityMinecartMixins extends Entity {
                     this.field_82153_h = 0;
                 }
             }
-            if (self.timeUntilPortal > 0) {
-                --self.timeUntilPortal;
+            if (this.timeUntilPortal > 0) {
+                --this.timeUntilPortal;
             }
-            self.worldObj.theProfiler.endSection();
+            this.worldObj.theProfiler.endSection();
         }
-        if (self.worldObj.isRemote) {
-            int turn_progress = ((IEntityMinecartAccessMixins)self).getTurnProgress();
+        if (this.worldObj.isRemote) {
+            int turn_progress = this.turnProgress;
             if (turn_progress > 0) {
                 // Divisions swapped to multiplications for SPEED
                 double dTurn = 1.0D / (double)turn_progress;
-                double dX = self.posX + (((IEntityMinecartAccessMixins)self).getMinecartX() - self.posX) * dTurn;
-                double dY = self.posY + (((IEntityMinecartAccessMixins)self).getMinecartY() - self.posY) * dTurn;
-                double dZ = self.posZ + (((IEntityMinecartAccessMixins)self).getMinecartZ() - self.posZ) * dTurn;
-                double dYaw = MathHelper.wrapAngleTo180_double(((IEntityMinecartAccessMixins)self).getMinecartYaw() - (double)self.rotationYaw);
-                self.rotationYaw = (float)((double)self.rotationYaw + dYaw * dTurn);
-                self.rotationPitch = (float)((double)self.rotationPitch + (((IEntityMinecartAccessMixins)self).getMinecartPitch() - (double)self.rotationPitch) * dTurn);
-                ((IEntityMinecartAccessMixins)self).setTurnProgress(turn_progress - 1);
-                self.setPosition(dX, dY, dZ);
+                double dX = this.posX + (this.minecartX - this.posX) * dTurn;
+                double dY = this.posY + (this.minecartY - this.posY) * dTurn;
+                double dZ = this.posZ + (this.minecartZ - this.posZ) * dTurn;
+                double dYaw = MathHelper.wrapAngleTo180_double(this.minecartYaw - (double)this.rotationYaw);
+                this.rotationYaw = (float)((double)this.rotationYaw + dYaw * dTurn);
+                this.rotationPitch = (float)((double)this.rotationPitch + (this.minecartPitch - (double)this.rotationPitch) * dTurn);
+                --this.turnProgress;
+                this.setPosition(dX, dY, dZ);
             }
             else {
-                self.setPosition(self.posX, self.posY, self.posZ);
+                this.setPosition(this.posX, this.posY, this.posZ);
             }
-            this.setRotation(self.rotationYaw, self.rotationPitch);
+            this.setRotation(this.rotationYaw, this.rotationPitch);
         }
         else {
-            self.prevPosX = self.posX;
-            self.prevPosY = self.posY;
-            self.prevPosZ = self.posZ;
-            self.motionY -= 0.03999999910593033D;
-            int x = MathHelper.floor_double(self.posX);
-            int y = MathHelper.floor_double(self.posY);
-            int z = MathHelper.floor_double(self.posZ);
-            if (BlockRailBase.isRailBlockAt(self.worldObj, x, y - 1, z)) {
+            this.prevPosX = this.posX;
+            this.prevPosY = this.posY;
+            this.prevPosZ = this.posZ;
+            this.motionY -= 0.03999999910593033D;
+            int x = MathHelper.floor_double(this.posX);
+            int y = MathHelper.floor_double(this.posY);
+            int z = MathHelper.floor_double(this.posZ);
+            if (BlockRailBase.isRailBlockAt(this.worldObj, x, y - 1, z)) {
                 --y;
             }
             if (this.debounce > 0) {
@@ -214,10 +229,10 @@ public abstract class EntityMinecartMixins extends Entity {
             if (this.debounce < 0) {
                 ++this.debounce;
             }
-            int blockId = self.worldObj.getBlockId(x, y, z);
+            int blockId = this.worldObj.getBlockId(x, y, z);
             double maxSpeed = this.getMaxSpeed();
             if (BlockRailBase.isRailBlock(blockId)) {
-                int meta = self.worldObj.getBlockMetadata(x, y, z);
+                int meta = this.worldObj.getBlockMetadata(x, y, z);
                 this.updateOnTrack(
                     x, y, z,
                     maxSpeed * ((IBaseRailBlockMixins)Block.blocksList[blockId]).getRailMaxSpeedFactor(),
@@ -231,30 +246,28 @@ public abstract class EntityMinecartMixins extends Entity {
                 this.func_94088_b(maxSpeed);
             }
             this.doBlockCollisions();
-            self.rotationPitch = 0.0F;
-            double xDelta = self.prevPosX - self.posX;
-            double zDelta = self.prevPosZ - self.posZ;
+            this.rotationPitch = 0.0F;
+            double xDelta = this.prevPosX - this.posX;
+            double zDelta = this.prevPosZ - this.posZ;
             if (xDelta * xDelta + zDelta * zDelta > 0.001D) {
-                self.rotationYaw = (((float)(Math.atan2(zDelta, xDelta)))*57.29577951F);
-                //if (((IEntityMinecartAccessMixins)self).getIsInReverse()) {
-                    //self.rotationYaw += 180.0F;
+                this.rotationYaw = (((float)(Math.atan2(zDelta, xDelta)))*57.29577951F);
+                //if (this.isInReverse) {
+                    //this.rotationYaw += 180.0F;
                 //}
             }
-            //double yawDelta = (double)MathHelper.wrapAngleTo180_float(self.rotationYaw - self.prevRotationYaw);
+            //double yawDelta = (double)MathHelper.wrapAngleTo180_float(this.rotationYaw - this.prevRotationYaw);
             //float yawDelta = ;
             //if (yawDelta < -170.0D || yawDelta >= 170.0D) {
-            if (ZeroUtil.angle_diff_abs(self.rotationYaw, self.prevRotationYaw) > 170.0F) {
-                //self.rotationYaw += 180.0F;
-                ((IEntityMinecartAccessMixins)self).setIsInReverse(
-                    !((IEntityMinecartAccessMixins)self).getIsInReverse()
-                );
+            if (ZeroUtil.angle_diff_abs(this.rotationYaw, this.prevRotationYaw) > 170.0F) {
+                //this.rotationYaw += 180.0F;
+                this.isInReverse = ((this.isInReverse)^true);
             }
-            //this.setRotation(self.rotationYaw, self.rotationPitch);
+            //this.setRotation(this.rotationYaw, this.rotationPitch);
             // Still trying to fix parallel track collisions...
             /*
             double expandX = 0.05D;
             double expandZ = 0.05D;
-            switch (YAW_FLAT_DIRECTION8(self.rotationYaw)) {
+            switch (YAW_FLAT_DIRECTION8(this.rotationYaw)) {
                 case FLAT_DIRECTION8_NORTH: case FLAT_DIRECTION8_SOUTH:
                     expandX = 0.2D;
                     //expandZ = 0.0D;
@@ -265,35 +278,35 @@ public abstract class EntityMinecartMixins extends Entity {
             }
             
             //AddonHandler.logMessage(
-                //YAW_FLAT_DIRECTION8(self.rotationYaw)+" "+self.rotationYaw
+                //YAW_FLAT_DIRECTION8(this.rotationYaw)+" "+this.rotationYaw
             //);
             
             
-            List<Entity> entityList = self.worldObj.getEntitiesWithinAABBExcludingEntity(self, self.boundingBox.expand(expandX, 0.0D, expandZ));
+            List<Entity> entityList = this.worldObj.getEntitiesWithinAABBExcludingEntity(this, this.boundingBox.expand(expandX, 0.0D, expandZ));
             */
-            List<Entity> entityList = self.worldObj.getEntitiesWithinAABBExcludingEntity(self, self.boundingBox.expand(0.2D, 0.0D, 0.2D));
+            List<Entity> entityList = this.worldObj.getEntitiesWithinAABBExcludingEntity(this, this.boundingBox.expand(0.2D, 0.0D, 0.2D));
             if (
                 entityList != null &&
                 !entityList.isEmpty()
             ) {
                 for (Entity entity : entityList) {
                     if (
-                        entity != self.riddenByEntity &&
+                        entity != this.riddenByEntity &&
                         entity.canBePushed() &&
                         entity instanceof EntityMinecart
                     ) {
-                        entity.applyEntityCollision(self);
+                        entity.applyEntityCollision(this);
                     }
                 }
             }
             if (
-                self.riddenByEntity != null &&
-                self.riddenByEntity.isDead
+                this.riddenByEntity != null &&
+                this.riddenByEntity.isDead
             ) {
-                if (self.riddenByEntity.ridingEntity == self) {
-                    self.riddenByEntity.ridingEntity = null;
+                if (this.riddenByEntity.ridingEntity == this) {
+                    this.riddenByEntity.ridingEntity = null;
                 }
-                self.riddenByEntity = null;
+                this.riddenByEntity = null;
             }
         }
     }
