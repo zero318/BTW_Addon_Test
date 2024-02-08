@@ -94,4 +94,8 @@ public class DeadCoralFan extends Block {
                 return AxisAlignedBB.getAABBPool().getAABB(0.0D, 0.25D, 0.0D, 0.6875D, 0.75D, 1.0D);
         }
     }
+    @Override
+    @Environment(EnvType.CLIENT)
+    public void registerIcons(IconRegister register) {
+    }
 }

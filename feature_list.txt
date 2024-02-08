@@ -109,6 +109,7 @@ Rails:
 
 Furnace Minecarts:
 - Changed to be ovens instead of furnaces
+- Can be refueled with hoppers
 - Move backwards if alt used
 - Stop moving if crouch used
 - Automatically reverse directions when passing a powered activator rail
@@ -176,4 +177,4 @@ Known Issues
 - Sloped rails don't flatten out when the rail they're connected to is moved down by a piston
 - Block placers/breakers have lazy texturing
 - Exploit with platforms
-- Minecart hitboxes obstruct the rail they are placed on
+- Minecart hitboxes obstruct the rail they are placed on (maybe not an issue? Only needed for merged cart jank)

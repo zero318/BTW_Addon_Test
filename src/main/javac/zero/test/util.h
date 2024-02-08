@@ -1423,6 +1423,8 @@ _OFFSET_DIRECTION_ARGS(X, Y, Z, MACRO_CAT(direction,_OFFSETS))
 
 #define DIRECTION_IS_VALID(dir) ((dir)<=5)
 
+#define DIRECTION_AXES_MATCH(dirA,dirB) (DIRECTION_AXIS((dirA)^(dirB))==0)
+
 #define FLAT_DIRECTION_NORTH 0
 #define FLAT_DIRECTION_EAST 1
 #define FLAT_DIRECTION_SOUTH 2
@@ -1434,7 +1436,7 @@ _OFFSET_DIRECTION_ARGS(X, Y, Z, MACRO_CAT(direction,_OFFSETS))
 #define FLAT_AXIS_X 0x1
 #define FLAT_AXIS_Z 0x0
 
-#define FLAT_DIRECTION_AXES_MATCH(dirA,dirB) ((((dirA)^(dirB))&1)==0)
+#define FLAT_DIRECTION_AXES_MATCH(dirA,dirB) (FLAT_DIRECTION_AXIS((dirA)^(dirB))==0)
 
 #define FLAT_DIRECTION_TO_DIRECTION(dir) (OPPOSITE_DIRECTION(net.minecraft.src.Direction.directionToFacing[dir]))
 

@@ -233,7 +233,7 @@ MACRO_VOID(/* Reskin furnace minecarts to be ovens */)
 #define ENABLE_MINECART_OVEN 1
 
 MACRO_VOID(/* Allow hoppers to add fuel to minecarts */)
-#define ENABLE_HOPPERS_FUELING_CARTS 0
+#define ENABLE_HOPPERS_FUELING_CARTS 1
 
 MACRO_VOID(/* */)
 #define ENABLE_MINECART_BLOCK_DISPENSER 0

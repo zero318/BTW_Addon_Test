@@ -4,6 +4,9 @@ package zero.test.block;
 #include "..\feature_flags.h"
 #include "..\ids.h"
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+
 import net.minecraft.src.*;
 
 public class PullOnlyTestBlock extends Block {
@@ -28,4 +31,20 @@ public class PullOnlyTestBlock extends Block {
         return false;
     }
 #endif
+
+    @Environment(EnvType.CLIENT)
+    protected Icon texture_top;
+
+    @Override
+    @Environment(EnvType.CLIENT)
+    public void registerIcons(IconRegister register) {
+        super.registerIcons(register);
+        this.texture_top = register.registerIcon("hardpoint_top");
+    }
+    
+    @Override
+    @Environment(EnvType.CLIENT)
+    public Icon getIcon(int side, int meta) {
+        return DIRECTION_IS_HORIZONTAL(side) ? this.blockIcon : this.texture_top;
+    }
 }

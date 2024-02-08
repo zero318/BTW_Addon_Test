@@ -26,6 +26,6 @@ public abstract class TorchBlockBaseMixins {
     )
     public boolean doesBlockHaveCenterHardpointToFacing_redirect(IBlockAccess blockAccess, int x, int y, int z, int direction) {
         Block block = Block.blocksList[blockAccess.getBlockId(x, y, z)];
-        return !((block)==null) && block.hasCenterHardPointToFacing(blockAccess, x, y, z, ((direction)^1), true);
+        return !((block)==null) && block.hasCenterHardPointToFacing(blockAccess, x, y, z, direction, true);
     }
 }

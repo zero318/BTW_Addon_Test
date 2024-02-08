@@ -2,18 +2,52 @@ package zero.test.mixin;
 
 import net.minecraft.src.*;
 
+import btw.block.BTWBlocks;
 import btw.block.tileentity.HopperTileEntity;
+import btw.inventory.util.InventoryUtils;
+import btw.world.util.WorldUtils;
+import btw.client.fx.BTWEffectManager;
+
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.gen.Invoker;
+
+import zero.test.IEntityMinecartFurnaceMixins;
+
+import java.util.List;
 
 
 #include "..\feature_flags.h"
 #include "..\util.h"
 
+#define MINECART_RIDEABLE 0
+#define MINECART_CHEST 1
+#define MINECART_FURNACE 2
+#define MINECART_TNT 3
+#define MINECART_SPAWNER 4
+#define MINECART_HOPPER 5
+#define MINECART_COMMAND_BLOCK 6
+#define MINECART_BLOCK_DISPENSER 7
+
 @Mixin(HopperTileEntity.class)
 public abstract class HopperTileEntityMixins extends TileEntity /*implements IInventory, TileEntityDataPacketHandler*/ {
 #if ENABLE_HOPPERS_FUELING_CARTS
+
+    @Shadow
+    public int filterItemID;
+    
+    @Shadow
+    public abstract void ejectStack(ItemStack stack);
     
 #define STACK_SIZE_TO_EJECT 8
-    @Overwrite
+    @Overwrite(remap=false)
     public void attemptToEjectStackFromInv() {
         HopperTileEntity self = (HopperTileEntity)(Object)this;
         
@@ -57,7 +91,7 @@ public abstract class HopperTileEntityMixins extends TileEntity /*implements IIn
                         bEjectIntoWorld = true;
                     }
                     else if (targetBlock.doesBlockHopperInsert(self.worldObj, iTargetI, iTargetJ, iTargetK)) {
-                        outputBlocked = true;
+                        self.outputBlocked = true;
                     }
                     else {
                         TileEntity targetTileEntity = self.worldObj.getBlockTileEntity(iTargetI, iTargetJ, iTargetK);
@@ -75,7 +109,7 @@ public abstract class HopperTileEntityMixins extends TileEntity /*implements IIn
                             else if (iTargetBlockID == BTWBlocks.hopper.blockID) {
                                 iMaxSlotToAddTo = 17;
                                 
-                                int iTargetFilterID = ((HopperTileEntity) targetTileEntity).filterItemID;
+                                int iTargetFilterID = ((HopperTileEntityMixins) targetTileEntity).filterItemID;
                                 
                                 if (iTargetFilterID > 0) {
                                     // filters in the hopper below block ejection
@@ -103,17 +137,17 @@ public abstract class HopperTileEntityMixins extends TileEntity /*implements IIn
                                 }
                                 
                                 if (iNumItemsStored > 0) {
-                                    decrStackSize(iStackIndex, iNumItemsStored);
+                                    self.decrStackSize(iStackIndex, iNumItemsStored);
                                     
                                     worldObj.playAuxSFX(BTWEffectManager.ITEM_COLLECTION_POP_EFFECT_ID, xCoord, yCoord, zCoord, 0);
                                 }
                             }
                             else {
-                                outputBlocked = true;
+                                self.outputBlocked = true;
                             }
                         }
                         else {
-                            outputBlocked = true;
+                            self.outputBlocked = true;
                         }
                     }
                 }
@@ -129,8 +163,12 @@ public abstract class HopperTileEntityMixins extends TileEntity /*implements IIn
                     for (int listIndex = 0; listIndex < list.size(); listIndex++) {
                         EntityMinecart minecartEntity = (EntityMinecart) list.get(listIndex);
                         
-                        if (minecartEntity.getMinecartType() == 1)    // storage cart
-                        {
+                        int minecartType = minecartEntity.getMinecartType();
+                        if (
+                            minecartType == MINECART_CHEST ||
+                            minecartType == MINECART_HOPPER ||
+                            minecartType == MINECART_FURNACE
+                        ) {
                             // check if the cart is properly aligned with the nozzle
                             
                             if (minecartEntity.boundingBox.intersectsWith(AxisAlignedBB.getAABBPool()
@@ -144,15 +182,22 @@ public abstract class HopperTileEntityMixins extends TileEntity /*implements IIn
                                                     (float) zCoord + 1.0f))) {
                                 int iNumItemsStored = 0;
                                 
-                                if (InventoryUtils.addItemStackToInventory((IInventory) minecartEntity, ejectStack)) {
-                                    iNumItemsStored = iEjectStackSize;
+                                // Stupid mixins and their BS "can't alter control flow".
+                                // This shouldn't need an overwrite
+                                if (minecartType != MINECART_FURNACE) {
+                                    if (InventoryUtils.addItemStackToInventory((IInventory) minecartEntity, ejectStack)) {
+                                        iNumItemsStored = iEjectStackSize;
+                                    }
+                                    else {
+                                        iNumItemsStored = iEjectStackSize - ejectStack.stackSize;
+                                    }
                                 }
                                 else {
-                                    iNumItemsStored = iEjectStackSize - ejectStack.stackSize;
+                                    iNumItemsStored = ((IEntityMinecartFurnaceMixins)minecartEntity).attemptToAddFuel(ejectStack);
                                 }
                                 
                                 if (iNumItemsStored > 0) {
-                                    decrStackSize(iStackIndex, iNumItemsStored);
+                                    self.decrStackSize(iStackIndex, iNumItemsStored);
                                     
                                     worldObj.playAuxSFX(BTWEffectManager.ITEM_COLLECTION_POP_EFFECT_ID, xCoord, yCoord, zCoord, 0);
                                 }
@@ -169,7 +214,7 @@ public abstract class HopperTileEntityMixins extends TileEntity /*implements IIn
             if (bEjectIntoWorld) {
                 ejectStack(ejectStack);
                 
-                decrStackSize(iStackIndex, iEjectStackSize);
+                self.decrStackSize(iStackIndex, iEjectStackSize);
             }
         }
     }
