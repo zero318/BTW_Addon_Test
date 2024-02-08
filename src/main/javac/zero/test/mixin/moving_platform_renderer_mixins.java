@@ -38,9 +38,9 @@ import org.objectweb.asm.Opcodes;
 import zero.test.IBlockMixins;
 import zero.test.IWorldMixins;
 import zero.test.IBlockRedstoneWireMixins;
-import zero.test.mixin.IRedstoneWireAccessMixins;
+//import zero.test.mixin.IRedstoneWireAccessMixins;
 import zero.test.IBlockRedstoneLogicMixins;
-import zero.test.mixin.IRenderBlocksAccessMixins;
+//import zero.test.mixin.IRenderBlocksAccessMixins;
 import zero.test.IRenderBlocksMixins;
 import zero.test.IMovingPlatformEntityMixins;
 

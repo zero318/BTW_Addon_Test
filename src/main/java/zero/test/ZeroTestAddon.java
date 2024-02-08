@@ -17,7 +17,7 @@ import zero.test.item.SlimeBlockItem;
 public class ZeroTestAddon extends BTWAddon {
     private static ZeroTestAddon instance;
     private ZeroTestAddon() {
-        super("Zero Test Addon", "0.1.8", "ZeroTest");
+        super("Zero Test Addon", "0.1.9", "ZeroTest");
     }
     @Override
     public void initialize() {

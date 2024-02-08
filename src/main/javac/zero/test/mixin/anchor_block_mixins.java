@@ -26,7 +26,7 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 import zero.test.IWorldMixins;
 import zero.test.IBlockMixins;
 import zero.test.IMovingPlatformEntityMixins;
-import zero.test.mixin.IAnchorBlockAccessMixins;
+//import zero.test.mixin.IAnchorBlockAccessMixins;
 
 import java.util.Random;
 

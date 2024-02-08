@@ -18,7 +18,7 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 import zero.test.IBlockMixins;
 import zero.test.IWorldMixins;
 import zero.test.IBlockRedstoneWireMixins;
-import zero.test.mixin.IRedstoneWireAccessMixins;
+//import zero.test.mixin.IRedstoneWireAccessMixins;
 
 #include "..\func_aliases.h"
 #include "..\feature_flags.h"

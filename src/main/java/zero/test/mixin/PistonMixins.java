@@ -595,8 +595,6 @@ public abstract class PistonMixins extends BlockPistonBase {
                 !world.isRemote &&
                 !((block)==null)
             ) {
-                // BUG: Some blocks don't seem to be returning the correct
-                // items when called like this, particularly packed earth.
                 int itemId = block.idDropped(blockMeta, world.rand, 0);
                 if (itemId != 0) {
                     ItemUtils.ejectStackFromBlockTowardsFacing(

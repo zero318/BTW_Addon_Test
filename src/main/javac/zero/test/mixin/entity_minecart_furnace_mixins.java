@@ -17,7 +17,7 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 
 import zero.test.IEntityMixins;
-import zero.test.mixin.IEntityMinecartFurnaceAccessMixins;
+//import zero.test.mixin.IEntityMinecartFurnaceAccessMixins;
 import zero.test.IEntityMinecartFurnaceMixins;
 
 import java.util.List;

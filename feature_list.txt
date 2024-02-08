@@ -76,6 +76,7 @@ Cistern:
 Soap Blocks:
 - Given the properties of glazed terracotta
 - Crafting changed to 4 soap instead of 9
+- Are conductive for redstone
 
 Metal Spikes:
 - Conduct power into the block they're attached to
@@ -101,6 +102,10 @@ Note Blocks:
 
 Rails and other movable blocks that need support:
 - Should no longer break when pushed in most situations
+
+Rails:
+- Less aggressive snapping logic, similar to modern versions
+- Can be placed on top of hoppers
 
 Furnace Minecarts:
 - Changed to be ovens instead of furnaces
@@ -136,6 +141,9 @@ Repeaters:
 
 Publish Command:
 - Added arguments to match modern versions
+
+Other:
+- Fixed the illegal stance crouch death bug
 
 ///
 Debug Features (No recipes and more broken)

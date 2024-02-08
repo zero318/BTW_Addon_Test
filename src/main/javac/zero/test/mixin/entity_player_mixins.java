@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 
-import zero.test.mixin.IEntityPlayerAccessMixins;
+//import zero.test.mixin.IEntityPlayerAccessMixins;
 
 #include "..\feature_flags.h"
 #include "..\util.h"
@@ -89,4 +89,55 @@ public abstract class EntityPlayerMixins extends EntityLiving {
         }
     }
 #endif
+
+// Somehow this one fails to apply?
+/*
+    @Redirect(
+        method = "onDeath(Lnet/minecraft/src/DamageSource;)V",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/src/Entity;setPosition(DDD)V"
+        )
+    )
+    public void setPosition_fix_illegal_stance(Entity entity, double x, double y, double z) {
+        entity.ySize = 0.0F;
+        entity.setPosition(x, y, z);
+    }
+*/
+
+    @Overwrite
+    public void onDeath(DamageSource par1DamageSource)
+    {
+        super.onDeath(par1DamageSource);
+        
+        EntityPlayer self = (EntityPlayer)(Object)this;
+        
+        this.setSize(0.2F, 0.2F);
+        this.ySize = 0.0F;
+        this.setPosition(this.posX, this.posY, this.posZ);
+        this.motionY = 0.10000000149011612D;
+
+        if (self.username.equals("Notch"))
+        {
+            self.dropPlayerItemWithRandomChoice(new ItemStack(Item.appleRed, 1), true);
+        }
+
+        if (!this.worldObj.getGameRules().getGameRuleBooleanValue("keepInventory"))
+        {
+            self.inventory.dropAllItems();
+        }
+
+        if (par1DamageSource != null)
+        {
+            this.motionX = (double)(-MathHelper.cos((this.attackedAtYaw + this.rotationYaw) * (float)Math.PI / 180.0F) * 0.1F);
+            this.motionZ = (double)(-MathHelper.sin((this.attackedAtYaw + this.rotationYaw) * (float)Math.PI / 180.0F) * 0.1F);
+        }
+        else
+        {
+            this.motionX = this.motionZ = 0.0D;
+        }
+
+        this.yOffset = 0.1F;
+        self.addStat(StatList.deathsStat, 1);
+    }
 }

@@ -18,7 +18,7 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
-import zero.test.mixin.IBlockComparatorAccessMixins;
+//import zero.test.mixin.IBlockComparatorAccessMixins;
 import zero.test.mixin.IBlockRedstoneLogicAccessMixins;
 import zero.test.IBlockRedstoneLogicMixins;
 import zero.test.IRenderBlocksMixins;

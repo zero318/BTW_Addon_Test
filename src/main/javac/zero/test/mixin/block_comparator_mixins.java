@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Implements;
 
-import zero.test.mixin.IBlockComparatorAccessMixins;
+//import zero.test.mixin.IBlockComparatorAccessMixins;
 import zero.test.mixin.IBlockRedstoneLogicAccessMixins;
 import zero.test.IBlockRedstoneLogicMixins;
 import zero.test.IBlockMixins;

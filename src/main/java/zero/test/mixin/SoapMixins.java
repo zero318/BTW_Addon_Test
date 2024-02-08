@@ -19,4 +19,7 @@ public class SoapMixins extends Block {
     public boolean canBeStuckTo(World world, int x, int y, int z, int direction, int neighborId) {
         return false;
     }
+    public boolean isRedstoneConductor(IBlockAccess blockAccess, int x, int y, int z) {
+        return blockAccess.getBlockMetadata(x, y, z) == AestheticOpaqueBlock.SUBTYPE_SOAP || blockAccess.isBlockNormalCube(x, y, z);
+    }
 }

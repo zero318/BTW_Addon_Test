@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.gen.Invoker;
 import org.objectweb.asm.Opcodes;
 
-import zero.test.mixin.IDataWatcherAccessMixins;
+//import zero.test.mixin.IDataWatcherAccessMixins;
 
 #include "..\feature_flags.h"
 #include "..\util.h"
