@@ -36,7 +36,7 @@ public abstract class BlockRailBaseMixins extends Block implements IBaseRailBloc
     @Override
     public int preBlockPlacedBy(World world, int x, int y, int z, int meta, EntityLiving entityLiving) {
         return /*entityLiving instanceof EntityPlayer &&*/
-               0x2 != (((Direction.directionToFacing[((int)MathHelper.floor_double((double)(entityLiving.rotationYaw)/90.0D+0.5D)&3)]))&~1)
+               0x2 != (((Direction.directionToFacing[((int)MathHelper.floor_double((double)(entityLiving.rotationYaw)*0.01111111111111111111111111111111D+0.5D)&3)]))&~1)
                 ? 1
                 : 0;
     }

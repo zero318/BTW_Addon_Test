@@ -28,6 +28,14 @@ public abstract class BlockLeverMixins extends Block {
     public BlockLeverMixins(int blockId, Material material) {
         super(blockId, material);
     }
+    
+#if ENABLE_BUDDY_BLOCK_IGNORES_POWER_UPDATES
+    @Override
+    public boolean triggersBuddy() {
+        return false;
+    }
+#endif
+    
 #if ENABLE_MODERN_SUPPORT_LOGIC == MODERN_SUPPORT_LOGIC_GLOBAL_ALL
 
     @Overwrite
@@ -63,6 +71,10 @@ public abstract class BlockLeverMixins extends Block {
                 case DIRECTION_UP:
                     leverDir = 5;
                     break;
+                default:
+                    leverDir = 6 - side;
+                    break;
+/*
                 case DIRECTION_NORTH:
                     leverDir = 4;
                     break;
@@ -75,6 +87,7 @@ public abstract class BlockLeverMixins extends Block {
                 default:
                     leverDir = 1;
                     break;
+*/
             }
         }
         return MERGE_META_FIELD(meta, LEVER_DIRECTION, leverDir);

@@ -63,7 +63,11 @@
     "HopperBlockMixins",
     "RedstoneRepeaterBlockMixins",
     "HopperTileEntityMixins",
-    "BlockLeverMixins"
+    "BlockLeverMixins",
+    "BlockButtonMixins",
+    "ButtonBlockMixins",
+    "BlockPressurePlateMixins",
+    "DoorBlockMixins"
   ],
   "client": [
     "ComparatorBlockMixins",

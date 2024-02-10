@@ -65,7 +65,7 @@ public class BufferStopBlock extends Block {
 */
     @Override
     public int preBlockPlacedBy(World world, int x, int y, int z, int meta, EntityLiving entity) {
-        return ((int)MathHelper.floor_double((double)(entity.rotationYaw)/90.0D+0.5D)&3);
+        return ((int)MathHelper.floor_double((double)(entity.rotationYaw)*0.01111111111111111111111111111111D+0.5D)&3);
     }
     @Override
     public void onNeighborBlockChange(World world, int x, int y, int z, int neighborId) {

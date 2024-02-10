@@ -100,6 +100,12 @@ Note Blocks:
 - Interact with oberservers like in modern versions
 - (This uses the 1st and 2nd metadata bits)
 
+Blocks that could only be placed on solid blocks:
+- Can be placed on transparent blocks
+
+Buttons:
+- Can be placed on the top/bottom of blocks
+
 Rails and other movable blocks that need support:
 - Should no longer break when pushed in most situations
 

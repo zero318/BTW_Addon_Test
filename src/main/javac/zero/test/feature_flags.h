@@ -39,6 +39,16 @@ MACRO_VOID(
 )
 #define ENABLE_BETTER_BUDDY_DETECTION 1
 
+MACRO_VOID(
+// Make buddy blocks ignore updates from
+// buttons, levers, pressure plates, and
+// other strong-power components. This
+// is to cut down on confusion for them
+// triggering buddy blocks through blocks,
+// particularly when that block is a piston.
+)
+#define ENABLE_BUDDY_BLOCK_IGNORES_POWER_UPDATES 1
+
 MACRO_VOID(/*
 Done:
 MC-8911
@@ -266,6 +276,9 @@ MACRO_VOID(/* Reduce the cost of a soap block to 4 soap */)
 
 MACRO_VOID(/* Allow rails to be placed on hoppers */)
 #define ENABLE_MORE_RAIL_PLACEMENTS 1
+
+MACRO_VOID(/* Allow buttons to be placed on the top/bottom of blocks */)
+#define ENABLE_VERTICAL_BUTTONS 1
 
 #define ENABLE_DEBUG_STRING_JANK 0
 

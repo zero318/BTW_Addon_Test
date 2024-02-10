@@ -87,6 +87,10 @@ public class SlimeBlock extends Block {
             if (newY < 0.0D) {
                 //entity.isAirBorne = true;
                 // This doesn't work...?
+                // Apparently it's because the game cancels the motion
+                // via the generic "hit wall" code. I draw the line
+                // at an @Overwrite for the entire movement code
+                // just to add this, so RIP bouncy slime.
                 if (entity instanceof EntityLiving) {
                     newY *= 0.8D;
                 }

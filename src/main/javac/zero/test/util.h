@@ -1826,11 +1826,13 @@ MACRO_VOID(
 #define YAW_TO_RAD(yaw) ((yaw)*-0.017453292D)
 #define YAW_TO_DEG(yaw) (-(yaw))
 
-#define YAW_FLAT_DIRECTION(yaw) ((int)MathHelper.floor_double((double)(yaw)/90.0D+0.5D)&3)
+#define YAW_FLAT_DIRECTION(yaw) ((int)MathHelper.floor_double((double)(yaw)*0.01111111111111111111111111111111D+0.5D)&3)
+
+#define YAW_FLAT_AXIS(yaw) ((int)MathHelper.floor_double((double)(yaw)*0.01111111111111111111111111111111D+0.5D)&1)
 
 #define YAW_DIRECTION(yaw) (Direction.directionToFacing[YAW_FLAT_DIRECTION(yaw)])
 
-#define YAW_FLAT_DIRECTION8(yaw) ((int)MathHelper.floor_double((double)(yaw)/45.0D+0.5D)&7)
+#define YAW_FLAT_DIRECTION8(yaw) ((int)MathHelper.floor_double((double)(yaw)*0.02222222222222222222222222222222D+0.5D)&7)
 
 #define sinf(...) (MathHelper.sin((float)(__VA_ARGS__)))
 #define cosf(...) (MathHelper.cos((float)(__VA_ARGS__)))

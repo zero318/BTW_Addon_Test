@@ -17,6 +17,10 @@ public abstract class BlockLeverMixins extends Block {
     public BlockLeverMixins(int blockId, Material material) {
         super(blockId, material);
     }
+    @Override
+    public boolean triggersBuddy() {
+        return false;
+    }
     @Overwrite
     public boolean canPlaceBlockOnSide(World world, int x, int y, int z, int direction) {
         return WorldUtils.doesBlockHaveLargeCenterHardpointToFacing(
@@ -48,18 +52,23 @@ public abstract class BlockLeverMixins extends Block {
                 case 1:
                     leverDir = 5;
                     break;
-                case 2:
+                default:
+                    leverDir = 6 - side;
+                    break;
+/*
+                case DIRECTION_NORTH:
                     leverDir = 4;
                     break;
-                case 3:
+                case DIRECTION_SOUTH:
                     leverDir = 3;
                     break;
-                case 4:
+                case DIRECTION_WEST:
                     leverDir = 2;
                     break;
                 default:
                     leverDir = 1;
                     break;
+*/
             }
         }
         return (((meta)&8|(leverDir)));

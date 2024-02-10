@@ -5,6 +5,7 @@ import net.minecraft.src.BlockPistonBase;
 import net.minecraft.src.*;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import btw.block.BTWBlocks;
 import btw.block.blocks.PistonBlockBase;
 import btw.block.blocks.PistonBlockMoving;
 import btw.item.util.ItemUtils;
@@ -23,15 +24,24 @@ import zero.test.IWorldMixins;
 import zero.test.IBlockEntityPistonMixins;
 // Block piston reactions
 //#define getInputSignal(...) func_94482_f(__VA_ARGS__)
+// Filling the shovel list
+// Placing the blocks
+// Emit updates to neighbors
+// Try to fix 0-tick BS
 @Mixin(PistonBlockBase.class)
 public abstract class PistonMixins extends BlockPistonBase {
     public PistonMixins(int blockId, boolean isSticky) {
         super(blockId, isSticky);
     }
+// Re-enable this once the moving blocks are sorted out
+/*
+#if ENABLE_BETTER_BUDDY_DETECTION
     @Override
     public boolean triggersBuddy() {
         return false;
     }
+#endif
+*/
     // Don't conduct redstone despite being "normal"
     public boolean isRedstoneConductor(IBlockAccess blockAccess, int x, int y, int z) {
         return false;
@@ -502,7 +512,7 @@ public abstract class PistonMixins extends BlockPistonBase {
         int headZ = z;
         if (!isExtending) {
             if (world.getBlockId(x, y, z) == Block.pistonExtension.blockID) {
-                world.setBlock(x, y, z, 0, 0, 0x20);
+                world.setBlock(x, y, z, 0, 0, 0x20 | 0x80);
             }
             x += Facing.offsetsXForSide[direction];
             y += Facing.offsetsYForSide[direction];
@@ -560,17 +570,18 @@ public abstract class PistonMixins extends BlockPistonBase {
             y += Facing.offsetsYForSide[direction];
             z += Facing.offsetsZForSide[direction];
             world.setBlock(x, y, z, Block.pistonMoving.blockID, blockMeta, 0x08 | 0x20 | 0x40);
-            world.setBlockTileEntity(x, y, z, BlockPistonMoving.getTileEntity(blockId, blockMeta, direction, true, false));
+            TileEntity tileEntity = BlockPistonMoving.getTileEntity(blockId, blockMeta, direction, true, false);
             if (tileEntityData != null) {
-                ((TileEntityPiston)world.getBlockTileEntity(x, y, z)).storeTileEntity(tileEntityData);
+                ((TileEntityPiston)tileEntity).storeTileEntity(tileEntityData);
             }
+            world.setBlockTileEntity(x, y, z, tileEntity);
         }
         // Place a moving piston entity for the head
         if (isExtending) {
             blockMeta = direction | (this.isSticky ? 8 : 0);
                                                                                                                   ;
             world.setBlock(headX, headY, headZ, Block.pistonMoving.blockID, blockMeta, 0x08 | 0x20 | 0x40);
-   world.setBlockTileEntity(headX, headY, headZ, BlockPistonMoving.getTileEntity(Block.pistonExtension.blockID, blockMeta, direction, true, true));
+            world.setBlockTileEntity(headX, headY, headZ, BlockPistonMoving.getTileEntity(Block.pistonExtension.blockID, blockMeta, direction, true, true));
         }
         // START SHOVEL CODE
         for (int i = shovel_index_global; --i >= SHOVEL_EJECT_LIST_START_INDEX;) {
@@ -583,18 +594,23 @@ public abstract class PistonMixins extends BlockPistonBase {
             block = Block.blocksList[blockId];
             blockMeta = block.adjustMetadataForPistonMove(blockMeta);
             int ejectDirection = data_list[i + SHOVEL_DIRECTION_LIST_OFFSET];
+            boolean breakTarget = false;
             if (
                 ((targetBlock)==null) ||
-                targetBlock.getMobilityFlag() == 1
+                (breakTarget = targetBlock.getMobilityFlag() == 1)
             ) {
-                onShovelEjectIntoBlock(world, x, y, z);
-                world.setBlock(x, y, z, Block.pistonMoving.blockID, blockMeta, 0x04);
+                                             ;
+                if (breakTarget) {
+                    targetBlock.dropBlockAsItem(world, x, y, z, world.getBlockMetadata(x, y, z), 0);
+                }
+                world.setBlock(x, y, z, Block.pistonMoving.blockID, blockMeta, 0x08 | 0x20 | 0x40);
                 world.setBlockTileEntity(x, y, z, PistonBlockMoving.getShoveledTileEntity(blockId, blockMeta, ejectDirection));
             }
             else if (
                 !world.isRemote &&
                 !((block)==null)
             ) {
+                                             ;
                 int itemId = block.idDropped(blockMeta, world.rand, 0);
                 if (itemId != 0) {
                     ItemUtils.ejectStackFromBlockTowardsFacing(
@@ -611,6 +627,14 @@ public abstract class PistonMixins extends BlockPistonBase {
                     );
                 }
             }
+            // For some reason this is required to keep
+            // certain 0-tick shovels working. IDK why.
+            world.notifyBlocksOfNeighborChange(
+                x - Facing.offsetsXForSide[ejectDirection],
+                y - Facing.offsetsYForSide[ejectDirection],
+                z - Facing.offsetsZForSide[ejectDirection],
+                BTWBlocks.pistonShovel.blockID
+            );
         }
         // END SHOVEL CODE
         for (int i = destroy_index_global; --i >= DESTROY_LIST_START_INDEX;) {
@@ -623,6 +647,13 @@ public abstract class PistonMixins extends BlockPistonBase {
             packedPos = pushed_blocks[i];
             world.notifyBlocksOfNeighborChange(((int)((packedPos)<<26>>(64)-26)),((int)(packedPos)<<(32)-12>>(32)-12),((int)((packedPos)>>(64)-26)), ((data_list[i])&0xFFFF));
         }
+        // START SHOVEL CODE
+        for (int i = shovel_index_global; --i >= SHOVEL_EJECT_LIST_START_INDEX;) {
+            // Set x,y,z to position of block in shovel eject list
+            packedPos = pushed_blocks[i];
+            world.notifyBlocksOfNeighborChange(((int)((packedPos)<<26>>(64)-26)),((int)(packedPos)<<(32)-12>>(32)-12),((int)((packedPos)>>(64)-26)), ((data_list[i])&0xFFFF));
+        }
+        // END SHOVEL CODE
         if (isExtending) {
             world.notifyBlocksOfNeighborChange(headX, headY, headZ, Block.pistonExtension.blockID);
         }
