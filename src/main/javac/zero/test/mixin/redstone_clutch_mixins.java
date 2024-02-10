@@ -13,10 +13,10 @@ import java.util.Random;
 #include "..\util.h"
 
 @Mixin(RedstoneClutchBlock.class)
-public class RedstoneClutchBlockMixins extends GearBoxBlock {
+public abstract class RedstoneClutchBlockMixins extends GearBoxBlock {
     
-    public RedstoneClutchBlockMixins(int blockId) {
-        super(blockId);
+    public RedstoneClutchBlockMixins() {
+        super(0);
     }
     
 #if ENABLE_LESS_CRAP_BTW_BLOCK_POWERING

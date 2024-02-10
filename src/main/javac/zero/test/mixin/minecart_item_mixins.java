@@ -23,8 +23,8 @@ import java.util.List;
 
 @Mixin(MinecartItem.class)
 public abstract class ItemMinecartMixins extends ItemMinecart {
-    public ItemMinecartMixins(int iItemID, int par2) {
-        super(iItemID, par2);
+    public ItemMinecartMixins() {
+        super(0, 0);
     }
     
 #if ENABLE_MINECART_HITBOX_FIXES

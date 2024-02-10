@@ -17,7 +17,7 @@ import zero.test.IBlockRedstoneWireMixins;
 // Block piston reactions
 //#define getInputSignal(...) func_94482_f(__VA_ARGS__)
 @Mixin(BlockRedstoneWire.class)
-public class RedstoneWireMixins implements IBlockRedstoneWireMixins {
+public abstract class RedstoneWireMixins implements IBlockRedstoneWireMixins {
     //@Override
     //public void updateIndirectNeighbourShapes(World world, int x, int y, int z) {
         //((IRedstoneWireAccessMixins)(Object)this).callUpdateAndPropagateCurrentStrength(world, x, y, z);

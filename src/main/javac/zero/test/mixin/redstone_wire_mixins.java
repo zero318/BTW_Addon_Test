@@ -35,7 +35,7 @@ import zero.test.IBlockRedstoneWireMixins;
 #endif
 
 @Mixin(BlockRedstoneWire.class)
-public class RedstoneWireMixins implements IBlockRedstoneWireMixins {
+public abstract class RedstoneWireMixins implements IBlockRedstoneWireMixins {
     
     //@Override
     //public void updateIndirectNeighbourShapes(World world, int x, int y, int z) {

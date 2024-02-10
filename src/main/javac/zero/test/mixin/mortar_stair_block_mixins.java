@@ -16,9 +16,9 @@ import zero.test.IBlockMixins;
 #include "../ids.h"
 
 @Mixin(MortarReceiverStairsBlock.class)
-public class MortarReceiverStairsBlockMixins extends FallingStairsBlock {
-    public MortarReceiverStairsBlockMixins(int id, Block referenceBlock, int referenceBlockMeta) {
-        super(id, referenceBlock, referenceBlockMeta);
+public abstract class MortarReceiverStairsBlockMixins extends FallingStairsBlock {
+    public MortarReceiverStairsBlockMixins() {
+        super(0, null, 0);
     }
     
 #if ENABLE_MOVING_BLOCK_CHAINING && ENABLE_SLIME_SUPPORTING_MORTAR_BLOCKS

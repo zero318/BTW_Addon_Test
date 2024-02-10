@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.Mixin;
 #include "..\util.h"
 
 @Mixin(BlockGlowStone.class)
-public class BlockGlowStoneMixins {
+public abstract class BlockGlowStoneMixins {
 #if ENABLE_MODERN_REDSTONE_WIRE
     public boolean isRedstoneConductor(IBlockAccess blockAccess, int x, int y, int z) {
         return false;

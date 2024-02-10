@@ -30,8 +30,8 @@ import java.util.Random;
 @Mixin(BlockComparator.class)
 public abstract class BlockComparatorMixins extends BlockRedstoneLogic {
     
-    public BlockComparatorMixins(int par1, boolean par2) {
-        super(par1, par2);
+    public BlockComparatorMixins() {
+        super(0, false);
     }
    
 #if ENABLE_BETTER_BUDDY_DETECTION

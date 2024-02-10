@@ -24,9 +24,9 @@ import java.util.ArrayList;
 // Block piston reactions
 //#define getInputSignal(...) func_94482_f(__VA_ARGS__)
 @Mixin(PistonBlockMoving.class)
-public class BlockPistonMovingMixins extends BlockPistonMoving {
-    public BlockPistonMovingMixins(int block_id) {
-        super(block_id);
+public abstract class BlockPistonMovingMixins extends BlockPistonMoving {
+    public BlockPistonMovingMixins() {
+        super(0);
     }
     // TODO: Make this depend on the block being moved somehow
 /*

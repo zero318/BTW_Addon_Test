@@ -24,8 +24,8 @@ import zero.test.mixin.IBlockRedstoneLogicAccessMixins;
 @Mixin(BlockRedstoneLogic.class)
 public abstract class BlockRedstoneLogicMixins extends BlockDirectional implements IBlockRedstoneLogicMixins {
     
-    public BlockRedstoneLogicMixins(int blockId, Material material) {
-        super(blockId, material);
+    public BlockRedstoneLogicMixins() {
+        super(0, null);
     }
     
     public boolean isRenderingLogicBase;

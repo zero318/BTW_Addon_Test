@@ -30,8 +30,8 @@ import zero.test.IBlockEntityPistonMixins;
 // Try to fix 0-tick BS
 @Mixin(PistonBlockBase.class)
 public abstract class PistonMixins extends BlockPistonBase {
-    public PistonMixins(int blockId, boolean isSticky) {
-        super(blockId, isSticky);
+    public PistonMixins() {
+        super(0, false);
     }
 // Re-enable this once the moving blocks are sorted out
 /*

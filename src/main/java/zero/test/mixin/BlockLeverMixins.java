@@ -14,8 +14,8 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 // Block piston reactions
 @Mixin(BlockLever.class)
 public abstract class BlockLeverMixins extends Block {
-    public BlockLeverMixins(int blockId, Material material) {
-        super(blockId, material);
+    public BlockLeverMixins() {
+        super(0, null);
     }
     @Override
     public boolean triggersBuddy() {

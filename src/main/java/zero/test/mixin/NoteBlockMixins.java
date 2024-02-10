@@ -17,9 +17,9 @@ import zero.test.IWorldMixins;
 // Block piston reactions
 //updateNeighbourShapes
 @Mixin(NoteBlock.class)
-public class NoteBlockMixins extends Block {
-    public NoteBlockMixins(int par1, Material par2) {
-        super(par1, par2);
+public abstract class NoteBlockMixins extends Block {
+    public NoteBlockMixins() {
+        super(0, null);
     }
     @Override
     public void onNeighborBlockChange(World world, int x, int y, int z, int neighborId) {

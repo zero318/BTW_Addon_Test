@@ -22,7 +22,7 @@ import zero.test.IWorldMixins;
 #include "..\util.h"
 
 @Mixin(BlockChest.class)
-public class ChestMixins {
+public abstract class ChestMixins {
     
 #if ENABLE_DIRECTIONAL_UPDATES
     @Overwrite

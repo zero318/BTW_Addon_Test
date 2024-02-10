@@ -27,8 +27,8 @@ import zero.test.IWorldMixins;
 @Mixin(BlockDispenserBlock.class)
 public abstract class BlockDispenserBlockMixins extends BlockContainer {
     
-    public BlockDispenserBlockMixins(int par1, Material par2Material) {
-        super(par1, par2Material);
+    public BlockDispenserBlockMixins() {
+        super(0, null);
     }
     
 #if ENABLE_BETTER_BLOCK_DISPENSER_POWERING

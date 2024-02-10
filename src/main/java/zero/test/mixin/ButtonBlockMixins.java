@@ -15,8 +15,8 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 // Block piston reactions
 @Mixin(ButtonBlock.class)
 public abstract class ButtonBlockMixins extends BlockButton {
-    public ButtonBlockMixins(int par1, boolean par2) {
-        super(par1, par2);
+    public ButtonBlockMixins() {
+        super(0, false);
     }
     @Overwrite
     public AxisAlignedBB getBlockBoundsFromPoolBasedOnState(IBlockAccess blockAccess, int x, int y, int z) {

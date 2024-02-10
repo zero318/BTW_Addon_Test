@@ -26,8 +26,8 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 
 @Mixin(ButtonBlock.class)
 public abstract class ButtonBlockMixins extends BlockButton {
-    public ButtonBlockMixins(int par1, boolean par2) {
-        super(par1, par2);
+    public ButtonBlockMixins() {
+        super(0, false);
     }
 #if ENABLE_VERTICAL_BUTTONS
     @Overwrite

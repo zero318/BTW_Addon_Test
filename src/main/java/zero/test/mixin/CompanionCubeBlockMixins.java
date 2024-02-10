@@ -16,7 +16,7 @@ import zero.test.IWorldMixins;
 import java.util.Random;
 // Block piston reactions
 @Mixin(CompanionCubeBlock.class)
-public class CompanionCubeBlockMixins {
+public abstract class CompanionCubeBlockMixins {
     // Another case of overriding
     // isNormalBlock that screws with redstone.
     //

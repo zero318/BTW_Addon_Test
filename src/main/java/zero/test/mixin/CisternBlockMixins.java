@@ -10,7 +10,7 @@ import zero.test.IBlockMixins;
 import zero.test.IEntityMixins;
 // Block piston reactions
 @Mixin(CisternBlock.class)
-public class CisternBlockMixins {
+public abstract class CisternBlockMixins {
     @Overwrite(remap=false)
     public void method_413(World world, int x, int y, int z, AxisAlignedBB intersectBox, List list, Entity entity) {
      AABBPool pool = AxisAlignedBB.getAABBPool();

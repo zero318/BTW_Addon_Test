@@ -17,8 +17,8 @@ import zero.test.IWorldMixins;
 
 @Mixin(HopperBlock.class)
 public abstract class HopperBlockMixins extends BlockContainer {
-    public HopperBlockMixins(int blockId, Material material) {
-        super(blockId, material);
+    public HopperBlockMixins() {
+        super(0, null);
     }
     public boolean canSupportRails(World world, int x, int y, int z) {
         return true;

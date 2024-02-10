@@ -14,8 +14,8 @@ import java.util.Random;
 // Block piston reactions
 @Mixin(BlockComparator.class)
 public abstract class BlockComparatorMixins extends BlockRedstoneLogic {
-    public BlockComparatorMixins(int par1, boolean par2) {
-        super(par1, par2);
+    public BlockComparatorMixins() {
+        super(0, false);
     }
     @Override
     public boolean triggersBuddy() {

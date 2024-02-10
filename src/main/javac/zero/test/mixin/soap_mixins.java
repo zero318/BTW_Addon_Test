@@ -12,10 +12,10 @@ import org.spongepowered.asm.mixin.Shadow;
 #include "..\util.h"
 
 @Mixin(AestheticOpaqueBlock.class)
-public class SoapMixins extends Block {
+public abstract class SoapMixins extends Block {
     
-    public SoapMixins(int par1, Material par2) {
-        super(par1, par2);
+    public SoapMixins() {
+        super(0, null);
     }
     
 #if ENABLE_MOVING_BLOCK_CHAINING

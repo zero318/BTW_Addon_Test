@@ -18,8 +18,8 @@ import zero.test.IBlockMixins;
 
 @Mixin(MortarReceiverBlock.class)
 public class MortarReceiverBlockMixins extends FallingFullBlock {
-    public MortarReceiverBlockMixins(int id, Material material) {
-        super(id, material);
+    public MortarReceiverBlockMixins() {
+        super(0, null);
     }
     
 #if ENABLE_MOVING_BLOCK_CHAINING && ENABLE_SLIME_SUPPORTING_MORTAR_BLOCKS

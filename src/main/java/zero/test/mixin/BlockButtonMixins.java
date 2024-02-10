@@ -15,8 +15,8 @@ import java.util.List;
 // Block piston reactions
 @Mixin(BlockButton.class)
 public abstract class BlockButtonMixins extends Block {
-    public BlockButtonMixins(int blockId, Material material) {
-        super(blockId, material);
+    public BlockButtonMixins() {
+        super(0, null);
     }
     @Override
     public boolean triggersBuddy() {

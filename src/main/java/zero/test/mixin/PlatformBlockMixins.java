@@ -18,7 +18,7 @@ import zero.test.IBlockMixins;
 import java.util.Random;
 // Block piston reactions
 @Mixin(PlatformBlock.class)
-public class PlatformBlockMixins {
+public abstract class PlatformBlockMixins {
     public boolean isStickyForBlocks(World world, int x, int y, int z, int direction) {
         // Only attach to other platforms.
         // Check is done here to act as a whitelist

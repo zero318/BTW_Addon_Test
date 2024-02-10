@@ -10,8 +10,8 @@ import zero.test.IBlockMixins;
 
 @Mixin(MortarReceiverBlock.class)
 public class MortarReceiverBlockMixins extends FallingFullBlock {
-    public MortarReceiverBlockMixins(int id, Material material) {
-        super(id, material);
+    public MortarReceiverBlockMixins() {
+        super(0, null);
     }
     @Override
     public void updateTick(World world, int x, int y, int z, Random random) {

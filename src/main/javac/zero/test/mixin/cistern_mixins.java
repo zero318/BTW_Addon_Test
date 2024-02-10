@@ -21,7 +21,7 @@ import zero.test.IEntityMixins;
 #define addCollisionBoxesToList(...) method_413(__VA_ARGS__)
 
 @Mixin(CisternBlock.class)
-public class CisternBlockMixins {
+public abstract class CisternBlockMixins {
 #if ENABLE_HOLLOW_COLLISION_BOXES
     
     @Overwrite(remap=false)

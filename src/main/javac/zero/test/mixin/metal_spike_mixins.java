@@ -27,10 +27,10 @@ import java.util.Random;
 #define POWERED_META_OFFSET 3
 
 @Mixin(MetalSpikeBlock.class)
-public class MetalSpikeBlockMixins extends Block {
+public abstract class MetalSpikeBlockMixins extends Block {
     
-    public MetalSpikeBlockMixins(int par1, Material par2) {
-        super(par1, par2);
+    public MetalSpikeBlockMixins() {
+        super(0, null);
     }
     
 #if ENABLE_CONDUCTIVE_METAL_SPIKES

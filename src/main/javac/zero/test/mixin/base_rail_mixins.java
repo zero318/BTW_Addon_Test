@@ -37,8 +37,8 @@ import zero.test.IBaseRailBlockMixins;
 @Mixin(BlockRailBase.class)
 public abstract class BlockRailBaseMixins extends Block implements IBaseRailBlockMixins {
     
-    public BlockRailBaseMixins(int par1, Material par2Material) {
-        super(par1, par2Material);
+    public BlockRailBaseMixins() {
+        super(0, null);
     }
     
     /*

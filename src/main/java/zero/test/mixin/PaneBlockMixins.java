@@ -6,7 +6,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 // Block piston reactions
 @Mixin(PaneBlock.class)
-public class PaneBlockMixins {
+public abstract class PaneBlockMixins {
     // The original function passed x,y,z to
     // shouldPaneConnectToThisBlockToFacing
     // instead of nextX,nextY,nextZ like

@@ -6,9 +6,9 @@ import org.spongepowered.asm.mixin.Overwrite;
 import java.util.Random;
 // Block piston reactions
 @Mixin(RedstoneClutchBlock.class)
-public class RedstoneClutchBlockMixins extends GearBoxBlock {
-    public RedstoneClutchBlockMixins(int blockId) {
-        super(blockId);
+public abstract class RedstoneClutchBlockMixins extends GearBoxBlock {
+    public RedstoneClutchBlockMixins() {
+        super(0);
     }
     // Prevent clutches getting quasi powered
     @Overwrite

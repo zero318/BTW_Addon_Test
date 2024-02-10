@@ -19,8 +19,8 @@ import zero.test.IBlockMixins;
 
 @Mixin(LavaReceiverBlock.class)
 public abstract class LavaReceiverBlockMixins extends MortarReceiverBlock {
-    public LavaReceiverBlockMixins(int id, Material material) {
-        super(id, material);
+    public LavaReceiverBlockMixins() {
+        super(0, null);
     }
     
 #if ENABLE_MOVING_BLOCK_CHAINING && ENABLE_SLIME_SUPPORTING_MORTAR_BLOCKS

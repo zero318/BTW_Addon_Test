@@ -35,7 +35,7 @@ import zero.test.IRenderBlocksMixins;
 // Block piston reactions
 //#define getInputSignal(...) func_94482_f(__VA_ARGS__)
 @Mixin(RenderBlocks.class)
-public class RenderBlocksMixins implements IRenderBlocksMixins {
+public abstract class RenderBlocksMixins implements IRenderBlocksMixins {
 /*
     0 East Side
     1 East Up

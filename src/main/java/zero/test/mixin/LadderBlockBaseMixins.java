@@ -16,7 +16,7 @@ import zero.test.IWorldMixins;
 import java.util.Random;
 // Block piston reactions
 @Mixin(LadderBlockBase.class)
-public class LadderBlockBaseMixins {
+public abstract class LadderBlockBaseMixins {
     // Ladders previously used WorldUtils version
     // of the hardpoint check, which still defaults to false
     // to avoid making 5 million mixins

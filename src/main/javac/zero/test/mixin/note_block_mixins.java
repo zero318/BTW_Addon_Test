@@ -33,10 +33,10 @@ import zero.test.IWorldMixins;
 //updateNeighbourShapes
 
 @Mixin(NoteBlock.class)
-public class NoteBlockMixins extends Block {
+public abstract class NoteBlockMixins extends Block {
     
-    public NoteBlockMixins(int par1, Material par2) {
-        super(par1, par2);
+    public NoteBlockMixins() {
+        super(0, null);
     }
     
 #if ENABLE_DIRECTIONAL_UPDATES

@@ -24,9 +24,9 @@ import zero.test.IBlockEntityPistonMixins;
 // Block piston reactions
 //#define getInputSignal(...) func_94482_f(__VA_ARGS__)
 @Mixin(BlockPistonExtension.class)
-public class BlockPistonExtensionMixins extends Block {
-    public BlockPistonExtensionMixins(int blockId, Material material) {
-        super(blockId, material);
+public abstract class BlockPistonExtensionMixins extends Block {
+    public BlockPistonExtensionMixins() {
+        super(0, null);
     }
     @Override
     public boolean triggersBuddy() {

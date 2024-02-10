@@ -27,8 +27,8 @@ import java.util.List;
 
 @Mixin(BlockButton.class)
 public abstract class BlockButtonMixins extends Block {
-    public BlockButtonMixins(int blockId, Material material) {
-        super(blockId, material);
+    public BlockButtonMixins() {
+        super(0, null);
     }
     
 #if ENABLE_BUDDY_BLOCK_IGNORES_POWER_UPDATES

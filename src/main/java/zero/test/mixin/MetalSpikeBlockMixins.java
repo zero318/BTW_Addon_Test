@@ -16,9 +16,9 @@ import zero.test.IWorldMixins;
 import java.util.Random;
 // Block piston reactions
 @Mixin(MetalSpikeBlock.class)
-public class MetalSpikeBlockMixins extends Block {
-    public MetalSpikeBlockMixins(int par1, Material par2) {
-        super(par1, par2);
+public abstract class MetalSpikeBlockMixins extends Block {
+    public MetalSpikeBlockMixins() {
+        super(0, null);
     }
     @Override
     public boolean canProvidePower() {

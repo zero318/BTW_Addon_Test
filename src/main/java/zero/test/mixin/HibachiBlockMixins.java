@@ -6,7 +6,7 @@ import org.spongepowered.asm.mixin.Overwrite;
 import java.util.Random;
 // Block piston reactions
 @Mixin(HibachiBlock.class)
-public class HibachiBlockMixins {
+public abstract class HibachiBlockMixins {
     // Prevent hibachi getting quasi powered
     @Overwrite
     public boolean isGettingPowered(World world, int x, int y, int z) {

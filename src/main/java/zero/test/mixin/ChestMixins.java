@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import zero.test.IWorldMixins;
 // Block piston reactions
 @Mixin(BlockChest.class)
-public class ChestMixins {
+public abstract class ChestMixins {
     @Overwrite
     public boolean canPlaceBlockAt(World world, int x, int y, int z) {
         int allowed_chests = 2;

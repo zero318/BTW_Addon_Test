@@ -23,8 +23,8 @@ import zero.test.IWorldMixins;
 
 @Mixin(HopperBlock.class)
 public abstract class HopperBlockMixins extends BlockContainer {
-    public HopperBlockMixins(int blockId, Material material) {
-        super(blockId, material);
+    public HopperBlockMixins() {
+        super(0, null);
     }
     
 #if ENABLE_MORE_RAIL_PLACEMENTS

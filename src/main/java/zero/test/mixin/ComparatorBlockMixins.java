@@ -19,8 +19,8 @@ import zero.test.IBlockRedstoneLogicMixins;
 import zero.test.IRenderBlocksMixins;
 @Mixin(ComparatorBlock.class)
 public abstract class ComparatorBlockMixins extends BlockComparator {
-    public ComparatorBlockMixins(int id, boolean powered) {
-  super(id, powered);
+    public ComparatorBlockMixins() {
+  super(0, false);
  }
     @Environment(EnvType.CLIENT)
     @Inject(

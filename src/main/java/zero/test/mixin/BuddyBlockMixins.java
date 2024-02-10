@@ -6,8 +6,8 @@ import org.spongepowered.asm.mixin.Overwrite;
 // Block piston reactions
 @Mixin(BuddyBlock.class)
 public abstract class BuddyBlockMixins extends Block {
-    public BuddyBlockMixins(int par1, Material par2Material) {
-        super(par1, par2Material);
+    public BuddyBlockMixins() {
+        super(0, null);
     }
     @Overwrite
     public void onNeighborBlockChange(World world, int x, int y, int z, int neighborId) {

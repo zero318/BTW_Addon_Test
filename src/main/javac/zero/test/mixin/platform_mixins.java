@@ -34,7 +34,7 @@ import java.util.Random;
 #endif
 
 @Mixin(PlatformBlock.class)
-public class PlatformBlockMixins {
+public abstract class PlatformBlockMixins {
 #if ENABLE_PLATFORMS_WITH_PISTONS
     public boolean isStickyForBlocks(World world, int x, int y, int z, int direction) {
         // Only attach to other platforms.

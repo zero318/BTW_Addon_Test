@@ -16,8 +16,8 @@ import org.spongepowered.asm.mixin.Overwrite;
 @Mixin(BuddyBlock.class)
 public abstract class BuddyBlockMixins extends Block {
     
-    public BuddyBlockMixins(int par1, Material par2Material) {
-        super(par1, par2Material);
+    public BuddyBlockMixins() {
+        super(0, null);
     }
     
 #if ENABLE_BETTER_BUDDY_DETECTION

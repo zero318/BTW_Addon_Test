@@ -16,8 +16,8 @@ import zero.test.mixin.IBlockRedstoneLogicAccessMixins;
 //#define getInputSignal(...) func_94482_f(__VA_ARGS__)
 @Mixin(BlockRedstoneLogic.class)
 public abstract class BlockRedstoneLogicMixins extends BlockDirectional implements IBlockRedstoneLogicMixins {
-    public BlockRedstoneLogicMixins(int blockId, Material material) {
-        super(blockId, material);
+    public BlockRedstoneLogicMixins() {
+        super(0, null);
     }
     public boolean isRenderingLogicBase;
     public void setRenderingBaseTextures(boolean value) {

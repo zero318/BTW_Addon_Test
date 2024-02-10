@@ -37,10 +37,10 @@ import zero.test.IBlockEntityPistonMixins;
 #define STICKY_IS_BOOL true
 
 @Mixin(BlockPistonExtension.class)
-public class BlockPistonExtensionMixins extends Block {
+public abstract class BlockPistonExtensionMixins extends Block {
     
-    public BlockPistonExtensionMixins(int blockId, Material material) {
-        super(blockId, material);
+    public BlockPistonExtensionMixins() {
+        super(0, null);
     }
     
 #if ENABLE_BETTER_BUDDY_DETECTION

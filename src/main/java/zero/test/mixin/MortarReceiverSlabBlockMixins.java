@@ -9,8 +9,8 @@ import zero.test.IBlockMixins;
 
 @Mixin(MortarReceiverSlabBlock.class)
 public abstract class MortarReceiverSlabBlockMixins extends FallingSlabBlock {
-    public MortarReceiverSlabBlockMixins(int id, Material material) {
-        super(id, material);
+    public MortarReceiverSlabBlockMixins() {
+        super(0, null);
     }
     @Override
     public void updateTick(World world, int x, int y, int z, Random random) {

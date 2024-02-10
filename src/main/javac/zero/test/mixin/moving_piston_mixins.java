@@ -37,10 +37,10 @@ import java.util.ArrayList;
 #define STICKY_IS_BOOL true
 
 @Mixin(PistonBlockMoving.class)
-public class BlockPistonMovingMixins extends BlockPistonMoving {
+public abstract class BlockPistonMovingMixins extends BlockPistonMoving {
     
-    public BlockPistonMovingMixins(int block_id) {
-        super(block_id);
+    public BlockPistonMovingMixins() {
+        super(0);
     }
 
     // TODO: Make this depend on the block being moved somehow

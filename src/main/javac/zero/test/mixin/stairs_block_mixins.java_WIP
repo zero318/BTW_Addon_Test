@@ -20,7 +20,7 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 
 @Mixin(StairsBlockBase.class)
 public abstract class StairsBlockBaseMixins extends Block {
-    public StairsBlockBaseMixins(int blockId, Material material) {
-        super(blockId, material);
+    public StairsBlockBaseMixins() {
+        super(0, null);
     }
 }

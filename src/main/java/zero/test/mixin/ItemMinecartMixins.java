@@ -15,8 +15,8 @@ import java.util.List;
 // Block piston reactions
 @Mixin(MinecartItem.class)
 public abstract class ItemMinecartMixins extends ItemMinecart {
-    public ItemMinecartMixins(int iItemID, int par2) {
-        super(iItemID, par2);
+    public ItemMinecartMixins() {
+        super(0, 0);
     }
     @Override
     public boolean onItemUse(ItemStack itemStack, EntityPlayer entityPlayer, World world, int x, int y, int z, int par7, float par8, float par9, float par10) {

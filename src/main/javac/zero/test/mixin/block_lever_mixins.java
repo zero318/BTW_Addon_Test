@@ -25,8 +25,8 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 
 @Mixin(BlockLever.class)
 public abstract class BlockLeverMixins extends Block {
-    public BlockLeverMixins(int blockId, Material material) {
-        super(blockId, material);
+    public BlockLeverMixins() {
+        super(0, null);
     }
     
 #if ENABLE_BUDDY_BLOCK_IGNORES_POWER_UPDATES

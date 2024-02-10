@@ -8,9 +8,9 @@ import zero.test.IBlockMixins;
 // Block piston reactions
 
 @Mixin(MortarReceiverStairsBlock.class)
-public class MortarReceiverStairsBlockMixins extends FallingStairsBlock {
-    public MortarReceiverStairsBlockMixins(int id, Block referenceBlock, int referenceBlockMeta) {
-        super(id, referenceBlock, referenceBlockMeta);
+public abstract class MortarReceiverStairsBlockMixins extends FallingStairsBlock {
+    public MortarReceiverStairsBlockMixins() {
+        super(0, null, 0);
     }
     @Override
     public void updateTick(World world, int x, int y, int z, Random random) {

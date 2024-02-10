@@ -18,8 +18,8 @@ import zero.test.mixin.IBlockRedstoneLogicAccessMixins;
 @Mixin(BlockRedstoneRepeater.class)
 public abstract class BlockRedstoneRepeaterMixins extends BlockRedstoneLogic {
     
-    public BlockRedstoneRepeaterMixins(int par1, boolean par2) {
-        super(par1, par2);
+    public BlockRedstoneRepeaterMixins() {
+        super(0, false);
     }
     
 #if ENABLE_REDSTONE_BUGFIXES

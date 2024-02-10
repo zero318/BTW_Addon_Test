@@ -11,8 +11,8 @@ import zero.test.IBlockMixins;
 
 @Mixin(LavaReceiverBlock.class)
 public abstract class LavaReceiverBlockMixins extends MortarReceiverBlock {
-    public LavaReceiverBlockMixins(int id, Material material) {
-        super(id, material);
+    public LavaReceiverBlockMixins() {
+        super(0, null);
     }
     @Shadow
     protected abstract boolean getHasLavaInCracks(IBlockAccess blockAccess, int x, int y, int z);

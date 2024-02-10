@@ -15,8 +15,8 @@ import zero.test.IBaseRailBlockMixins;
 
 @Mixin(BlockRailPowered.class)
 public abstract class BlockRailPoweredMixins extends BlockRailBase implements IBaseRailBlockMixins {
-    public BlockRailPoweredMixins(int par1) {
-        super(par1, true);
+    public BlockRailPoweredMixins(0) {
+        super(0, false);
     }
     
     public boolean hasSpeedBoost = false;

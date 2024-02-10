@@ -22,8 +22,8 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(RedstoneRepeaterBlock.class)
 public abstract class RedstoneRepeaterBlockMixins extends BlockRedstoneRepeater {
     
-    public RedstoneRepeaterBlockMixins(int blockId, boolean powered) {
-        super(blockId, powered);
+    public RedstoneRepeaterBlockMixins() {
+        super(0, false);
     }
     
 #if ENABLE_REDSTONE_BUGFIXES

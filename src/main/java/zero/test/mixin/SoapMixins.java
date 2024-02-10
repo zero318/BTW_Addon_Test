@@ -5,9 +5,9 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 // Block piston reactions
 @Mixin(AestheticOpaqueBlock.class)
-public class SoapMixins extends Block {
-    public SoapMixins(int par1, Material par2) {
-        super(par1, par2);
+public abstract class SoapMixins extends Block {
+    public SoapMixins() {
+        super(0, null);
     }
     public int getMobilityFlag(World world, int x, int y, int z) {
         return world.getBlockMetadata(x, y, z) == AestheticOpaqueBlock.SUBTYPE_SOAP ? 4 : ((Block)(Object)this).getMobilityFlag();

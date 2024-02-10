@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.Overwrite;
 #include "..\util.h"
 
 @Mixin(PaneBlock.class)
-public class PaneBlockMixins {
+public abstract class PaneBlockMixins {
 #if ENABLE_CONNECTED_BLOCK_TWEAKS
     // The original function passed x,y,z to
     // shouldPaneConnectToThisBlockToFacing

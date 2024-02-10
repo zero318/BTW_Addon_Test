@@ -24,7 +24,7 @@ import java.util.Random;
 #include "..\util.h"
 
 @Mixin(LadderBlockBase.class)
-public class LadderBlockBaseMixins {
+public abstract class LadderBlockBaseMixins {
 #if ENABLE_MODERN_SUPPORT_LOGIC == MODERN_SUPPORT_LOGIC_GLOBAL_ALL
     // Ladders previously used WorldUtils version
     // of the hardpoint check, which still defaults to false

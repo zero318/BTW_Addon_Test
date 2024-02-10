@@ -13,7 +13,7 @@ import java.util.Random;
 #include "..\util.h"
 
 @Mixin(HibachiBlock.class)
-public class HibachiBlockMixins {
+public abstract class HibachiBlockMixins {
 #if ENABLE_LESS_CRAP_BTW_BLOCK_POWERING
     // Prevent hibachi getting quasi powered
     @Overwrite

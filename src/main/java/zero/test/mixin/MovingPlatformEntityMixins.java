@@ -25,5 +25,5 @@ import zero.test.IMovingPlatformEntityMixins;
 import java.util.Random;
 // Block piston reactions
 @Mixin(MovingPlatformEntity.class)
-public class MovingPlatformEntityMixins implements IMovingPlatformEntityMixins {
+public abstract class MovingPlatformEntityMixins implements IMovingPlatformEntityMixins {
 }

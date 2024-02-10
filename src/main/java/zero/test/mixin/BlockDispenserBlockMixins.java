@@ -14,8 +14,8 @@ import zero.test.IWorldMixins;
 // Block piston reactions
 @Mixin(BlockDispenserBlock.class)
 public abstract class BlockDispenserBlockMixins extends BlockContainer {
-    public BlockDispenserBlockMixins(int par1, Material par2Material) {
-        super(par1, par2Material);
+    public BlockDispenserBlockMixins() {
+        super(0, null);
     }
     @Overwrite
     public boolean isReceivingRedstonePower(World world, int x, int y, int z) {

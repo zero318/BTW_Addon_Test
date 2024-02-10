@@ -16,8 +16,8 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 
 @Mixin(BlockPressurePlate.class)
 public abstract class BlockPressurePlateMixins extends Block {
-    public BlockPressurePlateMixins(int blockId, Material material) {
-        super(blockId, material);
+    public BlockPressurePlateMixins() {
+        super(0, null);
     }
     @Override
     public boolean triggersBuddy() {

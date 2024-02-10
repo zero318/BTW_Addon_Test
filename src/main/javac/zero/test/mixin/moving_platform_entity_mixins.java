@@ -33,7 +33,7 @@ import java.util.Random;
 #include "..\util.h"
 
 @Mixin(MovingPlatformEntity.class)
-public class MovingPlatformEntityMixins implements IMovingPlatformEntityMixins {
+public abstract class MovingPlatformEntityMixins implements IMovingPlatformEntityMixins {
 #if ENABLE_PLATFORM_EXTENSIONS
     public int block_id;
     public int block_meta;

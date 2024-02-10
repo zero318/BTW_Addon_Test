@@ -24,7 +24,7 @@ import java.util.Random;
 #include "..\util.h"
 
 @Mixin(CompanionCubeBlock.class)
-public class CompanionCubeBlockMixins {
+public abstract class CompanionCubeBlockMixins {
 #if ENABLE_MODERN_REDSTONE_WIRE
     // Another case of overriding
     // isNormalBlock that screws with redstone.

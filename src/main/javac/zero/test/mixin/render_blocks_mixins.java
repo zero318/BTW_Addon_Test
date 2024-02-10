@@ -47,7 +47,7 @@ import zero.test.IRenderBlocksMixins;
 #define POWER_META_OFFSET 0
 
 @Mixin(RenderBlocks.class)
-public class RenderBlocksMixins implements IRenderBlocksMixins {
+public abstract class RenderBlocksMixins implements IRenderBlocksMixins {
     
 #if ENABLE_MODERN_REDSTONE_WIRE
 
