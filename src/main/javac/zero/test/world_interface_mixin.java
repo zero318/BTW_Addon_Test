@@ -18,6 +18,8 @@ public interface IWorldMixins {
     public int updateFromNeighborShapes(int x, int y, int z, int blockId, int blockMeta);
 #endif
 
+    public void notifyBlockChangeAndComparators(int x, int y, int z, int blockId, int prevBlockId);
+
     public int getBlockStrongPowerInputExceptFacing(int x, int y, int z, int facing);
     public int getBlockWeakPowerInputExceptFacing(int x, int y, int z, int facing);
     

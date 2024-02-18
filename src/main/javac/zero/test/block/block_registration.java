@@ -32,4 +32,7 @@ public class ZeroTestBlocks {
 #if ENABLE_RAIL_BUFFER_STOP
     public static Block buffer_stop;
 #endif
+#if ENABLE_SCAFFOLDING
+    public static Block scaffolding;
+#endif
 }

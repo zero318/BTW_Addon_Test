@@ -44,27 +44,24 @@ public abstract class BlockPistonMovingMixins extends BlockPistonMoving {
     }
 
     // TODO: Make this depend on the block being moved somehow
-/*
+
 #if ENABLE_BETTER_BUDDY_DETECTION
     @Override
     public boolean triggersBuddy() {
         return false;
     }
     
-#if 0
+#if BETTER_BUDDY_PISTON_FIX_TYPE == BETTER_BUDDY_PISTON_FIX_B
     public boolean triggersBuddy(World world, int x, int y, int z) {
         TileEntity tileEntity;
         if ((tileEntity = world.getBlockTileEntity(x, y, z)) instanceof TileEntityPiston) {
-            Block storedBlock = Block.blocksList[((TileEntityPiston)tileEntity).getStoredBlockID()];
-            if (storedBlock != null) {
-                return storedBlock.triggersBuddy();
-            }
+            return BOOL_INVERT(((IBlockEntityPistonMixins)(Object)tileEntity).isRetractingBase());
         }
         return true;
     }
 #endif
 #endif
-*/
+
 
     @Override
     public void addCollisionBoxesToList(World world, int x, int y, int z, AxisAlignedBB maskBox, List list, Entity entity) {

@@ -1,0 +1,39 @@
+package zero.test;
+
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+#define LONG_VERSION 0
+#define BOOLEAN_VERSION 1
+
+#define CRAP_IMPLEMENTATION LONG_VERSION
+
+public class CrapLock {
+#if CRAP_IMPLEMENTATION == LONG_VERSION
+    private AtomicLong lock = new AtomicLong(-1L);
+#elif CRAP_IMPLEMENTATION == BOOLEAN_VERSION
+    private AtomicBoolean lock = new AtomicBoolean();
+#endif
+    
+    public CrapLock() {}
+    
+    public void acquire() {
+#if CRAP_IMPLEMENTATION == LONG_VERSION
+        long index = this.lock.incrementAndGet();
+        if (index == 0L) {
+            return;
+        }
+        while (index != this.lock.get());
+#elif CRAP_IMPLEMENTATION == BOOLEAN_VERSION
+        while (!this.lock.compareAndSet(false, true));
+#endif
+    }
+    
+    public void release() {
+#if CRAP_IMPLEMENTATION == LONG_VERSION
+        this.lock.decrementAndGet();
+#elif CRAP_IMPLEMENTATION == BOOLEAN_VERSION
+        this.lock.set(false);
+#endif
+    }
+}

@@ -39,7 +39,7 @@ import java.util.List;
 #include "..\util.h"
 #include "..\ids.h"
 
-#define PISTON_TILE_ENTITY_PRINT_DEBUGGING 0
+#define PISTON_TILE_ENTITY_PRINT_DEBUGGING 1
 
 #if PISTON_TILE_ENTITY_PRINT_DEBUGGING
 #define PISTON_TILE_ENTITY_DEBUG(...) if (!self.worldObj.isRemote) AddonHandler.logMessage(__VA_ARGS__)
@@ -55,7 +55,18 @@ import java.util.List;
 #define PISTON_ENTITY_PUSH_DEBUG(...)
 #endif
 
+// Enabling the cache creates rendering
+// bugs when pushing double chests.
+#define USE_TILE_ENTITY_CACHE 0
+
+// Turns out this "cache" is actually just
+// creating an extra tile entity for no
+// reason. Scrap it.
+#define DISABLE_TILE_ENTITY_CACHE 1
+
 #define DELAY_SENDING_BLOCK_TO_CLIENT 0
+
+#define USE_CHUNK_MIXINS 1
 
 @Mixin(TileEntityPiston.class)
 public abstract class BlockEntityPistonMixins extends TileEntity implements IBlockEntityPistonMixins {
@@ -75,8 +86,8 @@ public abstract class BlockEntityPistonMixins extends TileEntity implements IBlo
     public abstract boolean destroyAndDropIfShoveled();
     @Shadow
     public abstract void preBlockPlaced();
-    //@Shadow
-    //public abstract void attemptToPackItems();
+    @Shadow
+    public abstract void attemptToPackItems();
     
 #if ENABLE_MORE_MOVING_BLOCK_HARDPOINTS
     public boolean hasSmallCenterHardPointToFacing(int x, int y, int z, int direction, boolean ignoreTransparency) {
@@ -128,12 +139,11 @@ public abstract class BlockEntityPistonMixins extends TileEntity implements IBlo
         return false;
     }
     
-    // Turns out this "cache" is actually just
-    // creating an extra tile entity for no
-    // reason. Scrap it.
+#if DISABLE_TILE_ENTITY_CACHE
     @Overwrite
     public void storeCachedTileEntity() {
     }
+#endif
     
     @Overwrite
     public void restoreStoredBlock() {
@@ -155,6 +165,12 @@ public abstract class BlockEntityPistonMixins extends TileEntity implements IBlo
         boolean scanningTileEntitiesTemp = ((IWorldAccessMixins)self.worldObj).getScanningTileEntities();
         ((IWorldAccessMixins)self.worldObj).setScanningTileEntities(true);
         
+#if USE_CHUNK_MIXINS
+        if (self.storedTileEntityData != null) {
+            
+            ZeroUtil.pistonTemp = TileEntity.createAndLoadEntity(self.storedTileEntityData);
+        }
+#endif
         if (newMeta >= 0) {
 #if DELAY_SENDING_BLOCK_TO_CLIENT
             self.worldObj.setBlock(self.xCoord, self.yCoord, self.zCoord, storedBlockId, newMeta, UPDATE_INVISIBLE | UPDATE_KNOWN_SHAPE | UPDATE_MOVE_BY_PISTON);
@@ -167,6 +183,7 @@ public abstract class BlockEntityPistonMixins extends TileEntity implements IBlo
             self.worldObj.setBlock(self.xCoord, self.yCoord, self.zCoord, storedBlockId, storedMeta, UPDATE_INVISIBLE | UPDATE_KNOWN_SHAPE | UPDATE_MOVE_BY_PISTON | UPDATE_SUPPRESS_LIGHT);
         }
         
+#if !USE_CHUNK_MIXINS
 #if PISTON_TILE_ENTITY_PRINT_DEBUGGING
         NBTTagCompound prevTileEntityData = new NBTTagCompound();
 #endif
@@ -174,10 +191,22 @@ public abstract class BlockEntityPistonMixins extends TileEntity implements IBlo
             // setBlockTileEntity updates the entity
             // coordinates itself when scanningTileEntities
             // is true
+#if USE_TILE_ENTITY_CACHE && !DISABLE_TILE_ENTITY_CACHE
+            TileEntity tileEntity = self.cachedTileEntity;
+            if (tileEntity == null) {
+                tileEntity = TileEntity.createAndLoadEntity(self.storedTileEntityData);
+            }
+            worldObj.setBlockTileEntity(self.xCoord, self.yCoord, self.zCoord, tileEntity);
+#else
             TileEntity tileEntity = TileEntity.createAndLoadEntity(self.storedTileEntityData);
             worldObj.setBlockTileEntity(self.xCoord, self.yCoord, self.zCoord, tileEntity);
+#endif
+            tileEntity.updateContainingBlockInfo();
 #if PISTON_TILE_ENTITY_PRINT_DEBUGGING
             tileEntity.writeToNBT(prevTileEntityData);
+#endif
+#if !DISABLE_TILE_ENTITY_CACHE
+            self.cachedTileEntity = null;
 #endif
 #if DELAY_SENDING_BLOCK_TO_CLIENT
             if (newMeta >= 0) {
@@ -199,13 +228,14 @@ public abstract class BlockEntityPistonMixins extends TileEntity implements IBlo
             newTileEntityA.writeToNBT(newTileEntityDataA);
         }
 #endif
+#endif
         
         if (newMeta >= 0) {
             self.worldObj.notifyBlockOfNeighborChange(self.xCoord, self.yCoord, self.zCoord, storedBlockId);
         } else {
             self.worldObj.destroyBlock(self.xCoord, self.yCoord, self.zCoord, true);
         }
-
+#if !USE_CHUNK_MIXINS
 #if PISTON_TILE_ENTITY_PRINT_DEBUGGING
         NBTTagCompound newTileEntityDataB = null;
         TileEntity newTileEntityB = self.worldObj.getBlockTileEntity(self.xCoord, self.yCoord, self.zCoord);
@@ -230,6 +260,7 @@ public abstract class BlockEntityPistonMixins extends TileEntity implements IBlo
                 AddonHandler.logMessage("NewB: null");
             }
         }
+#endif
 #endif
         
         // Restore original value of scanningTileEntities
@@ -318,7 +349,7 @@ public abstract class BlockEntityPistonMixins extends TileEntity implements IBlo
             // for the base.
             // Future versions with block states should just query the
             // collision of the extended state directly rather than
-            // hardcoding this.
+            // making hardcoding this.
             AxisAlignedBB tempBox = AxisAlignedBB.getAABBPool().getAABB(
                 x, y, z,
                 x + 1.0D, y + 1.0D, z + 1.0D
@@ -679,28 +710,30 @@ public abstract class BlockEntityPistonMixins extends TileEntity implements IBlo
                     }
                     
                     entityList = self.worldObj.getEntitiesWithinAABBExcludingEntity((Entity)null, boundingBox);
-                    dX *= idkOffset;
-                    dY *= idkOffset;
-                    dZ *= idkOffset;
-                    for (Entity entity : entityList) {
-                        if (PISTON_CAN_STICK_ENTITY(((IEntityMixins)entity).getPistonMobilityFlags(direction))) {
-                            PISTON_ENTITY_PUSH_DEBUG(
-                                "Pre-Entity moving sticky("+storedBlockId+"):"+
-                                "\nX: "+entity.posX+" + "+dX+
-                                "\nY: "+entity.posY+" + "+dY+
-                                "\nZ: "+entity.posZ+" + "+dZ
-                            );
-                            
-                            ((IEntityMixins)entity).moveEntityByPiston(dX, dY, dZ);
-                            
-                            PISTON_ENTITY_PUSH_DEBUG(
-                                "Post-Entity moving sticky("+storedBlockId+"):"+
-                                "\nX: "+entity.posX+
-                                "\nY: "+entity.posY+
-                                "\nZ: "+entity.posZ
-                            );
+                    //if (!entityList.isEmpty()) {
+                        dX *= idkOffset;
+                        dY *= idkOffset;
+                        dZ *= idkOffset;
+                        for (Entity entity : entityList) {
+                            if (PISTON_CAN_STICK_ENTITY(((IEntityMixins)entity).getPistonMobilityFlags(direction))) {
+                                PISTON_ENTITY_PUSH_DEBUG(
+                                    "Pre-Entity moving sticky("+storedBlockId+"):"+
+                                    "\nX: "+entity.posX+" + "+dX+
+                                    "\nY: "+entity.posY+" + "+dY+
+                                    "\nZ: "+entity.posZ+" + "+dZ
+                                );
+                                
+                                ((IEntityMixins)entity).moveEntityByPiston(dX, dY, dZ);
+                                
+                                PISTON_ENTITY_PUSH_DEBUG(
+                                    "Post-Entity moving sticky("+storedBlockId+"):"+
+                                    "\nX: "+entity.posX+
+                                    "\nY: "+entity.posY+
+                                    "\nZ: "+entity.posZ
+                                );
+                            }
                         }
-                    }
+                    //}
                 }
             }
         }
@@ -805,49 +838,5 @@ public abstract class BlockEntityPistonMixins extends TileEntity implements IBlo
     )
     public void writeToNBT_inject(NBTTagCompound compound, CallbackInfo info) {
         compound.setBoolean("source", this.shouldHeadBeRendered);
-    }
-    
-    @Shadow
-    public abstract boolean isLocationSuitableForPacking(int i, int j, int k, int iPistonDirection);
-    
-    @Shadow
-    public abstract void removeItemsOfTypeFromList(ItemStack stack, int iCount, List list);
-    
-    @Shadow
-    public abstract void createPackedBlockOfTypeAtLocation(int blockID, int metadata, int x, int y, int z);
-    
-    @Overwrite
-    public void attemptToPackItems() {
-        TileEntityPiston self = (TileEntityPiston)(Object)this;
-        if (
-            !this.worldObj.isRemote &&
-            self.isExtending()
-        ) {
-            int direction = self.getPistonOrientation();
-            int x = this.xCoord + Facing.offsetsXForSide[direction];
-            int y = this.yCoord + Facing.offsetsYForSide[direction];
-            int z = this.zCoord + Facing.offsetsZForSide[direction];
-            
-            if (this.isLocationSuitableForPacking(x, y, z, OPPOSITE_DIRECTION(direction))) {
-                AxisAlignedBB targetBox = AxisAlignedBB.getAABBPool().getAABB(
-                    x, y, z, 
-                    x + 1.0D, y + 1.0D, z + 1.0D
-                );
-                
-                List<EntityItem> itemsWithinBox = this.worldObj.getEntitiesWithinAABB(EntityItem.class, targetBox);
-                
-                if (!itemsWithinBox.isEmpty()) {
-                    PistonPackingRecipe recipe = PistonPackingCraftingManager.instance.getValidRecipeFromItemList(itemsWithinBox);
-                    
-                    if (recipe != null) {
-                        for (ItemStack stack : recipe.getInput()) {
-                            this.removeItemsOfTypeFromList(stack, stack.stackSize, itemsWithinBox);
-                        }
-                        
-                        this.createPackedBlockOfTypeAtLocation(recipe.getOutput().blockID, recipe.getOutputMetadata(), x, y, z);
-                    }
-                }
-            }
-        }
     }
 }

@@ -32,11 +32,11 @@ public interface IBlockMixins {
     //}
 #endif
 
-/*
 #if ENABLE_BETTER_BUDDY_DETECTION
-    public boolean triggersBuddy(World world, int x, int y, int z);
+    default public boolean triggersBuddy(World world, int x, int y, int z) {
+        return ((Block)(Object)this).triggersBuddy();
+    }
 #endif
-*/
 
 #if ENABLE_MOVING_BLOCK_CHAINING
 

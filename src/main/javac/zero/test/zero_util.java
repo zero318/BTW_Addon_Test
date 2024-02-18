@@ -1,11 +1,15 @@
 package zero.test;
 
+import net.minecraft.src.*;
+
 import btw.AddonHandler;
 
 #include "feature_flags.h"
 #include "util.h"
 
 public class ZeroUtil {
+    
+    //public static TileEntity pistonTemp = null;
     
     public static final int[] rail_exit_directions = new int[] {
         DIRECTION_SOUTH, DIRECTION_NORTH,

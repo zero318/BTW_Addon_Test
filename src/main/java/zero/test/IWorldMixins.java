@@ -7,6 +7,7 @@ public interface IWorldMixins {
     //public boolean get_is_handling_piston_move();
     public void updateNeighbourShapes(int x, int y, int z, int flags);
     public int updateFromNeighborShapes(int x, int y, int z, int blockId, int blockMeta);
+    public void notifyBlockChangeAndComparators(int x, int y, int z, int blockId, int prevBlockId);
     public int getBlockStrongPowerInputExceptFacing(int x, int y, int z, int facing);
     public int getBlockWeakPowerInputExceptFacing(int x, int y, int z, int facing);
     default public boolean doesBlockSupportRails(int x, int y, int z) {

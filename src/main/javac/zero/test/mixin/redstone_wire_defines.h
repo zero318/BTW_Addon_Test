@@ -20,39 +20,39 @@
 
 #define BITS_PER_DIRECTION 3    
 
-#define EAST_MASK  0x007
-#define WEST_MASK  0x038
-#define SOUTH_MASK 0x1C0
-#define NORTH_MASK 0xE00
+#define EAST_MASK  00007
+#define WEST_MASK  00070
+#define SOUTH_MASK 00700
+#define NORTH_MASK 07000
 
-#define EAST_BIT_MIN    0x001
-#define EAST_BIT_MAX    0x004
-#define WEST_BIT_MIN    0x008
-#define WEST_BIT_MAX    0x020
-#define SOUTH_BIT_MIN   0x040
-#define SOUTH_BIT_MAX   0x100
-#define NORTH_BIT_MIN   0x200
-#define NORTH_BIT_MAX   0x800
+#define EAST_BIT_MIN    00001
+#define EAST_BIT_MAX    00004
+#define WEST_BIT_MIN    00010
+#define WEST_BIT_MAX    00040
+#define SOUTH_BIT_MIN   00100
+#define SOUTH_BIT_MAX   00400
+#define NORTH_BIT_MIN   01000
+#define NORTH_BIT_MAX   04000
 
 #define NO_CONNECTIONS 0
 
-#define SIDE_CONNECTION 1
-#define UP_CONNECTION   2
-#define DOWN_CONNECTION 4
-#define UP_CONNECTION_RENDER_BACK 4
+#define SIDE_CONNECTION 01
+#define UP_CONNECTION   02
+#define DOWN_CONNECTION 04
+#define UP_CONNECTION_RENDER_BACK 04
 
-#define EAST_SIDE  0x001
-#define EAST_UP    0x002
-#define EAST_DOWN  0x004
-#define WEST_SIDE  0x008
-#define WEST_UP    0x010
-#define WEST_DOWN  0x020
-#define SOUTH_SIDE 0x040
-#define SOUTH_UP   0x080
-#define SOUTH_DOWN 0x100
-#define NORTH_SIDE 0x200
-#define NORTH_UP   0x400
-#define NORTH_DOWN 0x800
+#define EAST_SIDE  00001
+#define EAST_UP    00002
+#define EAST_DOWN  00004
+#define WEST_SIDE  00010
+#define WEST_UP    00020
+#define WEST_DOWN  00040
+#define SOUTH_SIDE 00100
+#define SOUTH_UP   00200
+#define SOUTH_DOWN 00400
+#define NORTH_SIDE 01000
+#define NORTH_UP   02000
+#define NORTH_DOWN 04000
 
 #define HAS_NORTH_CONNECTION(connections)   ((connections)>=NORTH_BIT_MIN)
 #define HAS_ANY_SWE_CONNECTION(connections) (((connections)&~NORTH_MASK)!=0)

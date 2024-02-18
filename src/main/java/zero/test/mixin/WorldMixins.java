@@ -64,6 +64,17 @@ public class WorldMixins implements IWorldMixins {
             }
         }
     }
+    public void notifyBlockChangeAndComparators(int x, int y, int z, int blockId, int prevBlockId) {
+        World self = (World)(Object)this;
+        self.notifyBlockChange(x, y, z, prevBlockId);
+        Block block = Block.blocksList[blockId];
+        if (
+            block != null &&
+            block.hasComparatorInputOverride()
+        ) {
+            self.func_96440_m(x, y, z, blockId);
+        }
+    }
     public void updateNeighbourShapes(int x, int y, int z, int flags) {
         World world = (World)(Object)this;
         IBlockMixins neighborBlock;
@@ -204,14 +215,17 @@ public class WorldMixins implements IWorldMixins {
                     !world.isRemote &&
                     (flags & 0x01) != 0
                 ) {
+                    this.notifyBlockChangeAndComparators(x, y, z, blockId, currentBlockId);
+                    /*
                     world.notifyBlockChange(x, y, z, currentBlockId);
                     Block block = Block.blocksList[blockId];
                     if (
-                        !((block)==null) &&
+                        !BLOCK_IS_AIR(block) &&
                         block.hasComparatorInputOverride()
                     ) {
                         world.func_96440_m(x, y, z, blockId);
                     }
+                    */
                 }
                 if (
                     (flags & 0x10) == 0
@@ -279,14 +293,17 @@ public class WorldMixins implements IWorldMixins {
                     (flags & 0x01) != 0
                 ) {
                     int currentBlockId = chunk.getBlockID(x & 0xF, y, z & 0xF);
+                    this.notifyBlockChangeAndComparators(x, y, z, currentBlockId, currentBlockId);
+                    /*
                     world.notifyBlockChange(x, y, z, currentBlockId);
                     Block block = Block.blocksList[currentBlockId];
                     if (
-                        !((block)==null) &&
+                        !BLOCK_IS_AIR(block) &&
                         block.hasComparatorInputOverride()
                     ) {
                         world.func_96440_m(x, y, z, currentBlockId);
                     }
+                    */
                 }
                 if (
                     (flags & 0x10) == 0

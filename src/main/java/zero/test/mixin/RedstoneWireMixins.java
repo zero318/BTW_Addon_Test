@@ -101,18 +101,18 @@ public abstract class RedstoneWireMixins implements IBlockRedstoneWireMixins {
                         block.isNormalCube(blockAccess, nextX, y, nextZ) // dangerous stinky hack to make more things show up
                     ))
                 ) {
-                    connections += 2;
+                    connections += 02;
                     if (
                         forRendering &&
                         !((block)==null) && block.shouldRenderNeighborFullFaceSide(blockAccess, nextX, y, nextZ, ((direction)^1))
                     ) {
-                        connections += 4;
+                        connections += 04;
                     }
                 }
-                connections += 1;
+                connections += 01;
             }
             else if (isPowerProviderOrWire(blockAccess, nextX, y, nextZ, Direction.facingToDirection[direction])) {
-                connections += 1;
+                connections += 01;
             }
             if (
                 (
@@ -121,25 +121,25 @@ public abstract class RedstoneWireMixins implements IBlockRedstoneWireMixins {
                 ) &&
                 blockAccess.getBlockId(nextX, y - 1, nextZ) == Block.redstoneWire.blockID
             ) {
-                connections |= 1;
+                connections |= 01;
                 if (belowIsConductive) {
-                    connections += 4;
+                    connections += 04;
                 }
             }
         } while (((++direction)<=5));
         int connectionsRet = connections;
         if (!forRendering) {
-            if (!(((connections)&~0x1C0)!=0)) {
-                connectionsRet += 0x200;
+            if (!(((connections)&~00700)!=0)) {
+                connectionsRet += 01000;
             }
-            if (!(((connections)&~0xE00)!=0)) {
-                connectionsRet += 0x040;
+            if (!(((connections)&~07000)!=0)) {
+                connectionsRet += 00100;
             }
-            if (!((connections)>0x007)) {
-                connectionsRet += 0x008;
+            if (!((connections)>00007)) {
+                connectionsRet += 00010;
             }
-            if (!(((connections)&~0x038)!=0)) {
-                connectionsRet += 0x001;
+            if (!(((connections)&~00070)!=0)) {
+                connectionsRet += 00001;
             }
         }
         return connectionsRet;
@@ -157,7 +157,7 @@ public abstract class RedstoneWireMixins implements IBlockRedstoneWireMixins {
                                                                                                                            ;
                 switch (direction) {
                     case 2:
-                        if (!(((connections)&0x040)!=0)) {
+                        if (!(((connections)&00100)!=0)) {
                             break;
                         }
                     // Apparently this isn't called in cases where the block
@@ -165,17 +165,17 @@ public abstract class RedstoneWireMixins implements IBlockRedstoneWireMixins {
                     default:
                         return power;
                     case 3:
-                        if (!(((connections)&0x200)!=0)) {
+                        if (!(((connections)&01000)!=0)) {
                             break;
                         }
                         return power;
                     case 4:
-                        if (!(((connections)&0x001)!=0)) {
+                        if (!(((connections)&00001)!=0)) {
                             break;
                         }
                         return power;
                     case 5:
-                        if (!(((connections)&0x008)!=0)) {
+                        if (!(((connections)&00010)!=0)) {
                             break;
                         }
                         return power;
@@ -187,8 +187,8 @@ public abstract class RedstoneWireMixins implements IBlockRedstoneWireMixins {
     @Environment(EnvType.CLIENT)
     public int get_texture_index_for_connections(int connections) {
         if (
-            ((connections & (0x001 | 0x008)) != 0) ^
-            ((connections & (0x040 | 0x200)) == 0)
+            ((connections & (00001 | 00010)) != 0) ^
+            ((connections & (00100 | 01000)) == 0)
         ) {
             return 2;
         }

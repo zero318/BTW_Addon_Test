@@ -39,6 +39,12 @@ MACRO_VOID(
 )
 #define ENABLE_BETTER_BUDDY_DETECTION 1
 
+#define BETTER_BUDDY_PISTON_FIX_NONE 0
+#define BETTER_BUDDY_PISTON_FIX_A 1
+#define BETTER_BUDDY_PISTON_FIX_B 1
+
+#define BETTER_BUDDY_PISTON_FIX_TYPE BETTER_BUDDY_PISTON_FIX_NONE
+
 MACRO_VOID(
 // Make buddy blocks ignore updates from
 // buttons, levers, pressure plates, and
@@ -279,6 +285,9 @@ MACRO_VOID(/* Allow rails to be placed on hoppers */)
 
 MACRO_VOID(/* Allow buttons to be placed on the top/bottom of blocks */)
 #define ENABLE_VERTICAL_BUTTONS 1
+
+MACRO_VOID(/**/)
+#define ENABLE_SCAFFOLDING 1
 
 #define ENABLE_DEBUG_STRING_JANK 0
 

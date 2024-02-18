@@ -71,7 +71,7 @@ public abstract class RenderBlocksMixins implements IRenderBlocksMixins {
         }
         else {
             float temp;
-            red = (temp = (float)power / 15.0F) * 0.6F + (power != 0 ? 0.4F : 0.3F);
+            red = (temp = (float)power * 0.06666667F) * 0.6F + (power != 0 ? 0.4F : 0.3F);
             green = (temp *= temp) * 0.7F - 0.5F;
             blue = temp * 0.6F - 0.7F;
         }
@@ -101,6 +101,10 @@ public abstract class RenderBlocksMixins implements IRenderBlocksMixins {
         double texMaxU;
         double texMinV;
         double texMaxV;
+        double minU;
+        double maxU;
+        double minV;
+        double maxV;
         /*
         AddonHandler.logMessage(""
             +X+" "+Y+" "+Z+"\n"
@@ -110,27 +114,27 @@ public abstract class RenderBlocksMixins implements IRenderBlocksMixins {
         // Flat dust rendering
         if (texture_index != 0) {
             // Rendering the cross texture
-            double minU = 0.0D;
-            double minV = 0.0D;
-            double maxU = 16.0D;
-            double maxV = 16.0D;
+            minU = 0.0D;
+            minV = 0.0D;
+            maxU = 16.0D;
+            maxV = 16.0D;
             tempMinX = minX;
             tempMaxX = maxX;
             tempMinZ = minZ;
             tempMaxZ = maxZ;
-            if (!(((connections)&0x001)!=0)) {
+            if (!(((connections)&00001)!=0)) {
                 tempMaxX -= 0.3125D;
                 maxU = 11.0D;
             }
-            if (!(((connections)&0x008)!=0)) {
+            if (!(((connections)&00010)!=0)) {
                 tempMinX += 0.3125D;
                 minU = 5.0D;
             }
-            if (!(((connections)&0x040)!=0)) {
+            if (!(((connections)&00100)!=0)) {
                 tempMaxZ -= 0.3125D;
                 maxV = 11.0D;
             }
-            if (!(((connections)&0x200)!=0)) {
+            if (!(((connections)&01000)!=0)) {
                 tempMinZ += 0.3125D;
                 minV = 5.0D;
             }
@@ -166,52 +170,60 @@ public abstract class RenderBlocksMixins implements IRenderBlocksMixins {
         }
         else {
             // Rendering the line texture
-            if (!((connections)>=0x040)) {
-                texMinU = base_texture.getMinU();
-                texMaxU = base_texture.getMaxU();
-                texMinV = base_texture.getMinV();
-                texMaxV = base_texture.getMaxV();
+            minU = base_texture.getMinU();
+            maxU = base_texture.getMaxU();
+            minV = base_texture.getMinV();
+            maxV = base_texture.getMaxV();
+            if (!((connections)>=00100)) {
+                texMinU = minU;
+                texMaxU = maxU;
+                texMinV = minV;
+                texMaxV = maxV;
             } else {
-                texMinU = base_texture.getMaxU();
-                texMaxU = base_texture.getMinU();
-                texMinV = base_texture.getMaxV();
-                texMaxV = base_texture.getMinV();
+                texMinU = maxU;
+                texMaxU = minU;
+                texMinV = maxV;
+                texMaxV = minV;
             }
-            tessellator.addVertexWithUV(maxX, minY, maxZ, base_texture.getMaxU(), base_texture.getMaxV());
+            tessellator.addVertexWithUV(maxX, minY, maxZ, maxU, maxV);
             tessellator.addVertexWithUV(maxX, minY, minZ, texMaxU, texMinV);
-            tessellator.addVertexWithUV(minX, minY, minZ, base_texture.getMinU(), base_texture.getMinV());
+            tessellator.addVertexWithUV(minX, minY, minZ, minU, minV);
             tessellator.addVertexWithUV(minX, minY, maxZ, texMinU, texMaxV);
             if (renderBottom) {
                 tessellator.addVertexWithUV(minX, minY, maxZ, texMinU, texMaxV);
-                tessellator.addVertexWithUV(minX, minY, minZ, base_texture.getMinU(), base_texture.getMinV());
+                tessellator.addVertexWithUV(minX, minY, minZ, minU, minV);
                 tessellator.addVertexWithUV(maxX, minY, minZ, texMaxU, texMinV);
-                tessellator.addVertexWithUV(maxX, minY, maxZ, base_texture.getMaxU(), base_texture.getMaxV());
+                tessellator.addVertexWithUV(maxX, minY, maxZ, maxU, maxV);
             }
             tessellator.setColorRGBA(255, 255, 255, 255);
-            if (!((connections)>=0x040)) {
-                texMinU = overlay_texture.getMinU();
-                texMaxU = overlay_texture.getMaxU();
-                texMinV = overlay_texture.getMinV();
-                texMaxV = overlay_texture.getMaxV();
+            minU = overlay_texture.getMinU();
+            maxU = overlay_texture.getMaxU();
+            minV = overlay_texture.getMinV();
+            maxV = overlay_texture.getMaxV();
+            if (!((connections)>=00100)) {
+                texMinU = minU;
+                texMaxU = maxU;
+                texMinV = minV;
+                texMaxV = maxV;
             } else {
-                texMinU = overlay_texture.getMaxU();
-                texMaxU = overlay_texture.getMinU();
-                texMinV = overlay_texture.getMaxV();
-                texMaxV = overlay_texture.getMinV();
+                texMinU = maxU;
+                texMaxU = minU;
+                texMinV = maxV;
+                texMaxV = minV;
             }
-            tessellator.addVertexWithUV(maxX, minY, maxZ, overlay_texture.getMaxU(), overlay_texture.getMaxV());
+            tessellator.addVertexWithUV(maxX, minY, maxZ, maxU, maxV);
             tessellator.addVertexWithUV(maxX, minY, minZ, texMaxU, texMinV);
-            tessellator.addVertexWithUV(minX, minY, minZ, overlay_texture.getMinU(), overlay_texture.getMinV());
+            tessellator.addVertexWithUV(minX, minY, minZ, minU, minV);
             tessellator.addVertexWithUV(minX, minY, maxZ, texMinU, texMaxV);
             if (renderBottom) {
                 tessellator.addVertexWithUV(minX, minY, maxZ, texMinU, texMaxV);
-                tessellator.addVertexWithUV(minX, minY, minZ, overlay_texture.getMinU(), overlay_texture.getMinV());
+                tessellator.addVertexWithUV(minX, minY, minZ, minU, minV);
                 tessellator.addVertexWithUV(maxX, minY, minZ, texMaxU, texMinV);
-                tessellator.addVertexWithUV(maxX, minY, maxZ, overlay_texture.getMaxU(), overlay_texture.getMaxV());
+                tessellator.addVertexWithUV(maxX, minY, maxZ, maxU, maxV);
             }
         }
         // Vertical dust rendering
-        if ((((connections)&(0x002|0x010|0x080|0x400))!=0)) {
+        if ((((connections)&(00002|00020|00200|02000))!=0)) {
             tessellator.setColorOpaque_F(red, green, blue);
             base_texture = ((IBlockRedstoneWireMixins)block).get_texture_by_index(0);
             double maxY;
@@ -220,98 +232,102 @@ public abstract class RenderBlocksMixins implements IRenderBlocksMixins {
             tempMaxX = maxX - 0.015625D;
             tempMinZ = minZ + 0.015625D;
             tempMaxZ = maxZ - 0.015625D;
-            if ((((connections)&0x002)!=0)) {
-                tessellator.addVertexWithUV(tempMaxX, minY, maxZ, base_texture.getMinU(), base_texture.getMaxV());
-                tessellator.addVertexWithUV(tempMaxX, maxY, maxZ, base_texture.getMaxU(), base_texture.getMaxV());
-                tessellator.addVertexWithUV(tempMaxX, maxY, minZ, base_texture.getMaxU(), base_texture.getMinV());
-                tessellator.addVertexWithUV(tempMaxX, minY, minZ, base_texture.getMinU(), base_texture.getMinV());
-                if ((((connections)&0x004)!=0)) {
-                    tessellator.addVertexWithUV(tempMaxX, minY, minZ, base_texture.getMinU(), base_texture.getMinV());
-                    tessellator.addVertexWithUV(tempMaxX, maxY, minZ, base_texture.getMaxU(), base_texture.getMinV());
-                    tessellator.addVertexWithUV(tempMaxX, maxY, maxZ, base_texture.getMaxU(), base_texture.getMaxV());
-                    tessellator.addVertexWithUV(tempMaxX, minY, maxZ, base_texture.getMinU(), base_texture.getMaxV());
+            minU = base_texture.getMinU();
+            maxU = base_texture.getMaxU();
+            minV = base_texture.getMinV();
+            maxV = base_texture.getMaxV();
+            if ((((connections)&00002)!=0)) {
+                tessellator.addVertexWithUV(tempMaxX, minY, maxZ, minU, maxV);
+                tessellator.addVertexWithUV(tempMaxX, maxY, maxZ, maxU, maxV);
+                tessellator.addVertexWithUV(tempMaxX, maxY, minZ, maxU, minV);
+                tessellator.addVertexWithUV(tempMaxX, minY, minZ, minU, minV);
+                if ((((connections)&00004)!=0)) {
+                    tessellator.addVertexWithUV(tempMaxX, minY, minZ, minU, minV);
+                    tessellator.addVertexWithUV(tempMaxX, maxY, minZ, maxU, minV);
+                    tessellator.addVertexWithUV(tempMaxX, maxY, maxZ, maxU, maxV);
+                    tessellator.addVertexWithUV(tempMaxX, minY, maxZ, minU, maxV);
                 }
             }
-            if ((((connections)&0x010)!=0)) {
-                tessellator.addVertexWithUV(tempMinX, maxY, maxZ, base_texture.getMaxU(), base_texture.getMinV());
-                tessellator.addVertexWithUV(tempMinX, minY, maxZ, base_texture.getMinU(), base_texture.getMinV());
-                tessellator.addVertexWithUV(tempMinX, minY, minZ, base_texture.getMinU(), base_texture.getMaxV());
-                tessellator.addVertexWithUV(tempMinX, maxY, minZ, base_texture.getMaxU(), base_texture.getMaxV());
-                if ((((connections)&0x020)!=0)) {
-                    tessellator.addVertexWithUV(tempMinX, maxY, minZ, base_texture.getMaxU(), base_texture.getMaxV());
-                    tessellator.addVertexWithUV(tempMinX, minY, minZ, base_texture.getMinU(), base_texture.getMaxV());
-                    tessellator.addVertexWithUV(tempMinX, minY, maxZ, base_texture.getMinU(), base_texture.getMinV());
-                    tessellator.addVertexWithUV(tempMinX, maxY, maxZ, base_texture.getMaxU(), base_texture.getMinV());
+            if ((((connections)&00020)!=0)) {
+                tessellator.addVertexWithUV(tempMinX, maxY, maxZ, maxU, minV);
+                tessellator.addVertexWithUV(tempMinX, minY, maxZ, minU, minV);
+                tessellator.addVertexWithUV(tempMinX, minY, minZ, minU, maxV);
+                tessellator.addVertexWithUV(tempMinX, maxY, minZ, maxU, maxV);
+                if ((((connections)&00040)!=0)) {
+                    tessellator.addVertexWithUV(tempMinX, maxY, minZ, maxU, maxV);
+                    tessellator.addVertexWithUV(tempMinX, minY, minZ, minU, maxV);
+                    tessellator.addVertexWithUV(tempMinX, minY, maxZ, minU, minV);
+                    tessellator.addVertexWithUV(tempMinX, maxY, maxZ, maxU, minV);
                 }
             }
-            if ((((connections)&0x080)!=0)) {
-                tessellator.addVertexWithUV(maxX, maxY, tempMaxZ, base_texture.getMaxU(), base_texture.getMinV());
-                tessellator.addVertexWithUV(maxX, minY, tempMaxZ, base_texture.getMinU(), base_texture.getMinV());
-                tessellator.addVertexWithUV(minX, minY, tempMaxZ, base_texture.getMinU(), base_texture.getMaxV());
-                tessellator.addVertexWithUV(minX, maxY, tempMaxZ, base_texture.getMaxU(), base_texture.getMaxV());
-                if ((((connections)&0x100)!=0)) {
-                    tessellator.addVertexWithUV(minX, maxY, tempMaxZ, base_texture.getMaxU(), base_texture.getMaxV());
-                    tessellator.addVertexWithUV(minX, minY, tempMaxZ, base_texture.getMinU(), base_texture.getMaxV());
-                    tessellator.addVertexWithUV(maxX, minY, tempMaxZ, base_texture.getMinU(), base_texture.getMinV());
-                    tessellator.addVertexWithUV(maxX, maxY, tempMaxZ, base_texture.getMaxU(), base_texture.getMinV());
+            if ((((connections)&00200)!=0)) {
+                tessellator.addVertexWithUV(maxX, maxY, tempMaxZ, maxU, minV);
+                tessellator.addVertexWithUV(maxX, minY, tempMaxZ, minU, minV);
+                tessellator.addVertexWithUV(minX, minY, tempMaxZ, minU, maxV);
+                tessellator.addVertexWithUV(minX, maxY, tempMaxZ, maxU, maxV);
+                if ((((connections)&00400)!=0)) {
+                    tessellator.addVertexWithUV(minX, maxY, tempMaxZ, maxU, maxV);
+                    tessellator.addVertexWithUV(minX, minY, tempMaxZ, minU, maxV);
+                    tessellator.addVertexWithUV(maxX, minY, tempMaxZ, minU, minV);
+                    tessellator.addVertexWithUV(maxX, maxY, tempMaxZ, maxU, minV);
                 }
             }
-            if ((((connections)&0x400)!=0)) {
-                tessellator.addVertexWithUV(maxX, minY, tempMinZ, base_texture.getMinU(), base_texture.getMaxV());
-                tessellator.addVertexWithUV(maxX, maxY, tempMinZ, base_texture.getMaxU(), base_texture.getMaxV());
-                tessellator.addVertexWithUV(minX, maxY, tempMinZ, base_texture.getMaxU(), base_texture.getMinV());
-                tessellator.addVertexWithUV(minX, minY, tempMinZ, base_texture.getMinU(), base_texture.getMinV());
-                if (((connections)>=0x800)) {
-                    tessellator.addVertexWithUV(minX, minY, tempMinZ, base_texture.getMinU(), base_texture.getMinV());
-                    tessellator.addVertexWithUV(minX, maxY, tempMinZ, base_texture.getMaxU(), base_texture.getMinV());
-                    tessellator.addVertexWithUV(maxX, maxY, tempMinZ, base_texture.getMaxU(), base_texture.getMaxV());
-                    tessellator.addVertexWithUV(maxX, minY, tempMinZ, base_texture.getMinU(), base_texture.getMaxV());
+            if ((((connections)&02000)!=0)) {
+                tessellator.addVertexWithUV(maxX, minY, tempMinZ, minU, maxV);
+                tessellator.addVertexWithUV(maxX, maxY, tempMinZ, maxU, maxV);
+                tessellator.addVertexWithUV(minX, maxY, tempMinZ, maxU, minV);
+                tessellator.addVertexWithUV(minX, minY, tempMinZ, minU, minV);
+                if (((connections)>=04000)) {
+                    tessellator.addVertexWithUV(minX, minY, tempMinZ, minU, minV);
+                    tessellator.addVertexWithUV(minX, maxY, tempMinZ, maxU, minV);
+                    tessellator.addVertexWithUV(maxX, maxY, tempMinZ, maxU, maxV);
+                    tessellator.addVertexWithUV(maxX, minY, tempMinZ, minU, maxV);
                 }
             }
             tessellator.setColorRGBA(255, 255, 255, 255);
             overlay_texture = ((IBlockRedstoneWireMixins)block).get_texture_by_index(1);
-            if ((((connections)&0x002)!=0)) {
+            if ((((connections)&00002)!=0)) {
                 tessellator.addVertexWithUV(tempMaxX, minY, maxZ, overlay_texture.getMinU(), overlay_texture.getMaxV());
                 tessellator.addVertexWithUV(tempMaxX, maxY, maxZ, overlay_texture.getMaxU(), overlay_texture.getMaxV());
                 tessellator.addVertexWithUV(tempMaxX, maxY, minZ, overlay_texture.getMaxU(), overlay_texture.getMinV());
                 tessellator.addVertexWithUV(tempMaxX, minY, minZ, overlay_texture.getMinU(), overlay_texture.getMinV());
-                if ((((connections)&0x004)!=0)) {
+                if ((((connections)&00004)!=0)) {
                     tessellator.addVertexWithUV(tempMaxX, minY, minZ, overlay_texture.getMinU(), overlay_texture.getMinV());
                     tessellator.addVertexWithUV(tempMaxX, maxY, minZ, overlay_texture.getMaxU(), overlay_texture.getMinV());
                     tessellator.addVertexWithUV(tempMaxX, maxY, maxZ, overlay_texture.getMaxU(), overlay_texture.getMaxV());
                     tessellator.addVertexWithUV(tempMaxX, minY, maxZ, overlay_texture.getMinU(), overlay_texture.getMaxV());
                 }
             }
-            if ((((connections)&0x010)!=0)) {
+            if ((((connections)&00020)!=0)) {
                 tessellator.addVertexWithUV(tempMinX, maxY, maxZ, overlay_texture.getMaxU(), overlay_texture.getMinV());
                 tessellator.addVertexWithUV(tempMinX, minY, maxZ, overlay_texture.getMinU(), overlay_texture.getMinV());
                 tessellator.addVertexWithUV(tempMinX, minY, minZ, overlay_texture.getMinU(), overlay_texture.getMaxV());
                 tessellator.addVertexWithUV(tempMinX, maxY, minZ, overlay_texture.getMaxU(), overlay_texture.getMaxV());
-                if ((((connections)&0x020)!=0)) {
+                if ((((connections)&00040)!=0)) {
                     tessellator.addVertexWithUV(tempMinX, maxY, minZ, overlay_texture.getMaxU(), overlay_texture.getMaxV());
                     tessellator.addVertexWithUV(tempMinX, minY, minZ, overlay_texture.getMinU(), overlay_texture.getMaxV());
                     tessellator.addVertexWithUV(tempMinX, minY, maxZ, overlay_texture.getMinU(), overlay_texture.getMinV());
                     tessellator.addVertexWithUV(tempMinX, maxY, maxZ, overlay_texture.getMaxU(), overlay_texture.getMinV());
                 }
             }
-            if ((((connections)&0x080)!=0)) {
+            if ((((connections)&00200)!=0)) {
                 tessellator.addVertexWithUV(maxX, maxY, tempMaxZ, overlay_texture.getMaxU(), overlay_texture.getMinV());
                 tessellator.addVertexWithUV(maxX, minY, tempMaxZ, overlay_texture.getMinU(), overlay_texture.getMinV());
                 tessellator.addVertexWithUV(minX, minY, tempMaxZ, overlay_texture.getMinU(), overlay_texture.getMaxV());
                 tessellator.addVertexWithUV(minX, maxY, tempMaxZ, overlay_texture.getMaxU(), overlay_texture.getMaxV());
-                if ((((connections)&0x100)!=0)) {
+                if ((((connections)&00400)!=0)) {
                     tessellator.addVertexWithUV(minX, maxY, tempMaxZ, overlay_texture.getMaxU(), overlay_texture.getMaxV());
                     tessellator.addVertexWithUV(minX, minY, tempMaxZ, overlay_texture.getMinU(), overlay_texture.getMaxV());
                     tessellator.addVertexWithUV(maxX, minY, tempMaxZ, overlay_texture.getMinU(), overlay_texture.getMinV());
                     tessellator.addVertexWithUV(maxX, maxY, tempMaxZ, overlay_texture.getMaxU(), overlay_texture.getMinV());
                 }
             }
-            if ((((connections)&0x400)!=0)) {
+            if ((((connections)&02000)!=0)) {
                 tessellator.addVertexWithUV(maxX, minY, tempMinZ, overlay_texture.getMinU(), overlay_texture.getMaxV());
                 tessellator.addVertexWithUV(maxX, maxY, tempMinZ, overlay_texture.getMaxU(), overlay_texture.getMaxV());
                 tessellator.addVertexWithUV(minX, maxY, tempMinZ, overlay_texture.getMaxU(), overlay_texture.getMinV());
                 tessellator.addVertexWithUV(minX, minY, tempMinZ, overlay_texture.getMinU(), overlay_texture.getMinV());
-                if (((connections)>=0x800)) {
+                if (((connections)>=04000)) {
                     tessellator.addVertexWithUV(minX, minY, tempMinZ, overlay_texture.getMinU(), overlay_texture.getMinV());
                     tessellator.addVertexWithUV(minX, maxY, tempMinZ, overlay_texture.getMaxU(), overlay_texture.getMinV());
                     tessellator.addVertexWithUV(maxX, maxY, tempMinZ, overlay_texture.getMaxU(), overlay_texture.getMaxV());

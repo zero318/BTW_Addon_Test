@@ -7,6 +7,9 @@ import btw.block.blocks.BuddyBlock;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 
+import zero.test.IBlockMixins;
+import zero.test.IBlockEntityPistonMixins;
+
 #include "..\feature_flags.h"
 #include "..\util.h"
 
@@ -27,8 +30,22 @@ public abstract class BuddyBlockMixins extends Block {
         if (!self.isRedstoneOn(world, x, y, z)) {
             Block neighborBlock = Block.blocksList[neighborId];
             
+            TileEntity tileEntity;
             if (
-                (neighborBlock == null || neighborBlock.triggersBuddy()) &&
+                (
+                    neighborBlock == null ||
+#if BETTER_BUDDY_PISTON_FIX_TYPE == BETTER_BUDDY_PISTON_FIX_NONE
+                    neighborBlock.triggersBuddy()
+#elif BETTER_BUDDY_PISTON_FIX_TYPE == BETTER_BUDDY_PISTON_FIX_A
+                    neighborBlock.triggersBuddy() || (
+                        neighborId == Block.pistonMoving.blockID &&
+                        (tileEntity = world.getBlockTileEntity(x, y, z)) instanceof TileEntityPiston &&
+                        !((IBlockEntityPistonMixins)tileEntity).isRetractingBase()
+                    )
+#elif BETTER_BUDDY_PISTON_FIX_TYPE == BETTER_BUDDY_PISTON_FIX_B
+                    ((IBlockMixins)neighborBlock).triggersBuddy(world, x, y, z)
+#endif
+                ) &&
                 !world.isUpdatePendingThisTickForBlock(x, y, z, self.blockID)
             ) {
                 // minimal delay when triggered to avoid notfying neighbors of change in same tick

@@ -3,6 +3,8 @@ import net.minecraft.src.*;
 import btw.block.blocks.BuddyBlock;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
+import zero.test.IBlockMixins;
+import zero.test.IBlockEntityPistonMixins;
 // Block piston reactions
 @Mixin(BuddyBlock.class)
 public abstract class BuddyBlockMixins extends Block {
@@ -14,8 +16,12 @@ public abstract class BuddyBlockMixins extends Block {
         BuddyBlock self = (BuddyBlock)(Object)this;
         if (!self.isRedstoneOn(world, x, y, z)) {
             Block neighborBlock = Block.blocksList[neighborId];
+            TileEntity tileEntity;
             if (
-                (neighborBlock == null || neighborBlock.triggersBuddy()) &&
+                (
+                    neighborBlock == null ||
+                    neighborBlock.triggersBuddy()
+                ) &&
                 !world.isUpdatePendingThisTickForBlock(x, y, z, self.blockID)
             ) {
                 // minimal delay when triggered to avoid notfying neighbors of change in same tick

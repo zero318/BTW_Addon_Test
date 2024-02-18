@@ -80,6 +80,18 @@ public class WorldMixins implements IWorldMixins {
         }
     }
     
+    public void notifyBlockChangeAndComparators(int x, int y, int z, int blockId, int prevBlockId) {
+        World self = (World)(Object)this;
+        self.notifyBlockChange(x, y, z, prevBlockId);
+        Block block = Block.blocksList[blockId];
+        if (
+            block != null &&
+            block.hasComparatorInputOverride()
+        ) {
+            self.func_96440_m(x, y, z, blockId);
+        }
+    }
+    
 #if ENABLE_DIRECTIONAL_UPDATES
 
     public void updateNeighbourShapes(int x, int y, int z, int flags) {
@@ -229,6 +241,8 @@ public class WorldMixins implements IWorldMixins {
                     !world.isRemote &&
                     (flags & UPDATE_NEIGHBORS) != 0
                 ) {
+                    this.notifyBlockChangeAndComparators(x, y, z, blockId, currentBlockId);
+                    /*
                     world.notifyBlockChange(x, y, z, currentBlockId);
                     Block block = Block.blocksList[blockId];
                     if (
@@ -237,6 +251,7 @@ public class WorldMixins implements IWorldMixins {
                     ) {
                         world.func_96440_m(x, y, z, blockId);
                     }
+                    */
                 }
                 if (
                     (flags & UPDATE_KNOWN_SHAPE) == 0
@@ -308,6 +323,8 @@ public class WorldMixins implements IWorldMixins {
                     (flags & UPDATE_NEIGHBORS) != 0
                 ) {
                     int currentBlockId = chunk.getBlockID(x & 0xF, y, z & 0xF);
+                    this.notifyBlockChangeAndComparators(x, y, z, currentBlockId, currentBlockId);
+                    /*
                     world.notifyBlockChange(x, y, z, currentBlockId);
                     Block block = Block.blocksList[currentBlockId];
                     if (
@@ -316,6 +333,7 @@ public class WorldMixins implements IWorldMixins {
                     ) {
                         world.func_96440_m(x, y, z, currentBlockId);
                     }
+                    */
                 }
                 if (
                     (flags & UPDATE_KNOWN_SHAPE) == 0

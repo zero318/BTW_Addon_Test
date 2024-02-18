@@ -72,6 +72,10 @@ public class ZeroTestAddon extends BTWAddon {
         ZeroTestBlocks.buffer_stop = new BufferStopBlock(BUFFER_STOP_ID);
         Item.itemsList[BUFFER_STOP_ID] = new ItemBlock(BUFFER_STOP_ID-256);
 #endif
+#if ENABLE_SCAFFOLDING
+        ZeroTestBlocks.scaffolding = new ScaffoldingBlock(SCAFFOLDING_ID);
+        Item.itemsList[SCAFFOLDING_ID] = new ItemBlock(SCAFFOLDING_ID-256);
+#endif
     }
     
     @Override

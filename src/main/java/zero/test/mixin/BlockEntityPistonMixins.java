@@ -14,6 +14,7 @@ import zero.test.IBlockEntityPistonMixins;
 //import zero.test.mixin.IBlockEntityPistonAccessMixins;
 import zero.test.IBlockMixins;
 import zero.test.IEntityMixins;
+import zero.test.ZeroUtil;
 import btw.block.BTWBlocks;
 import btw.client.fx.BTWEffectManager;
 import btw.crafting.manager.PistonPackingCraftingManager;
@@ -30,8 +31,6 @@ import java.util.List;
 // Block piston reactions
 //#define getInputSignal(...) func_94482_f(__VA_ARGS__)
 
-// Enabling the cache creates rendering
-// bugs when pushing double chests.
 @Mixin(TileEntityPiston.class)
 public abstract class BlockEntityPistonMixins extends TileEntity implements IBlockEntityPistonMixins {
     public long lastTicked;
@@ -47,8 +46,8 @@ public abstract class BlockEntityPistonMixins extends TileEntity implements IBlo
     public abstract boolean destroyAndDropIfShoveled();
     @Shadow
     public abstract void preBlockPlaced();
-    @Shadow
-    public abstract void attemptToPackItems();
+    //@Shadow
+    //public abstract void attemptToPackItems();
     public boolean hasSmallCenterHardPointToFacing(int x, int y, int z, int direction, boolean ignoreTransparency) {
         if (
             // Treat retracting bases as a stationary block
@@ -94,6 +93,12 @@ public abstract class BlockEntityPistonMixins extends TileEntity implements IBlo
         }
         return false;
     }
+    // Turns out this "cache" is actually just
+    // creating an extra tile entity for no
+    // reason. Scrap it.
+    @Overwrite
+    public void storeCachedTileEntity() {
+    }
     @Overwrite
     public void restoreStoredBlock() {
         TileEntityPiston self = (TileEntityPiston)(Object)this;
@@ -123,7 +128,6 @@ public abstract class BlockEntityPistonMixins extends TileEntity implements IBlo
             // is true
             TileEntity tileEntity = TileEntity.createAndLoadEntity(self.storedTileEntityData);
             worldObj.setBlockTileEntity(self.xCoord, self.yCoord, self.zCoord, tileEntity);
-            self.cachedTileEntity = null;
         }
         if (newMeta >= 0) {
             self.worldObj.notifyBlockOfNeighborChange(self.xCoord, self.yCoord, self.zCoord, storedBlockId);
@@ -201,7 +205,7 @@ public abstract class BlockEntityPistonMixins extends TileEntity implements IBlo
             // for the base.
             // Future versions with block states should just query the
             // collision of the extended state directly rather than
-            // making hardcoding this.
+            // hardcoding this.
             AxisAlignedBB tempBox = AxisAlignedBB.getAABBPool().getAABB(
                 x, y, z,
                 x + 1.0D, y + 1.0D, z + 1.0D
@@ -519,18 +523,16 @@ public abstract class BlockEntityPistonMixins extends TileEntity implements IBlo
                         boundingBox.maxZ += GLUE_BLOCK_FUDGE_FACTOR;
                     }
                     entityList = self.worldObj.getEntitiesWithinAABBExcludingEntity((Entity)null, boundingBox);
-                    //if (!entityList.isEmpty()) {
-                        dX *= idkOffset;
-                        dY *= idkOffset;
-                        dZ *= idkOffset;
-                        for (Entity entity : entityList) {
-                            if ((((((IEntityMixins)entity).getPistonMobilityFlags(direction))&4)!=0)) {
-                                 ;
-                                ((IEntityMixins)entity).moveEntityByPiston(dX, dY, dZ);
-                                 ;
-                            }
+                    dX *= idkOffset;
+                    dY *= idkOffset;
+                    dZ *= idkOffset;
+                    for (Entity entity : entityList) {
+                        if ((((((IEntityMixins)entity).getPistonMobilityFlags(direction))&4)!=0)) {
+                             ;
+                            ((IEntityMixins)entity).moveEntityByPiston(dX, dY, dZ);
+                             ;
                         }
-                    //}
+                    }
                 }
             }
         }
@@ -625,5 +627,40 @@ public abstract class BlockEntityPistonMixins extends TileEntity implements IBlo
     )
     public void writeToNBT_inject(NBTTagCompound compound, CallbackInfo info) {
         compound.setBoolean("source", this.shouldHeadBeRendered);
+    }
+    @Shadow
+    public abstract boolean isLocationSuitableForPacking(int i, int j, int k, int iPistonDirection);
+    @Shadow
+    public abstract void removeItemsOfTypeFromList(ItemStack stack, int iCount, List list);
+    @Shadow
+    public abstract void createPackedBlockOfTypeAtLocation(int blockID, int metadata, int x, int y, int z);
+    @Overwrite
+    public void attemptToPackItems() {
+        TileEntityPiston self = (TileEntityPiston)(Object)this;
+        if (
+            !this.worldObj.isRemote &&
+            self.isExtending()
+        ) {
+            int direction = self.getPistonOrientation();
+            int x = this.xCoord + Facing.offsetsXForSide[direction];
+            int y = this.yCoord + Facing.offsetsYForSide[direction];
+            int z = this.zCoord + Facing.offsetsZForSide[direction];
+            if (this.isLocationSuitableForPacking(x, y, z, ((direction)^1))) {
+                AxisAlignedBB targetBox = AxisAlignedBB.getAABBPool().getAABB(
+                    x, y, z,
+                    x + 1.0D, y + 1.0D, z + 1.0D
+                );
+                List<EntityItem> itemsWithinBox = this.worldObj.getEntitiesWithinAABB(EntityItem.class, targetBox);
+                if (!itemsWithinBox.isEmpty()) {
+                    PistonPackingRecipe recipe = PistonPackingCraftingManager.instance.getValidRecipeFromItemList(itemsWithinBox);
+                    if (recipe != null) {
+                        for (ItemStack stack : recipe.getInput()) {
+                            this.removeItemsOfTypeFromList(stack, stack.stackSize, itemsWithinBox);
+                        }
+                        this.createPackedBlockOfTypeAtLocation(recipe.getOutput().blockID, recipe.getOutputMetadata(), x, y, z);
+                    }
+                }
+            }
+        }
     }
 }

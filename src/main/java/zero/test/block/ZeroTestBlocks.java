@@ -15,4 +15,5 @@ public class ZeroTestBlocks {
     public static Block wooden_rail;
     public static Block steel_rail;
     public static Block buffer_stop;
+    public static Block scaffolding;
 }

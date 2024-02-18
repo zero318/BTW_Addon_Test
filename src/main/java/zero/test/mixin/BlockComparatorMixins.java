@@ -138,6 +138,21 @@ public abstract class BlockComparatorMixins extends BlockRedstoneLogic {
                 return 0;
         }
     }
+    @Override
+    public int func_94488_g(IBlockAccess blockAccess, int x, int y, int z, int side)
+    {
+        int blockId = blockAccess.getBlockId(x, y, z);
+        if (blockId == Block.redstoneWire.blockID) {
+            return blockAccess.getBlockMetadata(x, y, z);
+        }
+        if (blockId == Block.blockRedstone.blockID) {
+            return 15;
+        }
+        if (this.func_94477_d(blockId)) {
+            return blockAccess.isBlockProvidingPowerTo(x, y, z, side);
+        }
+        return 0;
+    }
     //@Override
     public boolean getWeakChanges(World world, int x, int y, int z, int meta) {
         return true;

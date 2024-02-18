@@ -17,7 +17,7 @@ import zero.test.item.SlimeBlockItem;
 public class ZeroTestAddon extends BTWAddon {
     private static ZeroTestAddon instance;
     private ZeroTestAddon() {
-        super("Zero Test Addon", "0.1.10", "ZeroTest");
+        super("Zero Test Addon", "0.1.11", "ZeroTest");
     }
     @Override
     public void initialize() {
@@ -46,6 +46,8 @@ public class ZeroTestAddon extends BTWAddon {
         Item.itemsList[1328] = new ItemBlock(1328 -256);
         ZeroTestBlocks.buffer_stop = new BufferStopBlock(1329);
         Item.itemsList[1329] = new ItemBlock(1329 -256);
+        ZeroTestBlocks.scaffolding = new ScaffoldingBlock(1330);
+        Item.itemsList[1330] = new ItemBlock(1330 -256);
     }
     @Override
     public void postInitialize() {
