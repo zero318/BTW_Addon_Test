@@ -499,7 +499,7 @@ public class PistonResolver {
                     // This is to make sure that blocks being pulled leave air
                     // behind when another block isn't moving into that space.
                     // This replaces the hashmap from vanilla
-                    world.setBlock(x, y, z, 0, 0, 0x02 | 0x80);
+                    world.setBlock(x, y, z, 0, 0, 0x02);
                     break;
                 }
             } while (pushed_blocks[j] != packedPos);

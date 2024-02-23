@@ -286,8 +286,11 @@ MACRO_VOID(/* Allow rails to be placed on hoppers */)
 MACRO_VOID(/* Allow buttons to be placed on the top/bottom of blocks */)
 #define ENABLE_VERTICAL_BUTTONS 1
 
-MACRO_VOID(/**/)
+MACRO_VOID(/* The worst version of scaffolding you've ever seen */)
 #define ENABLE_SCAFFOLDING 1
+
+MACRO_VOID(/* Make detectors only update adjacent blocks */)
+#define ENABLE_NORMAL_DETECTOR_POWER_RANGE 1
 
 #define ENABLE_DEBUG_STRING_JANK 0
 

@@ -55,7 +55,7 @@ import java.util.List;
 #define PISTON_ENTITY_PUSH_DEBUG(...)
 #endif
 
-#define DELAY_SENDING_BLOCK_TO_CLIENT 0
+#define NEW_TILE_ENTITY_LOGIC 1
 
 @Mixin(TileEntityPiston.class)
 public abstract class BlockEntityPistonMixins extends TileEntity implements IBlockEntityPistonMixins {
@@ -70,6 +70,8 @@ public abstract class BlockEntityPistonMixins extends TileEntity implements IBlo
     public float lastProgress;
     @Shadow
     public boolean shouldHeadBeRendered;
+    @Shadow
+    public NBTTagCompound storedTileEntityData;
     
     @Shadow
     public abstract boolean destroyAndDropIfShoveled();
@@ -149,24 +151,25 @@ public abstract class BlockEntityPistonMixins extends TileEntity implements IBlo
             newMeta = ((IWorldMixins)self.worldObj).updateFromNeighborShapes(self.xCoord, self.yCoord, self.zCoord, storedBlockId, storedMeta);
         }
         
+#if !NEW_TILE_ENTITY_LOGIC
         // Set scanningTileEntities to true
         // so that the tile entity is always
         // placed correctly
         boolean scanningTileEntitiesTemp = ((IWorldAccessMixins)self.worldObj).getScanningTileEntities();
-        ((IWorldAccessMixins)self.worldObj).setScanningTileEntities(true);
+        ((IWorldAccessMixins)self.worldObj).setScanningTileEntities(SCANNING_TILE_ENTITIES_VALUE);
+#endif
         
         if (newMeta >= 0) {
-#if DELAY_SENDING_BLOCK_TO_CLIENT
-            self.worldObj.setBlock(self.xCoord, self.yCoord, self.zCoord, storedBlockId, newMeta, UPDATE_INVISIBLE | UPDATE_KNOWN_SHAPE | UPDATE_MOVE_BY_PISTON);
-#else
             self.worldObj.setBlock(self.xCoord, self.yCoord, self.zCoord, storedBlockId, newMeta, UPDATE_NEIGHBORS | UPDATE_CLIENTS | UPDATE_MOVE_BY_PISTON);
-#endif
         } else {
             // The block is going to be destroyed, 
             // so no need to render it on the client.
             self.worldObj.setBlock(self.xCoord, self.yCoord, self.zCoord, storedBlockId, storedMeta, UPDATE_INVISIBLE | UPDATE_KNOWN_SHAPE | UPDATE_MOVE_BY_PISTON | UPDATE_SUPPRESS_LIGHT);
         }
         
+        
+#if !NEW_TILE_ENTITY_LOGIC
+
 #if PISTON_TILE_ENTITY_PRINT_DEBUGGING
         NBTTagCompound prevTileEntityData = new NBTTagCompound();
 #endif
@@ -179,15 +182,6 @@ public abstract class BlockEntityPistonMixins extends TileEntity implements IBlo
 #if PISTON_TILE_ENTITY_PRINT_DEBUGGING
             tileEntity.writeToNBT(prevTileEntityData);
 #endif
-#if DELAY_SENDING_BLOCK_TO_CLIENT
-            if (newMeta >= 0) {
-                worldObj.markBlockForUpdate(self.xCoord, self.yCoord, self.zCoord);
-                ((IWorldMixins)worldObj).notifyBlockChangeAndComparators(self.xCoord, self.yCoord, self.zCoord, storedBlockId, Block.pistonMoving.blockID);
-#if ENABLE_DIRECTIONAL_UPDATES
-                ((IWorldMixins)worldObj).updateNeighbourShapes(self.xCoord, self.yCoord, self.zCoord, UPDATE_CLIENTS | UPDATE_MOVE_BY_PISTON);
-#endif
-            }
-#endif
         }
         
 #if PISTON_TILE_ENTITY_PRINT_DEBUGGING
@@ -199,12 +193,16 @@ public abstract class BlockEntityPistonMixins extends TileEntity implements IBlo
             newTileEntityA.writeToNBT(newTileEntityDataA);
         }
 #endif
-        
+
+#endif
+
         if (newMeta >= 0) {
             self.worldObj.notifyBlockOfNeighborChange(self.xCoord, self.yCoord, self.zCoord, storedBlockId);
         } else {
             self.worldObj.destroyBlock(self.xCoord, self.yCoord, self.zCoord, true);
         }
+
+#if !NEW_TILE_ENTITY_LOGIC
 
 #if PISTON_TILE_ENTITY_PRINT_DEBUGGING
         NBTTagCompound newTileEntityDataB = null;
@@ -234,18 +232,55 @@ public abstract class BlockEntityPistonMixins extends TileEntity implements IBlo
         
         // Restore original value of scanningTileEntities
         ((IWorldAccessMixins)self.worldObj).setScanningTileEntities(scanningTileEntitiesTemp);
+        
+#endif
     }
     
     @Overwrite
     public void clearPistonTileEntity() {
-        if (
-            this.lastProgress < 1.0F &&
-            this.worldObj != null
-        ) {
+#if NEW_TILE_ENTITY_LOGIC
+        if (this.worldObj != null) {
+            if (this.lastProgress < 1.0F) {
+                this.lastProgress = this.progress = 1.0F;
+                if (
+                    this.worldObj.getBlockId(this.xCoord, this.yCoord, this.zCoord) == Block.pistonMoving.blockID &&
+                    !this.destroyAndDropIfShoveled()
+                ) {
+                    this.preBlockPlaced();
+                    this.restoreStoredBlock();
+                }
+            }
+            else {
+                this.worldObj.removeBlockTileEntity(this.xCoord, this.yCoord, this.zCoord);
+                this.invalidate();
+                
+                if (this.storedTileEntityData != null) {
+                    
+                    // Set scanningTileEntities to true
+                    // so that the tile entity is always
+                    // placed correctly
+                    boolean scanningTileEntitiesTemp = ((IWorldAccessMixins)this.worldObj).getScanningTileEntities();
+                    ((IWorldAccessMixins)this.worldObj).setScanningTileEntities(true);
+                    
+                    TileEntity newTileEntity = TileEntity.createAndLoadEntity(this.storedTileEntityData);
+                    this.worldObj.setBlockTileEntity(this.xCoord, this.yCoord, this.zCoord, newTileEntity);
+                    
+                    // Restore original value of scanningTileEntities
+                    ((IWorldAccessMixins)this.worldObj).setScanningTileEntities(scanningTileEntitiesTemp);
+                    
+                    if (!scanningTileEntitiesTemp) {
+                        this.worldObj.setBlockTileEntity(this.xCoord, this.yCoord, this.zCoord, newTileEntity);
+                    }
+                }
+            }
+        }
+#else
+        if (this.lastProgress < 1.0F && this.worldObj != null) {
             this.lastProgress = this.progress = 1.0F;
+            
             this.worldObj.removeBlockTileEntity(this.xCoord, this.yCoord, this.zCoord);
             this.invalidate();
-            
+                
             if (
                 this.worldObj.getBlockId(this.xCoord, this.yCoord, this.zCoord) == Block.pistonMoving.blockID &&
                 !this.destroyAndDropIfShoveled()
@@ -254,6 +289,7 @@ public abstract class BlockEntityPistonMixins extends TileEntity implements IBlo
                 this.restoreStoredBlock();
             }
         }
+#endif
     }
     
     public long getLastTicked() {
@@ -767,9 +803,10 @@ public abstract class BlockEntityPistonMixins extends TileEntity implements IBlo
             // FCMOD: Added
             this.attemptToPackItems();
             // END FCMOD
-            
+#if !NEW_TILE_ENTITY_LOGIC
             this.worldObj.removeBlockTileEntity(this.xCoord, this.yCoord, this.zCoord);
             this.invalidate();
+#endif
             
             if (
                 this.worldObj.getBlockId(this.xCoord, this.yCoord, this.zCoord) == Block.pistonMoving.blockID &&
@@ -778,6 +815,12 @@ public abstract class BlockEntityPistonMixins extends TileEntity implements IBlo
                 this.preBlockPlaced();
                 this.restoreStoredBlock();
             }
+#if NEW_TILE_ENTITY_LOGIC
+            else {
+                this.worldObj.removeBlockTileEntity(this.xCoord, this.yCoord, this.zCoord);
+                this.invalidate();
+            }
+#endif
             return;
         }
         float nextProgress = currentProgress + 0.5F;

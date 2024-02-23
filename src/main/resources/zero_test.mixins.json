@@ -67,7 +67,8 @@
     "BlockButtonMixins",
     "ButtonBlockMixins",
     "BlockPressurePlateMixins",
-    "DoorBlockMixins"
+    "DoorBlockMixins",
+    "ChunkMixins"
   ],
   "client": [
     "ComparatorBlockMixins",
