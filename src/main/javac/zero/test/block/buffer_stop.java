@@ -68,6 +68,12 @@ public class BufferStopBlock extends Block {
     }
 #endif
 */
+
+#if ENABLE_PLATFORM_FIXES
+    public int getPlatformMobilityFlag(World world, int x, int y, int z) {
+        return PLATFORM_CAN_LIFT;
+    }
+#endif
     
     @Override
     public int getRenderType() {
@@ -208,5 +214,13 @@ public class BufferStopBlock extends Block {
     public void renderBlockAsItem(RenderBlocks renderBlocks, int damage, float brightness) {
         getTransformedModelForMetadata(DIRECTION_SOUTH).renderAsItemBlock(renderBlocks, this, damage);
     }
+    
+#if ENABLE_PLATFORM_FIXES
+    @Override
+    @Environment(EnvType.CLIENT)
+    public void renderFallingBlock(RenderBlocks renderBlocks, int x, int y, int z, int meta) {
+        getTransformedModelForMetadata(FLAT_DIRECTION_TO_DIRECTION(READ_META_FIELD(meta, FLAT_DIRECTION))).renderAsFallingBlock(renderBlocks, this, x, y, z, meta);
+    }
+#endif
 #endif
 }

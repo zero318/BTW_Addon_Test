@@ -1,5 +1,6 @@
 package zero.test.mixin;
 import net.minecraft.src.*;
+import btw.block.blocks.LeverBlock;
 import btw.world.util.WorldUtils;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -12,7 +13,7 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.gen.Invoker;
 // Block piston reactions
-@Mixin(BlockLever.class)
+@Mixin(LeverBlock.class)
 public abstract class BlockLeverMixins extends Block {
     public BlockLeverMixins() {
         super(0, null);
@@ -21,7 +22,7 @@ public abstract class BlockLeverMixins extends Block {
     public boolean triggersBuddy() {
         return false;
     }
-    @Overwrite
+    @Override
     public boolean canPlaceBlockOnSide(World world, int x, int y, int z, int direction) {
         return WorldUtils.doesBlockHaveLargeCenterHardpointToFacing(
             world,
@@ -32,7 +33,7 @@ public abstract class BlockLeverMixins extends Block {
             true
         );
     }
-    @Overwrite
+    @Override
     public boolean canPlaceBlockAt(World world, int x, int y, int z) {
         return this.canPlaceBlockOnSide(world, x, y, z, 0) ||
                this.canPlaceBlockOnSide(world, x, y, z, 1) ||
@@ -41,7 +42,7 @@ public abstract class BlockLeverMixins extends Block {
                this.canPlaceBlockOnSide(world, x, y, z, 4) ||
                this.canPlaceBlockOnSide(world, x, y, z, 5);
     }
-    @Overwrite
+    @Override
     public int onBlockPlaced(World world, int x, int y, int z, int side, float clickX, float clickY, float clickZ, int meta) {
         int leverDir = -1;
         if (this.canPlaceBlockOnSide(world, x, y, z, side)) {
@@ -73,7 +74,7 @@ public abstract class BlockLeverMixins extends Block {
         }
         return (((meta)&8|(leverDir)));
     }
-    @Overwrite
+    @Override
     public void onNeighborBlockChange(World world, int x, int y, int z, int neighborId) {
         int meta = world.getBlockMetadata(x, y, z);
         int direction = (((meta)&7));
@@ -92,5 +93,18 @@ public abstract class BlockLeverMixins extends Block {
             this.dropBlockAsItem(world, x, y, z, meta, 0);
             world.setBlockToAir(x, y, z);
         }
+    }
+    @Overwrite
+    public boolean onRotatedAroundBlockOnTurntableToFacing(World world, int x, int y, int z, int direction) {
+        return true;
+    }
+    @Override
+    public int rotateMetadataAroundJAxis(int meta, boolean reverse) {
+        int direction = (((meta)&7));
+        switch (direction) {
+            case 1: case 2: case 3: case 4:
+                direction = 6 - rotateFacingAroundY(6 - direction, reverse);
+        }
+        return (((meta)&8|(direction)));
     }
 }

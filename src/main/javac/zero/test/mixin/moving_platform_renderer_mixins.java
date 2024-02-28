@@ -43,26 +43,31 @@ import zero.test.IBlockRedstoneLogicMixins;
 //import zero.test.mixin.IRenderBlocksAccessMixins;
 import zero.test.IRenderBlocksMixins;
 import zero.test.IMovingPlatformEntityMixins;
+import zero.test.GenericBlockRenderer;
 
 #include "..\func_aliases.h"
 #include "..\feature_flags.h"
 #include "..\util.h"
 
 @Mixin(MovingPlatformRenderer.class)
-public abstract class MovingPlatformRendererMixins {
+public abstract class MovingPlatformRendererMixins extends Render {
 #if ENABLE_PLATFORM_EXTENSIONS
     
-    @Redirect(
+    @Inject(
         method = "doRender",
-        at = @At(
-            value = "FIELD",
-            target = "Lbtw/block/BTWBlocks;platform:Lnet/minecraft/src/Block;",
-            opcode = Opcodes.GETSTATIC
-        )
+        at = @At("HEAD"),
+        cancellable = true
     )
-    private Block redirect_block_get(Entity entity, double x, double y, double z, float yaw, float renderPartialTicks) {
-        Block block = Block.blocksList[((IMovingPlatformEntityMixins)(MovingPlatformEntity)entity).getBlockId()];
-        return !BLOCK_IS_AIR(block) ? block : BTWBlocks.platform;
+    public void doRender_inject(Entity entity, double x, double y, double z, float yaw, float renderPartialTicks, CallbackInfo callbackInfo) {
+        int blockId = ((IMovingPlatformEntityMixins)entity).getBlockId();
+        
+        if (
+            blockId != BTWBlocks.platform.blockID
+        ) {
+            GenericBlockRenderer.render_block(this.renderManager.renderEngine, entity, x, y, z, blockId, ((IMovingPlatformEntityMixins)entity).getBlockMeta());
+            callbackInfo.cancel();
+        }
     }
+    
 #endif
 }

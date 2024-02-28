@@ -68,7 +68,13 @@
     "ButtonBlockMixins",
     "BlockPressurePlateMixins",
     "DoorBlockMixins",
-    "ChunkMixins"
+    "ChunkMixins",
+    "PulleyBlockMixins",
+    "MovingAnchorEntityMixins",
+    "TurntableTileEntityMixins",
+    "FenceGateBlockMixins",
+    "TurntableBlockMixins",
+    "TrapDoorBlockMixins"
   ],
   "client": [
     "ComparatorBlockMixins",

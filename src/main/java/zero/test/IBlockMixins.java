@@ -42,6 +42,9 @@ public interface IBlockMixins {
     default public boolean isStickyForEntitiesWhenMoved(int direction, int meta) {
         return false;
     }
+    default public boolean canTransmitRotationHorizontallyOnTurntable(World world, int x, int y, int z, int direction) {
+        return ((Block)(Object)this).canTransmitRotationHorizontallyOnTurntable(world, x, y, z);
+    }
     default public boolean permanentlySupportsMortarBlocks(World world, int x, int y, int z, int direction) {
         return false;
     }

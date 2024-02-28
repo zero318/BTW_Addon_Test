@@ -15,8 +15,6 @@ public interface IBlockEntityPistonMixins {
     public boolean hasCenterHardPointToFacing(int x, int y, int z, int direction, boolean ignoreTransparency);
 #endif
 
-    public boolean isPlacingBlock();
-
     public boolean isRetractingBase();
 
     public boolean hasLargeCenterHardPointToFacing(int x, int y, int z, int direction, boolean ignoreTransparency);

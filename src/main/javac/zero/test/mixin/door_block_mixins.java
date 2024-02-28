@@ -70,4 +70,24 @@ public abstract class DoorBlockMixins extends BlockDoor {
         }
         return false;
     }
+    
+#if ENABLE_MORE_TURNABLE_BLOCKS && ENABLE_MOVING_BLOCK_CHAINING
+    @Override
+    public boolean canRotateOnTurntable(IBlockAccess blockAccess, int x, int y, int z) {
+        return true;
+    }
+    
+    @Override
+    public int rotateMetadataAroundJAxis(int meta, boolean reverse) {
+        if (!READ_META_FIELD(meta, DOOR_IS_TOP)) {
+            return MERGE_META_FIELD(meta, DOOR_DIRECTION, meta + (reverse ? -1 : 1) & 3);
+        }
+        return meta;
+    }
+    
+    public boolean isStickyForBlocks(World world, int x, int y, int z, int direction) {
+        int meta = world.getBlockMetadata(x, y, z);
+        return direction == (READ_META_FIELD(meta, DOOR_IS_TOP) ? DIRECTION_DOWN : DIRECTION_UP);
+    }
+#endif
 }

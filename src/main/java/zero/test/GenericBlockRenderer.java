@@ -1,4 +1,4 @@
-package zero.test.mixin;
+package zero.test;
 import net.minecraft.src.*;
 import btw.AddonHandler;
 import btw.block.BTWBlocks;
@@ -34,24 +34,38 @@ import zero.test.IBlockRedstoneWireMixins;
 import zero.test.IBlockRedstoneLogicMixins;
 //import zero.test.mixin.IRenderBlocksAccessMixins;
 import zero.test.IRenderBlocksMixins;
-import zero.test.GenericBlockRenderer;
 // Block piston reactions
 //#define getInputSignal(...) func_94482_f(__VA_ARGS__)
-@Mixin(BlockLiftedByPlatformRenderer.class)
-public abstract class BlockLiftedByPlatformRendererMixins extends Render {
-    @Inject(
-        method = "doRender(Lnet/minecraft/src/Entity;DDDFF)V",
-        at = @At("TAIL")
-    )
-    public void doRender_inject(Entity entity, double x, double y, double z, float yaw, float renderPartialTicks, CallbackInfo info) {
-        int blockId = ((BlockLiftedByPlatformEntity)entity).getBlockID();
+public class GenericBlockRenderer {
+    private static RenderBlocks renderBlocks = new RenderBlocks();
+    public static void render_block(RenderEngine render, Entity entity, double x, double y, double z, int blockId, int meta) {
         Block block = Block.blocksList[blockId];
-        if (
-            !((block)==null) &&
-            !(block instanceof BlockRailBase) &&
-            !(block instanceof BlockRedstoneWire)
-        ) {
-            GenericBlockRenderer.render_block(this.renderManager.renderEngine, entity, x, y, z, blockId, ((BlockLiftedByPlatformEntity)entity).getBlockMetadata());
+        if (!((block)==null)) {
+            // This is just ripped from falling sand
+            GL11.glPushMatrix();
+            GL11.glTranslatef((float)x, (float)y, (float)z);
+            render.bindTexture("/terrain.png");
+            GL11.glDisable(GL11.GL_LIGHTING);
+            renderBlocks.blockAccess = entity.worldObj;
+            Tessellator tessellator = Tessellator.instance;
+            tessellator.startDrawingQuads();
+            tessellator.setTranslation(
+                -MathHelper.floor_double(entity.posX) - 0.5D,
+                -MathHelper.floor_double(entity.posY) - 0.5D,
+                -MathHelper.floor_double(entity.posZ) - 0.5D
+            );
+            block.currentBlockRenderer = renderBlocks;
+            block.renderFallingBlock(
+                renderBlocks,
+                MathHelper.floor_double(entity.posX),
+                MathHelper.floor_double(entity.posY),
+                MathHelper.floor_double(entity.posZ),
+                meta
+            );
+            tessellator.setTranslation(0.0D, 0.0D, 0.0D);
+            tessellator.draw();
+            GL11.glEnable(GL11.GL_LIGHTING);
+            GL11.glPopMatrix();
         }
     }
 }

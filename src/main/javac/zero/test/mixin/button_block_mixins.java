@@ -35,4 +35,21 @@ public abstract class ButtonBlockMixins extends BlockButton {
         return super.getBlockBoundsFromPoolBasedOnState(blockAccess, x, y, z);
     }
 #endif
+
+#if ENABLE_MORE_TURNABLE_BLOCKS
+    @Overwrite
+    public boolean onRotatedAroundBlockOnTurntableToFacing(World world, int x, int y, int z, int direction) {
+        return true;
+    }
+    
+    @Override
+    public int rotateMetadataAroundJAxis(int meta, boolean reverse) {
+        int direction = READ_META_FIELD(meta, BUTTON_DIRECTION);
+        switch (direction) {
+            case 1: case 2: case 3: case 4:
+                direction = 6 - rotateFacingAroundY(6 - direction, reverse);
+        }
+        return MERGE_META_FIELD(meta, BUTTON_DIRECTION, direction);
+    }
+#endif
 }

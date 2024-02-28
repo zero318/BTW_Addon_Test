@@ -130,6 +130,7 @@ public abstract class BlockEntityPistonMixins extends TileEntity implements IBlo
         if (this.worldObj != null) {
             if (this.lastProgress < 1.0F) {
                 this.lastProgress = this.progress = 1.0F;
+                this.attemptToPackItems();
                 if (
                     this.worldObj.getBlockId(this.xCoord, this.yCoord, this.zCoord) == Block.pistonMoving.blockID &&
                     !this.destroyAndDropIfShoveled()
@@ -145,15 +146,16 @@ public abstract class BlockEntityPistonMixins extends TileEntity implements IBlo
                     // Set scanningTileEntities to true
                     // so that the tile entity is always
                     // placed correctly
-                    boolean scanningTileEntitiesTemp = ((IWorldAccessMixins)this.worldObj).getScanningTileEntities();
-                    ((IWorldAccessMixins)this.worldObj).setScanningTileEntities(true);
+                    //boolean scanningTileEntitiesTemp = ((IWorldAccessMixins)this.worldObj).getScanningTileEntities();
+                    //((IWorldAccessMixins)this.worldObj).setScanningTileEntities(true);
                     TileEntity newTileEntity = TileEntity.createAndLoadEntity(this.storedTileEntityData);
+                    this.storedTileEntityData = null;
                     this.worldObj.setBlockTileEntity(this.xCoord, this.yCoord, this.zCoord, newTileEntity);
                     // Restore original value of scanningTileEntities
-                    ((IWorldAccessMixins)this.worldObj).setScanningTileEntities(scanningTileEntitiesTemp);
-                    if (!scanningTileEntitiesTemp) {
-                        this.worldObj.setBlockTileEntity(this.xCoord, this.yCoord, this.zCoord, newTileEntity);
-                    }
+                    //((IWorldAccessMixins)this.worldObj).setScanningTileEntities(scanningTileEntitiesTemp);
+                    //if (!scanningTileEntitiesTemp) {
+                        //this.worldObj.setBlockTileEntity(this.xCoord, this.yCoord, this.zCoord, newTileEntity);
+                    //}
                 }
             }
         }
@@ -594,15 +596,15 @@ public abstract class BlockEntityPistonMixins extends TileEntity implements IBlo
         float currentProgress = this.progress;
         this.lastProgress = currentProgress;
         if (currentProgress >= 1.0F) {
-            // FCMOD: Added
-            this.attemptToPackItems();
-            // END FCMOD
             if (
                 this.worldObj.getBlockId(this.xCoord, this.yCoord, this.zCoord) == Block.pistonMoving.blockID &&
                 !this.destroyAndDropIfShoveled()
             ) {
                 this.preBlockPlaced();
                 this.restoreStoredBlock();
+                // FCMOD: Added
+                this.attemptToPackItems();
+                // END FCMOD
             }
             else {
                 this.worldObj.removeBlockTileEntity(this.xCoord, this.yCoord, this.zCoord);

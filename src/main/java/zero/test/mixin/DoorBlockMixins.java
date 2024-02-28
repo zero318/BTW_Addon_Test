@@ -40,4 +40,19 @@ public abstract class DoorBlockMixins extends BlockDoor {
         }
         return false;
     }
+    @Override
+    public boolean canRotateOnTurntable(IBlockAccess blockAccess, int x, int y, int z) {
+        return true;
+    }
+    @Override
+    public int rotateMetadataAroundJAxis(int meta, boolean reverse) {
+        if (!((((meta)>7)))) {
+            return (((meta)&12|(meta + (reverse ? -1 : 1) & 3)));
+        }
+        return meta;
+    }
+    public boolean isStickyForBlocks(World world, int x, int y, int z, int direction) {
+        int meta = world.getBlockMetadata(x, y, z);
+        return direction == (((((meta)>7))) ? 0 : 1);
+    }
 }

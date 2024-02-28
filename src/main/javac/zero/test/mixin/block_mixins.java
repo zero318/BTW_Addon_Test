@@ -192,6 +192,15 @@ public abstract class BlockMixins implements IBlockMixins {
 #endif
 */
 
+/*
+#if ENABLE_TURNTABLE_SLIME_SUPPORT
+    @Overwrite
+    public int getNewMetadataRotatedAroundBlockOnTurntableToFacing(World world, int x, int y, int z, int prevFacing, int newFacing) {
+        return world.getBlockMetadata(x, y, z);
+    }
+#endif
+*/
+
 #if ENABLE_TEXTURED_BOX
     @Environment(EnvType.CLIENT)
     public Icon getIconBySidedIndex(int side, int index) {

@@ -9,8 +9,6 @@ import btw.AddonHandler;
 
 public class ZeroUtil {
     
-    //public static TileEntity pistonTemp = null;
-    
     public static final int[] rail_exit_directions = new int[] {
         DIRECTION_SOUTH, DIRECTION_NORTH,
         DIRECTION_EAST, DIRECTION_WEST,

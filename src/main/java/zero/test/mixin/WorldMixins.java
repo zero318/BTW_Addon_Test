@@ -36,33 +36,32 @@ public class WorldMixins implements IWorldMixins {
     @Overwrite
     public void func_96440_m(int x, int y, int z, int neighborId) {
         World self = (World)(Object)this;
-        for (int i = 0; i < 4; ++i) {
-            int nextX = x + Direction.offsetX[i];
-            int nextZ = z + Direction.offsetZ[i];
-            int blockId = self.getBlockId(nextX, y, nextZ);
-            if (blockId != 0) {
-                Block block = Block.blocksList[blockId];
-                if (((IBlockMixins)block).getWeakChanges(self, nextX, y, nextZ, neighborId)) {
-                    block.onNeighborBlockChange(self, nextX, y, nextZ, neighborId);
+        int facing = 0;
+        do {
+            int nextX = x + Facing.offsetsXForSide[facing];
+            int nextY = y + Facing.offsetsYForSide[facing];
+            int nextZ = z + Facing.offsetsZForSide[facing];
+            Block block = Block.blocksList[self.getBlockId(nextX, nextY, nextZ)];
+            if (!((block)==null)) {
+                if (((IBlockMixins)block).getWeakChanges(self, nextX, nextY, nextZ, neighborId)) {
+                    block.onNeighborBlockChange(self, nextX, nextY, nextZ, neighborId);
                 }
-                // Crashes if this isn't an else? Why?
-                // TODO: See if the null check fixed this
                 else if (
                     ((IBlockMixins)block).isRedstoneConductor(self, nextX, y, nextZ)
                 ) {
-                    nextX += Direction.offsetX[i];
-                    nextZ += Direction.offsetZ[i];
-                    blockId = self.getBlockId(nextX, y, nextZ);
-                    block = Block.blocksList[blockId];
+                    nextX += Facing.offsetsXForSide[facing];
+                    nextY += Facing.offsetsYForSide[facing];
+                    nextZ += Facing.offsetsZForSide[facing];
+                    block = Block.blocksList[self.getBlockId(nextX, nextY, nextZ)];
                     if (
                         !((block)==null) &&
-                        ((IBlockMixins)block).getWeakChanges(self, nextX, y, nextZ, neighborId)
+                        ((IBlockMixins)block).getWeakChanges(self, nextX, nextY, nextZ, neighborId)
                     ) {
-                        block.onNeighborBlockChange(self, nextX, y, nextZ, neighborId);
+                        block.onNeighborBlockChange(self, nextX, nextY, nextZ, neighborId);
                     }
                 }
             }
-        }
+        } while (((++facing)<=5));
     }
     public void notifyBlockChangeAndComparators(int x, int y, int z, int blockId, int prevBlockId) {
         World self = (World)(Object)this;

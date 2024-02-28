@@ -8,7 +8,6 @@ public interface IBlockEntityPistonMixins {
     public void setLastTicked(long time);
     public boolean hasSmallCenterHardPointToFacing(int x, int y, int z, int direction, boolean ignoreTransparency);
     public boolean hasCenterHardPointToFacing(int x, int y, int z, int direction, boolean ignoreTransparency);
-    public boolean isPlacingBlock();
     public boolean isRetractingBase();
     public boolean hasLargeCenterHardPointToFacing(int x, int y, int z, int direction, boolean ignoreTransparency);
     public void getCollisionList(AxisAlignedBB maskBox, List list, Entity entity);

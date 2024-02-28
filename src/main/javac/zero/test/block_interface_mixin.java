@@ -64,6 +64,12 @@ public interface IBlockMixins {
         return false;
     }
     
+#if ENABLE_TURNTABLE_SLIME_SUPPORT
+    default public boolean canTransmitRotationHorizontallyOnTurntable(World world, int x, int y, int z, int direction) {
+        return ((Block)(Object)this).canTransmitRotationHorizontallyOnTurntable(world, x, y, z);
+    }
+#endif
+    
 #if ENABLE_SLIME_SUPPORTING_MORTAR_BLOCKS
     default public boolean permanentlySupportsMortarBlocks(World world, int x, int y, int z, int direction) {
         return false;

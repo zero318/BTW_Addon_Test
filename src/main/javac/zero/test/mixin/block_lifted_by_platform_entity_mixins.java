@@ -31,7 +31,12 @@ import java.util.List;
 #include "..\util.h"
 
 @Mixin(BlockLiftedByPlatformEntity.class)
-public class BlockLiftedByPlatformEntityMixins {
+public abstract class BlockLiftedByPlatformEntityMixins extends Entity {
+    
+    public BlockLiftedByPlatformEntityMixins() {
+        super(null);
+    }
+    
 #if ENABLE_PLATFORM_FIXES
 /*
     @Inject(
@@ -45,21 +50,23 @@ public class BlockLiftedByPlatformEntityMixins {
 
     @Overwrite(remap=false)
     public void destroyBlockWithDrop() {
-        BlockLiftedByPlatformEntity self = (BlockLiftedByPlatformEntity)(Object)this;
-        int idDropped = Block.blocksList[self.getBlockID()].idDropped(self.getBlockMetadata(), self.worldObj.rand, 0);
-        
-        if (idDropped > 0) {
-            ItemUtils.ejectSingleItemWithRandomOffset(
-                self.worldObj,
-                MathHelper.floor_double(self.posX),
-                MathHelper.floor_double(self.posY),
-                MathHelper.floor_double(self.posZ),
-                idDropped,
-                0
-            );
+        if (!this.worldObj.isRemote) {
+            BlockLiftedByPlatformEntity self = (BlockLiftedByPlatformEntity)(Object)this;
+            int idDropped = Block.blocksList[self.getBlockID()].idDropped(self.getBlockMetadata(), this.worldObj.rand, 0);
+            
+            if (idDropped > 0) {
+                ItemUtils.ejectSingleItemWithRandomOffset(
+                    this.worldObj,
+                    MathHelper.floor_double(this.posX),
+                    MathHelper.floor_double(this.posY),
+                    MathHelper.floor_double(this.posZ),
+                    idDropped,
+                    0
+                );
+            }
         }
         
-        self.setDead();
+        this.setDead();
     }
     
     @Overwrite(remap=false)

@@ -45,6 +45,9 @@ public class BufferStopBlock extends Block {
     }
 #endif
 */
+    public int getPlatformMobilityFlag(World world, int x, int y, int z) {
+        return 2;
+    }
     @Override
     public int getRenderType() {
         return 10;
@@ -150,5 +153,10 @@ public class BufferStopBlock extends Block {
     @Environment(EnvType.CLIENT)
     public void renderBlockAsItem(RenderBlocks renderBlocks, int damage, float brightness) {
         getTransformedModelForMetadata(3).renderAsItemBlock(renderBlocks, this, damage);
+    }
+    @Override
+    @Environment(EnvType.CLIENT)
+    public void renderFallingBlock(RenderBlocks renderBlocks, int x, int y, int z, int meta) {
+        getTransformedModelForMetadata((((net.minecraft.src.Direction.directionToFacing[(((meta)&3))])^1))).renderAsFallingBlock(renderBlocks, this, x, y, z, meta);
     }
 }

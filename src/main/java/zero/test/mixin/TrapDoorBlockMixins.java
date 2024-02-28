@@ -1,7 +1,7 @@
 package zero.test.mixin;
 import net.minecraft.src.*;
 import btw.world.util.WorldUtils;
-import btw.block.blocks.ButtonBlock;
+import btw.block.blocks.TrapDoorBlock;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -13,26 +13,17 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.gen.Invoker;
 // Block piston reactions
-@Mixin(ButtonBlock.class)
-public abstract class ButtonBlockMixins extends BlockButton {
-    public ButtonBlockMixins() {
-        super(0, false);
+@Mixin(TrapDoorBlock.class)
+public abstract class TrapDoorBlockMixins extends BlockTrapDoor {
+    public TrapDoorBlockMixins() {
+        super(0, null);
     }
-    @Overwrite
-    public AxisAlignedBB getBlockBoundsFromPoolBasedOnState(IBlockAccess blockAccess, int x, int y, int z) {
-        return super.getBlockBoundsFromPoolBasedOnState(blockAccess, x, y, z);
-    }
-    @Overwrite
-    public boolean onRotatedAroundBlockOnTurntableToFacing(World world, int x, int y, int z, int direction) {
+    @Override
+    public boolean canRotateOnTurntable(IBlockAccess blockAccess, int x, int y, int z) {
         return true;
     }
     @Override
     public int rotateMetadataAroundJAxis(int meta, boolean reverse) {
-        int direction = (((meta)&7));
-        switch (direction) {
-            case 1: case 2: case 3: case 4:
-                direction = 6 - rotateFacingAroundY(6 - direction, reverse);
-        }
-        return (((meta)&8|(direction)));
+        ;return (((meta)&12|(rotateFacingAroundY((((meta)&3)) + 2, ((reverse)^true)) - 2)));
     }
 }

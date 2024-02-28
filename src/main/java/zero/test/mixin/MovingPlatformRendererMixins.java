@@ -36,8 +36,23 @@ import zero.test.IBlockRedstoneLogicMixins;
 //import zero.test.mixin.IRenderBlocksAccessMixins;
 import zero.test.IRenderBlocksMixins;
 import zero.test.IMovingPlatformEntityMixins;
+import zero.test.GenericBlockRenderer;
 // Block piston reactions
 //#define getInputSignal(...) func_94482_f(__VA_ARGS__)
 @Mixin(MovingPlatformRenderer.class)
-public abstract class MovingPlatformRendererMixins {
+public abstract class MovingPlatformRendererMixins extends Render {
+    @Inject(
+        method = "doRender",
+        at = @At("HEAD"),
+        cancellable = true
+    )
+    public void doRender_inject(Entity entity, double x, double y, double z, float yaw, float renderPartialTicks, CallbackInfo callbackInfo) {
+        int blockId = ((IMovingPlatformEntityMixins)entity).getBlockId();
+        if (
+            blockId != BTWBlocks.platform.blockID
+        ) {
+            GenericBlockRenderer.render_block(this.renderManager.renderEngine, entity, x, y, z, blockId, ((IMovingPlatformEntityMixins)entity).getBlockMeta());
+            callbackInfo.cancel();
+        }
+    }
 }

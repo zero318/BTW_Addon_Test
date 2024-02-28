@@ -149,7 +149,10 @@ MACRO_VOID(/* Tweak the platform code to work properly with lifting blocks */)
 #define ENABLE_PLATFORM_FIXES 1
 
 MACRO_VOID(/* Rework the platform code to entirely to integrate slime */)
-#define ENABLE_PLATFORM_EXTENSIONS 0
+#define ENABLE_PLATFORM_EXTENSIONS 1
+
+MACRO_VOID(/* Allow anchor blocks to stop a platform  */)
+#define ENABLE_ANCHORS_STOPPING_PLATFORMS 1
 
 MACRO_VOID(
 // Try to fix platforms by using entity UUIDs
@@ -291,6 +294,12 @@ MACRO_VOID(/* The worst version of scaffolding you've ever seen */)
 
 MACRO_VOID(/* Make detectors only update adjacent blocks */)
 #define ENABLE_NORMAL_DETECTOR_POWER_RANGE 1
+
+MACRO_VOID(/* */)
+#define ENABLE_TURNTABLE_SLIME_SUPPORT 1
+
+MACRO_VOID(/* */)
+#define ENABLE_MORE_TURNABLE_BLOCKS 1
 
 #define ENABLE_DEBUG_STRING_JANK 0
 

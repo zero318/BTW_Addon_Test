@@ -19,6 +19,7 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.gen.Invoker;
+import zero.test.PlatformResolver;
 import zero.test.IWorldMixins;
 import zero.test.IBlockMixins;
 import zero.test.IMovingPlatformEntityMixins;
@@ -30,4 +31,35 @@ public abstract class AnchorBlockMixins extends Block {
     public AnchorBlockMixins() {
         super(0, null);
     }
+    @Shadow
+    public abstract void convertAnchorToEntity(World world, int i, int j, int k, PulleyTileEntity attachedTileEntityPulley, int iMovementDirection);
+    private static final PlatformResolver server_resolver = new PlatformResolver();
+    private static final PlatformResolver client_resolver = new PlatformResolver();
+    @Overwrite(remap=false)
+    public void convertConnectedPlatformsToEntities(World world, int x, int y, int z, MovingAnchorEntity associatedAnchorEntity) {
+        (!world.isRemote ? server_resolver : client_resolver).liftBlocks(world, x, y, z, associatedAnchorEntity);
+    }
+    @Overwrite(remap=false)
+    public boolean notifyAnchorBlockOfAttachedPulleyStateChange(PulleyTileEntity tileEntityPulley, World world, int x, int y, int z){
+  int iMovementDirection = 0;
+  if (tileEntityPulley.isRaising()) {
+   if (world.getBlockId(x, y + 1, z) == BTWBlocks.ropeBlock.blockID) {
+    iMovementDirection = 1;
+   }
+  }
+  else if (tileEntityPulley.isLowering()) {
+            Block block = Block.blocksList[world.getBlockId(x, y - 1, z)];
+            if (
+                ((block)==null) ||
+                ((IBlockMixins)block).getPlatformMobilityFlag(world, x, y - 1, z) == 1
+            ) {
+                iMovementDirection = -1;
+            }
+  }
+  if (iMovementDirection != 0) {
+   this.convertAnchorToEntity(world, x, y, z, tileEntityPulley, iMovementDirection);
+   return true;
+  }
+  return false;
+ }
 }

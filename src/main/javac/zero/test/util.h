@@ -1391,12 +1391,17 @@ MACRO_VOID(
 /// Fake Direction Metadata
 )
 
+#define DIRECTION_NONE -1
+
 #define DIRECTION_DOWN 0
 #define DIRECTION_UP 1
 #define DIRECTION_NORTH 2
 #define DIRECTION_SOUTH 3
 #define DIRECTION_WEST 4
 #define DIRECTION_EAST 5
+
+#define ALL_DIRECTION_ITER DIRECTION_DOWN
+#define HORIZONTAL_DIRECTION_ITER DIRECTION_NORTH
 
 #define OPPOSITE_DIRECTION(dir) ((dir)^1)
 
@@ -1425,6 +1430,8 @@ _OFFSET_DIRECTION_ARGS(X, Y, Z, MACRO_CAT(direction,_OFFSETS))
 
 #define DIRECTION_AXES_MATCH(dirA,dirB) (DIRECTION_AXIS((dirA)^(dirB))==0)
 
+#define DIRECTION_TO_FLAT_DIRECTION(dir) (net.minecraft.src.Direction.facingToDirection[OPPOSITE_DIRECTION(dir)])
+
 #define FLAT_DIRECTION_NORTH 0
 #define FLAT_DIRECTION_EAST 1
 #define FLAT_DIRECTION_SOUTH 2
@@ -1439,6 +1446,8 @@ _OFFSET_DIRECTION_ARGS(X, Y, Z, MACRO_CAT(direction,_OFFSETS))
 #define FLAT_DIRECTION_AXES_MATCH(dirA,dirB) (FLAT_DIRECTION_AXIS((dirA)^(dirB))==0)
 
 #define FLAT_DIRECTION_TO_DIRECTION(dir) (OPPOSITE_DIRECTION(net.minecraft.src.Direction.directionToFacing[dir]))
+
+#define FLAT_DIRECTION_IS_VALID(dir) ((dir)<4)
 
 #define FLAT_DIRECTION8_NORTH 0
 #define FLAT_DIRECTION8_NORTH_EAST 1
@@ -1679,6 +1688,12 @@ MACRO_VOID(
 #define PLATFORM_CAN_LIFT 2
 
 #define PLATFORM_LIFT_LIMIT 25
+
+MACRO_VOID(
+// Turntable flags
+)
+
+#define TURNTABLE_HEIGHT_LIMIT 12
 
 #define WORLD_HEIGHT_MIN 0
 #define WORLD_HEIGHT_MAX 255

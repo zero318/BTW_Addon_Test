@@ -28,6 +28,8 @@ import java.util.List;
 #include "..\feature_flags.h"
 #include "..\util.h"
 
+#define FULL_3D_COMPARATOR_UPDATES 1
+
 @Mixin(World.class)
 public class WorldMixins implements IWorldMixins {
     
@@ -46,6 +48,40 @@ public class WorldMixins implements IWorldMixins {
     @Overwrite
     public void func_96440_m(int x, int y, int z, int neighborId) {
         World self = (World)(Object)this;
+#if FULL_3D_COMPARATOR_UPDATES
+        int facing = 0;
+        do {
+            int nextX = x + Facing.offsetsXForSide[facing];
+            int nextY = y + Facing.offsetsYForSide[facing];
+            int nextZ = z + Facing.offsetsZForSide[facing];
+            
+            Block block = Block.blocksList[self.getBlockId(nextX, nextY, nextZ)];
+            
+            if (!BLOCK_IS_AIR(block)) {
+                if (((IBlockMixins)block).getWeakChanges(self, nextX, nextY, nextZ, neighborId)) {
+                    block.onNeighborBlockChange(self, nextX, nextY, nextZ, neighborId);
+                }
+                else if (
+#if ENABLE_MODERN_REDSTONE_WIRE
+                    ((IBlockMixins)block).isRedstoneConductor(self, nextX, y, nextZ)
+#else
+                    block.isNormalCube()
+#endif
+                ) {
+                    nextX += Facing.offsetsXForSide[facing];
+                    nextY += Facing.offsetsYForSide[facing];
+                    nextZ += Facing.offsetsZForSide[facing];
+                    block = Block.blocksList[self.getBlockId(nextX, nextY, nextZ)];
+                    if (
+                        !BLOCK_IS_AIR(block) &&
+                        ((IBlockMixins)block).getWeakChanges(self, nextX, nextY, nextZ, neighborId)
+                    ) {
+                        block.onNeighborBlockChange(self, nextX, nextY, nextZ, neighborId);
+                    }
+                }
+            }
+        } while (DIRECTION_IS_VALID(++facing));
+#else
         for (int i = 0; i < 4; ++i) {
             int nextX = x + Direction.offsetX[i];
             int nextZ = z + Direction.offsetZ[i];
@@ -56,8 +92,6 @@ public class WorldMixins implements IWorldMixins {
                 if (((IBlockMixins)block).getWeakChanges(self, nextX, y, nextZ, neighborId)) {
                     block.onNeighborBlockChange(self, nextX, y, nextZ, neighborId);
                 }
-                // Crashes if this isn't an else? Why?
-                // TODO: See if the null check fixed this
                 else if (
 #if ENABLE_MODERN_REDSTONE_WIRE
                     ((IBlockMixins)block).isRedstoneConductor(self, nextX, y, nextZ)
@@ -67,8 +101,7 @@ public class WorldMixins implements IWorldMixins {
                 ) {
                     nextX += Direction.offsetX[i];
                     nextZ += Direction.offsetZ[i];
-                    blockId = self.getBlockId(nextX, y, nextZ);
-                    block = Block.blocksList[blockId];
+                    block = Block.blocksList[self.getBlockId(nextX, y, nextZ)];
                     if (
                         !BLOCK_IS_AIR(block) &&
                         ((IBlockMixins)block).getWeakChanges(self, nextX, y, nextZ, neighborId)
@@ -78,6 +111,7 @@ public class WorldMixins implements IWorldMixins {
                 }
             }
         }
+#endif
     }
     
     public void notifyBlockChangeAndComparators(int x, int y, int z, int blockId, int prevBlockId) {

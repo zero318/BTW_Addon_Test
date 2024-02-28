@@ -3,7 +3,6 @@ import net.minecraft.src.*;
 import btw.AddonHandler;
 // Block piston reactions
 public class ZeroUtil {
-    //public static TileEntity pistonTemp = null;
     public static final int[] rail_exit_directions = new int[] {
         3, 2,
         5, 4,

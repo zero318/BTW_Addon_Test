@@ -32,8 +32,15 @@ import java.util.Random;
 #include "..\feature_flags.h"
 #include "..\util.h"
 
+#define ENABLE_GROSS_METADATA_HACK 1
+
 @Mixin(MovingPlatformEntity.class)
-public abstract class MovingPlatformEntityMixins implements IMovingPlatformEntityMixins {
+public abstract class MovingPlatformEntityMixins extends Entity implements IMovingPlatformEntityMixins {
+    
+    public MovingPlatformEntityMixins() {
+        super(null);
+    }
+    
 #if ENABLE_PLATFORM_EXTENSIONS
     public int block_id;
     public int block_meta;
@@ -51,6 +58,53 @@ public abstract class MovingPlatformEntityMixins implements IMovingPlatformEntit
     public int getBlockMeta() {
         return this.block_meta;
     }
+    
+    public boolean setBoundingBox() {
+#if ENABLE_GROSS_METADATA_HACK
+        int x = MathHelper.floor_double(this.posX);
+        //int y = MathHelper.floor_double(this.posY);
+        int z = MathHelper.floor_double(this.posZ);
+        
+        int prev_meta = this.worldObj.getBlockMetadata(x, 0, z);
+        
+        this.worldObj.setBlockMetadataWithNotify(x, 0, z, this.block_meta, UPDATE_INVISIBLE | UPDATE_KNOWN_SHAPE | UPDATE_SUPPRESS_LIGHT);
+        
+        AxisAlignedBB block_hitbox = Block.blocksList[this.block_id].getAsPistonMovingBoundingBox(this.worldObj, x, 0, z);
+        
+        this.worldObj.setBlockMetadataWithNotify(x, 0, z, prev_meta, UPDATE_INVISIBLE | UPDATE_KNOWN_SHAPE | UPDATE_SUPPRESS_LIGHT);
+        
+        if (block_hitbox != null) {
+            double temp = this.posY - (double)this.yOffset + (double)this.ySize;
+            block_hitbox.minY += temp;
+            block_hitbox.maxY = block_hitbox.maxY * this.height + temp;
+            this.boundingBox.setBB(block_hitbox);
+            return true;
+        }
+        return false;
+#else
+    
+#error I don't have any better ideas yet
+
+#endif
+    }
+    
+    @Inject(
+        method = "moveEntityInternal(DDD)V",
+        at = @At("HEAD"),
+        remap = false
+    )
+    public void configure_collision_jank(CallbackInfo info) {
+        this.setBoundingBox();
+    }
+    
+    @Overwrite(remap=false)
+    public AxisAlignedBB getBoundingBox() {
+        if (this.setBoundingBox()) {
+            return this.boundingBox;
+        }
+        return null;
+    }
+    
     /*
     public void setStickySides(int sides) {
         this.sticky_sides = sides;
@@ -74,78 +128,89 @@ public abstract class MovingPlatformEntityMixins implements IMovingPlatformEntit
         at = @At("TAIL")
     )
     public void readEntityFromNBT_inject(NBTTagCompound nbttagcompound, CallbackInfo info) {
-        this.block_id = nbttagcompound.getInteger("BlockId");
-        this.block_meta = nbttagcompound.getInteger("BlockMeta");
+        if (nbttagcompound.hasKey("BlockId")) {
+            this.block_id = nbttagcompound.getInteger("BlockId");
+        } else {
+            this.block_id = BTWBlocks.platform.blockID;
+        }
+        if (nbttagcompound.hasKey("BlockMeta")) {
+            this.block_meta = nbttagcompound.getInteger("BlockMeta");
+        }
+    }
+    
+    @Overwrite(remap=false)
+    public Packet getSpawnPacketForThisEntity() {
+        return new Packet23VehicleSpawn(this, 103, BLOCK_STATE_PACK(this.block_id, this.block_meta));
     }
     
     @Overwrite(remap=false)
     public void destroyPlatformWithDrop() {
-        MovingPlatformEntity self = (MovingPlatformEntity)(Object)this;
-        
-		ItemUtils.ejectStackWithRandomOffset(
-            self.worldObj,
-            MathHelper.floor_double(self.posX),
-            MathHelper.floor_double(self.posY),
-            MathHelper.floor_double(self.posZ),
-            new ItemStack(Block.blocksList[this.block_id])
-        );
+        if (!this.worldObj.isRemote) {
+            ItemUtils.ejectStackWithRandomOffset(
+                this.worldObj,
+                MathHelper.floor_double(this.posX),
+                MathHelper.floor_double(this.posY),
+                MathHelper.floor_double(this.posZ),
+                new ItemStack(Block.blocksList[this.block_id])
+            );
+        }
 		
-    	self.setDead();
+    	this.setDead();
     }
     
     @Overwrite(remap=false)
-    public void convertToBlock(int x, int y, int z, MovingAnchorEntity associatedAnchor, boolean bMovingUpwards) {
+    public void convertToBlock(int x, int y, int z, MovingAnchorEntity associatedAnchor, boolean movingUpwards) {
         MovingPlatformEntity self = (MovingPlatformEntity)(Object)this;
         
-    	int destBlockId = self.worldObj.getBlockId(x, y, z);
+    	int destBlockId = this.worldObj.getBlockId(x, y, z);
     	
-    	if (WorldUtils.isReplaceableBlock(self.worldObj, x, y, z)) {
-    		//self.worldObj.setBlockWithNotify(x, y, z, this.block_id);
-            self.worldObj.setBlock(x, y, z, this.block_id, this.block_meta, UPDATE_NEIGHBORS | UPDATE_CLIENTS);
+    	if (WorldUtils.isReplaceableBlock(this.worldObj, x, y, z)) {
+    		//this.worldObj.setBlockWithNotify(x, y, z, this.block_id);
+            this.worldObj.setBlock(x, y, z, this.block_id, this.block_meta, UPDATE_NEIGHBORS | UPDATE_CLIENTS);
     	}
     	else if (
-            !Block.blocksList[dest_block_id].blockMaterial.isSolid() ||
+            !Block.blocksList[destBlockId].blockMaterial.isSolid() ||
             destBlockId == Block.web.blockID ||
     		destBlockId == BTWBlocks.web.blockID
         ) {
-    		int targetMetadata = self.worldObj.getBlockMetadata(x, y, z);
+    		int targetMetadata = this.worldObj.getBlockMetadata(x, y, z);
     		
     		Block.blocksList[destBlockId].dropBlockAsItem( 
-				self.worldObj,
+				this.worldObj,
                 x, y, z,
                 targetMetadata,
                 0
             );
     		
-	        self.worldObj.playAuxSFX(
+	        this.worldObj.playAuxSFX(
                 BTWEffectManager.DESTROY_BLOCK_RESPECT_PARTICLE_SETTINGS_EFFECT_ID,
 	        	x, y, z,
                 destBlockId + (targetMetadata << 12)
             );
 	        
-    		//self.worldObj.setBlockWithNotify(x, y, z, this.block_id);
-            self.worldObj.setBlock(x, y, z, this.block_id, this.block_meta, UPDATE_NEIGHBORS | UPDATE_CLIENTS);
+    		//this.worldObj.setBlockWithNotify(x, y, z, this.block_id);
+            this.worldObj.setBlock(x, y, z, this.block_id, this.block_meta, UPDATE_NEIGHBORS | UPDATE_CLIENTS);
 		}
     	else {
     		// this shouldn't usually happen, but if the block is already occupied, eject the platform
     		// as an item
     		
 			ItemUtils.ejectSingleItemWithRandomOffset(
-                self.worldObj,
+                this.worldObj,
                 x, y, z,
                 this.block_id,
                 0
             );
     	}
     	
-    	MiscUtils.positionAllNonPlayerMoveableEntitiesOutsideOfLocation(self.worldObj, x, y, z);
+    	MiscUtils.positionAllNonPlayerMoveableEntitiesOutsideOfLocation(this.worldObj, x, y, z);
     	
 		// FCTODO: hacky way of making sure players don't fall through platforms when they stop
 		
-    	MiscUtils.serverPositionAllPlayerEntitiesOutsideOfLocation(self.worldObj, x, y + (!movingUpwards ? 1 : -1), z);
-        MiscUtils.serverPositionAllPlayerEntitiesOutsideOfLocation(self.worldObj, x, y, z);
+    	MiscUtils.serverPositionAllPlayerEntitiesOutsideOfLocation(this.worldObj, x, y + (!movingUpwards ? 1 : -1), z);
+        MiscUtils.serverPositionAllPlayerEntitiesOutsideOfLocation(this.worldObj, x, y, z);
     	
-    	self.setDead();
+    	this.setDead();
     }
 #endif
 }

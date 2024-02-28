@@ -86,6 +86,9 @@ Block Dispensers:
 - No longer receive redstone power through their front face (maintains previous behaviors with power rule changes)
 - Prioritize the entity closest to the center of the block in front of them
 
+Detector Blocks:
+- No longer send block updates 2 blocks aways
+
 Platforms:
 - Connect to other platforms when moved by pistons
 - Fixed broken code that prevented lifting redstone/rails
@@ -168,7 +171,6 @@ Dead Coral Fan:
 ///
 Planned Features
 ///
-- Giving slime/glue meaningful functionality with turntables
 - Finishing iron trapdoors to have a recipe and work properly
 - Adding an iron fence gate
 
@@ -182,5 +184,6 @@ Known Issues
 - The CUD block recipe sucks
 - Sloped rails don't flatten out when the rail they're connected to is moved down by a piston
 - Block placers/breakers have lazy texturing
-- Exploit with platforms
 - Minecart hitboxes obstruct the rail they are placed on (maybe not an issue? Only needed for merged cart jank)
+- Platforms delete tile entities
+- This file doesn't really explain new platform mechanics
