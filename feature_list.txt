@@ -54,6 +54,9 @@ Buffer Stop:
 Activator Rails:
 - Re-enabled from vanilla to be used with oven carts
 
+Droppers:
+- Re-enabled from vanilla, though nerfed to just dispense items regardless of type
+
 /noclip Command:
 - Sort of like spectator mode, but worse
 - Make sure you're already flying in creative mode or you'll just fall into the void
@@ -87,7 +90,7 @@ Block Dispensers:
 - Prioritize the entity closest to the center of the block in front of them
 
 Detector Blocks:
-- No longer send block updates 2 blocks aways
+- No longer send block updates 2 blocks away
 
 Platforms:
 - Connect to other platforms when moved by pistons
