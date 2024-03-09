@@ -6,6 +6,7 @@ import net.minecraft.src.*;
 import btw.block.blocks.PistonBlockBase;
 import btw.block.blocks.PistonBlockMoving;
 import btw.item.util.ItemUtils;
+import btw.inventory.util.InventoryUtils;
 import btw.AddonHandler;
 import btw.BTWAddon;
 import org.spongepowered.asm.mixin.Mixin;
@@ -19,6 +20,7 @@ import zero.test.IBlockMixins;
 import zero.test.mixin.IPistonBaseAccessMixins;
 import zero.test.IWorldMixins;
 import zero.test.IBlockEntityPistonMixins;
+import zero.test.ZeroUtil;
 import java.util.List;
 import java.util.ArrayList;
 // Block piston reactions
@@ -110,5 +112,19 @@ public abstract class BlockPistonMovingMixins extends BlockPistonMoving {
         // whether or not this was a freak accident
         AddonHandler.logMessage("ZASSERT: Moving piston entity not loaded at "+x+" "+y+" "+z+", block bounds incorrect");
         return super.getBlockBoundsFromPoolBasedOnState(blockAccess, x, y, z);
+    }
+    @Override
+    public void dropBlockAsItemWithChance(World world, int x, int y, int z, int par5, float chance, int par7) {
+        if (!world.isRemote) {
+            TileEntity tileEntity;
+            if ((tileEntity = world.getBlockTileEntity(x, y, z)) instanceof TileEntityPiston) {
+                TileEntityPiston pistonTileEntity = (TileEntityPiston)tileEntity;
+                TileEntity storedTileEntity;
+                if ((storedTileEntity = ((IBlockEntityPistonMixins)pistonTileEntity).getStoredTileEntity()) != null) {
+                    ZeroUtil.break_tile_entity(world, x, y, z, storedTileEntity);
+                }
+                Block.blocksList[pistonTileEntity.getStoredBlockID()].dropBlockAsItem(world, x, y, z, pistonTileEntity.getBlockMetadata(), 0);
+            }
+        }
     }
 }

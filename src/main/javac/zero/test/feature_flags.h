@@ -104,6 +104,9 @@ MC-200887
 */)
 #define ENABLE_REDSTONE_BUGFIXES 1
 
+MACRO_VOID(/* Add missing comparator support to BTW blocks */)
+#define ENABLE_MORE_COMPARATOR_OUTPUTS 1
+
 MACRO_VOID(/* Add a property for blocks to control where dust points */)
 #define ENABLE_BETTER_REDSTONE_WIRE_CONNECTIONS 1
 
@@ -300,6 +303,21 @@ MACRO_VOID(/* */)
 
 MACRO_VOID(/* */)
 #define ENABLE_MORE_TURNABLE_BLOCKS 1
+
+MACRO_VOID(/* */)
+#define ENABLE_MORE_AUTOMATION_RECIPES 0
+
+MACRO_VOID(/* */)
+#define ENABLE_PISTON_TILE_ENTITY_CACHE 0
+
+MACRO_VOID(/* Use a different random curve for dispenser velocity */)
+#define ENABLE_MORE_RELIABLE_RANDOMS 1
+
+MACRO_VOID(/* Reenable droppers but without the ability to insert into containers */)
+#define ENABLE_NERFED_DROPPER 1
+
+MACRO_VOID(/* Breaking a moving piston will drop the items from a moved tile entity */)
+#define ENABLE_MOVING_PISTON_ITEM_DROPS 1
 
 #define ENABLE_DEBUG_STRING_JANK 0
 

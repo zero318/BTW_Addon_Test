@@ -330,6 +330,19 @@ public class ZeroTestAddon extends BTWAddon {
             }
         );
 #endif
+
+#if ENABLE_NERFED_DROPPER
+        RecipeManager.addRecipe(
+            new ItemStack(Block.dropper, 1),
+            new Object[] {
+                "###", 
+                "# #", 
+                "#R#", 
+                '#', new ItemStack(BTWItems.stoneBrick, 1, InventoryUtils.IGNORE_METADATA),
+                'R', BTWItems.redstoneLatch
+            }
+        );
+#endif
     }
 
     // Is this important?

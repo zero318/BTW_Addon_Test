@@ -1,5 +1,13 @@
 package zero.test.mixin;
 import net.minecraft.src.*;
+import btw.block.BTWBlocks;
+import btw.client.fx.BTWEffectManager;
+import btw.crafting.manager.PistonPackingCraftingManager;
+import btw.crafting.recipe.types.PistonPackingRecipe;
+import btw.item.util.ItemUtils;
+import btw.world.util.BlockPos;
+import btw.inventory.util.InventoryUtils;
+import btw.AddonHandler;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -15,16 +23,9 @@ import zero.test.IBlockEntityPistonMixins;
 import zero.test.IBlockMixins;
 import zero.test.IEntityMixins;
 import zero.test.ZeroUtil;
-import btw.block.BTWBlocks;
-import btw.client.fx.BTWEffectManager;
-import btw.crafting.manager.PistonPackingCraftingManager;
-import btw.crafting.recipe.types.PistonPackingRecipe;
-import btw.item.util.ItemUtils;
-import btw.world.util.BlockPos;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import org.lwjgl.Sys;
-import btw.AddonHandler;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -44,6 +45,8 @@ public abstract class BlockEntityPistonMixins extends TileEntity implements IBlo
     public boolean shouldHeadBeRendered;
     @Shadow
     public NBTTagCompound storedTileEntityData;
+    @Shadow
+    public TileEntity cachedTileEntity;
     @Shadow
     public abstract boolean destroyAndDropIfShoveled();
     @Shadow
@@ -114,16 +117,19 @@ public abstract class BlockEntityPistonMixins extends TileEntity implements IBlo
         }
         if (newMeta >= 0) {
             self.worldObj.setBlock(self.xCoord, self.yCoord, self.zCoord, storedBlockId, newMeta, 0x01 | 0x02 | 0x40);
+            self.worldObj.notifyBlockOfNeighborChange(self.xCoord, self.yCoord, self.zCoord, storedBlockId);
         } else {
             // The block is going to be destroyed, 
             // so no need to render it on the client.
             self.worldObj.setBlock(self.xCoord, self.yCoord, self.zCoord, storedBlockId, storedMeta, 0x04 | 0x10 | 0x40 | 0x80);
-        }
-        if (newMeta >= 0) {
-            self.worldObj.notifyBlockOfNeighborChange(self.xCoord, self.yCoord, self.zCoord, storedBlockId);
-        } else {
             self.worldObj.destroyBlock(self.xCoord, self.yCoord, self.zCoord, true);
         }
+    }
+    public TileEntity getStoredTileEntity() {
+        if (this.storedTileEntityData != null) {
+            return TileEntity.createAndLoadEntity(this.storedTileEntityData);
+        }
+        return null;
     }
     @Overwrite
     public void clearPistonTileEntity() {
@@ -142,20 +148,10 @@ public abstract class BlockEntityPistonMixins extends TileEntity implements IBlo
             else {
                 this.worldObj.removeBlockTileEntity(this.xCoord, this.yCoord, this.zCoord);
                 this.invalidate();
-                if (this.storedTileEntityData != null) {
-                    // Set scanningTileEntities to true
-                    // so that the tile entity is always
-                    // placed correctly
-                    //boolean scanningTileEntitiesTemp = ((IWorldAccessMixins)this.worldObj).getScanningTileEntities();
-                    //((IWorldAccessMixins)this.worldObj).setScanningTileEntities(true);
-                    TileEntity newTileEntity = TileEntity.createAndLoadEntity(this.storedTileEntityData);
+                TileEntity newTileEntity;
+                if ((newTileEntity = this.getStoredTileEntity()) != null) {
                     this.storedTileEntityData = null;
                     this.worldObj.setBlockTileEntity(this.xCoord, this.yCoord, this.zCoord, newTileEntity);
-                    // Restore original value of scanningTileEntities
-                    //((IWorldAccessMixins)this.worldObj).setScanningTileEntities(scanningTileEntitiesTemp);
-                    //if (!scanningTileEntitiesTemp) {
-                        //this.worldObj.setBlockTileEntity(this.xCoord, this.yCoord, this.zCoord, newTileEntity);
-                    //}
                 }
             }
         }

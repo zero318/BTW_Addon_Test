@@ -8,6 +8,7 @@ import net.minecraft.src.*;
 import btw.block.blocks.PistonBlockBase;
 import btw.block.blocks.PistonBlockMoving;
 import btw.item.util.ItemUtils;
+import btw.inventory.util.InventoryUtils;
 import btw.AddonHandler;
 import btw.BTWAddon;
 
@@ -23,6 +24,7 @@ import zero.test.IBlockMixins;
 import zero.test.mixin.IPistonBaseAccessMixins;
 import zero.test.IWorldMixins;
 import zero.test.IBlockEntityPistonMixins;
+import zero.test.ZeroUtil;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -36,101 +38,12 @@ import java.util.ArrayList;
 #define STICKY_META_BITS 1
 #define STICKY_IS_BOOL true
 
-#define ENABLE_TILE_ENTITY_JANK 0
-
 @Mixin(PistonBlockMoving.class)
 public abstract class BlockPistonMovingMixins extends BlockPistonMoving {
     
     public BlockPistonMovingMixins() {
         super(0);
     }
-    
-#if ENABLE_TILE_ENTITY_JANK
-/*
-    @Override
-    public void breakBlock(World world, int x, int y, int z, int blockId, int meta) {
-        TileEntity tileEntity;
-        if ((tileEntity = world.getBlockTileEntity(x, y, z)) instanceof TileEntityPiston) {
-            if (((IBlockEntityPistonMixins)tileEntity).isPlacingBlock()) {
-                //btw.AddonHandler.logMessage("Has piston entity");
-                
-                TileEntity newTileEntity = null;
-                NBTTagCompound tileEntityData;
-                if ((tileEntityData = ((TileEntityPiston)tileEntity).storedTileEntityData) != null) {
-                    //btw.AddonHandler.logMessage("Piston entity has inner entity");
-                    newTileEntity = TileEntity.createAndLoadEntity(tileEntityData);
-                    newTileEntity.xCoord = x;
-                    newTileEntity.yCoord = y;
-                    newTileEntity.zCoord = z;
-                }
-                
-                
-                world.removeBlockTileEntity(x, y, z);
-                Chunk chunk = world.getChunkFromChunkCoords(x >> 4, z >> 4);
-                //chunk.removeChunkBlockTileEntity(x & 0xF, y, z & 0xF);
-                
-                //tileEntity.invalidate();
-                
-                if (newTileEntity != null) {
-                    world.setBlockTileEntity(x, y, z, newTileEntity);
-                    //chunk.setChunkBlockTileEntity(x & 0xF, y, z & 0xF, newTileEntity);
-                }
-            } else {
-                ((TileEntityPiston)tileEntity).clearPistonTileEntity();
-            }
-        } else {
-            super.breakBlock(world, x, y, z, blockId, meta);
-        }
-    }
-*/
-
-    @Override
-    public void breakBlock(World world, int x, int y, int z, int blockId, int meta) {
-        TileEntity tileEntity;
-        if ((tileEntity = world.getBlockTileEntity(x, y, z)) instanceof TileEntityPiston) {
-            //if (!((IBlockEntityPistonMixins)tileEntity).isPlacingBlock()) {
-                ((TileEntityPiston)tileEntity).clearPistonTileEntity();
-            //}
-        } else {
-            //super.breakBlock(world, x, y, z, blockId, meta);
-        }
-    }
-
-    @Override
-    public void onSetBlockIDWithMetaData(World world, int x, int y, int z, int meta) {
-        TileEntity newTileEntity = null;
-        
-        TileEntity tileEntity;
-        if ((tileEntity = world.getBlockTileEntity(x, y, z)) instanceof TileEntityPiston) {
-            if (((IBlockEntityPistonMixins)tileEntity).isPlacingBlock()) {
-                NBTTagCompound tileEntityData;
-                if ((tileEntityData = ((TileEntityPiston)tileEntity).storedTileEntityData) != null) {
-                    newTileEntity = TileEntity.createAndLoadEntity(tileEntityData);
-                    newTileEntity.xCoord = x;
-                    newTileEntity.yCoord = y;
-                    newTileEntity.zCoord = z;
-                }
-                world.removeBlockTileEntity(x, y, z);
-                //tileEntity.invalidate();
-            }
-        }
-        
-        if (newTileEntity != null) {
-            //Chunk chunk = world.getChunkFromChunkCoords(x >> 4, z >> 4);
-            //chunk.addTileEntity(newTileEntity);
-            world.setBlockTileEntity(x, y, z, newTileEntity);
-            //chunk.setChunkBlockTileEntity(x & 0xF, y, z & 0xF, newTileEntity);
-            //btw.AddonHandler.logMessage("test");
-        }
-        //btw.AddonHandler.logMessage("test");
-    }
-/*
-    @Override
-    public boolean shouldDeleteTileEntityOnBlockChange(int newBlockId) {
-        return !(Block.blocksList[newBlockId] instanceof ITileEntityProvider);
-    }
-*/
-#endif
 
     // TODO: Make this depend on the block being moved somehow
 
@@ -237,4 +150,23 @@ public abstract class BlockPistonMovingMixins extends BlockPistonMoving {
         AddonHandler.logMessage("ZASSERT: Moving piston entity not loaded at "+x+" "+y+" "+z+", block bounds incorrect");
         return super.getBlockBoundsFromPoolBasedOnState(blockAccess, x, y, z);
     }
+    
+#if ENABLE_MOVING_PISTON_ITEM_DROPS
+    @Override
+    public void dropBlockAsItemWithChance(World world, int x, int y, int z, int par5, float chance, int par7) {
+        if (!world.isRemote) {
+            TileEntity tileEntity;
+            if ((tileEntity = world.getBlockTileEntity(x, y, z)) instanceof TileEntityPiston) {
+                TileEntityPiston pistonTileEntity = (TileEntityPiston)tileEntity;
+                
+                TileEntity storedTileEntity;
+                if ((storedTileEntity = ((IBlockEntityPistonMixins)pistonTileEntity).getStoredTileEntity()) != null) {
+                    ZeroUtil.break_tile_entity(world, x, y, z, storedTileEntity);
+                }
+                
+                Block.blocksList[pistonTileEntity.getStoredBlockID()].dropBlockAsItem(world, x, y, z, pistonTileEntity.getBlockMetadata(), 0);
+            }
+        }
+    }
+#endif
 }

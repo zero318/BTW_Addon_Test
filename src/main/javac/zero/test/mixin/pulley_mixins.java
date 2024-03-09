@@ -36,4 +36,17 @@ public abstract class PulleyBlockMixins {
         return false;
     }
 #endif
+
+#if ENABLE_MORE_COMPARATOR_OUTPUTS
+    @Inject(
+        method = "breakBlock(Lnet/minecraft/src/World;IIIII)V",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/src/BlockContainer;breakBlock(Lnet/minecraft/src/World;IIIII)V"
+        )
+    )
+    public void break_block_comparator_inject(World world, int x, int y, int z, int blockId, int meta, CallbackInfo info) {
+        world.func_96440_m(x, y, z, blockId);
+    }
+#endif
 }

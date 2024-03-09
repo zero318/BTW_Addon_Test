@@ -2,6 +2,15 @@ package zero.test.mixin;
 
 import net.minecraft.src.*;
 
+import btw.block.BTWBlocks;
+import btw.client.fx.BTWEffectManager;
+import btw.crafting.manager.PistonPackingCraftingManager;
+import btw.crafting.recipe.types.PistonPackingRecipe;
+import btw.item.util.ItemUtils;
+import btw.world.util.BlockPos;
+import btw.inventory.util.InventoryUtils;
+import btw.AddonHandler;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -19,16 +28,9 @@ import zero.test.IBlockMixins;
 import zero.test.IEntityMixins;
 import zero.test.ZeroUtil;
 
-import btw.block.BTWBlocks;
-import btw.client.fx.BTWEffectManager;
-import btw.crafting.manager.PistonPackingCraftingManager;
-import btw.crafting.recipe.types.PistonPackingRecipe;
-import btw.item.util.ItemUtils;
-import btw.world.util.BlockPos;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import org.lwjgl.Sys;
-import btw.AddonHandler;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -72,6 +74,8 @@ public abstract class BlockEntityPistonMixins extends TileEntity implements IBlo
     public boolean shouldHeadBeRendered;
     @Shadow
     public NBTTagCompound storedTileEntityData;
+    @Shadow
+    public TileEntity cachedTileEntity;
     
     @Shadow
     public abstract boolean destroyAndDropIfShoveled();
@@ -136,6 +140,12 @@ public abstract class BlockEntityPistonMixins extends TileEntity implements IBlo
     @Overwrite
     public void storeCachedTileEntity() {
     }
+
+#if ENABLE_PISTON_TILE_ENTITY_CACHE
+    public void storeTileEntity(TileEntity tileEntity) {
+        (this.cachedTileEntity = tileEntity).writeToNBT(this.storedTileEntityData = new NBTTagCompound());
+    }
+#endif
     
     @Overwrite
     public void restoreStoredBlock() {
@@ -151,89 +161,27 @@ public abstract class BlockEntityPistonMixins extends TileEntity implements IBlo
             newMeta = ((IWorldMixins)self.worldObj).updateFromNeighborShapes(self.xCoord, self.yCoord, self.zCoord, storedBlockId, storedMeta);
         }
         
-#if !NEW_TILE_ENTITY_LOGIC
-        // Set scanningTileEntities to true
-        // so that the tile entity is always
-        // placed correctly
-        boolean scanningTileEntitiesTemp = ((IWorldAccessMixins)self.worldObj).getScanningTileEntities();
-        ((IWorldAccessMixins)self.worldObj).setScanningTileEntities(SCANNING_TILE_ENTITIES_VALUE);
-#endif
-        
         if (newMeta >= 0) {
             self.worldObj.setBlock(self.xCoord, self.yCoord, self.zCoord, storedBlockId, newMeta, UPDATE_NEIGHBORS | UPDATE_CLIENTS | UPDATE_MOVE_BY_PISTON);
+            self.worldObj.notifyBlockOfNeighborChange(self.xCoord, self.yCoord, self.zCoord, storedBlockId);
         } else {
             // The block is going to be destroyed, 
             // so no need to render it on the client.
             self.worldObj.setBlock(self.xCoord, self.yCoord, self.zCoord, storedBlockId, storedMeta, UPDATE_INVISIBLE | UPDATE_KNOWN_SHAPE | UPDATE_MOVE_BY_PISTON | UPDATE_SUPPRESS_LIGHT);
-        }
-        
-        
-#if !NEW_TILE_ENTITY_LOGIC
-
-#if PISTON_TILE_ENTITY_PRINT_DEBUGGING
-        NBTTagCompound prevTileEntityData = new NBTTagCompound();
-#endif
-        if (self.storedTileEntityData != null) {
-            // setBlockTileEntity updates the entity
-            // coordinates itself when scanningTileEntities
-            // is true
-            TileEntity tileEntity = TileEntity.createAndLoadEntity(self.storedTileEntityData);
-            worldObj.setBlockTileEntity(self.xCoord, self.yCoord, self.zCoord, tileEntity);
-#if PISTON_TILE_ENTITY_PRINT_DEBUGGING
-            tileEntity.writeToNBT(prevTileEntityData);
-#endif
-        }
-        
-#if PISTON_TILE_ENTITY_PRINT_DEBUGGING
-        int blockIdA = self.worldObj.getBlockId(self.xCoord, self.yCoord, self.zCoord);
-        NBTTagCompound newTileEntityDataA = null;
-        TileEntity newTileEntityA = self.worldObj.getBlockTileEntity(self.xCoord, self.yCoord, self.zCoord);
-        if (newTileEntityA != null) {
-            newTileEntityDataA = new NBTTagCompound();
-            newTileEntityA.writeToNBT(newTileEntityDataA);
-        }
-#endif
-
-#endif
-
-        if (newMeta >= 0) {
-            self.worldObj.notifyBlockOfNeighborChange(self.xCoord, self.yCoord, self.zCoord, storedBlockId);
-        } else {
             self.worldObj.destroyBlock(self.xCoord, self.yCoord, self.zCoord, true);
         }
-
-#if !NEW_TILE_ENTITY_LOGIC
-
-#if PISTON_TILE_ENTITY_PRINT_DEBUGGING
-        NBTTagCompound newTileEntityDataB = null;
-        TileEntity newTileEntityB = self.worldObj.getBlockTileEntity(self.xCoord, self.yCoord, self.zCoord);
-        if (newTileEntityB != null) {
-            newTileEntityDataB = new NBTTagCompound();
-            newTileEntityB.writeToNBT(newTileEntityDataB);
-        }
-        if (
-            self.storedTileEntityData != null &&
-            !prevTileEntityData.equals(newTileEntityDataB)
-        ) {
-            AddonHandler.logMessage("FAIL "+storedBlockId+" "+blockIdA);
-            AddonHandler.logMessage("Old : "+prevTileEntityData.toString());
-            if (newTileEntityDataA != null) {
-                AddonHandler.logMessage("NewA: "+newTileEntityDataA.toString());
-            } else {
-                AddonHandler.logMessage("NewA: null");
+    }
+    
+    public TileEntity getStoredTileEntity() {
+        if (this.storedTileEntityData != null) {
+#if ENABLE_PISTON_TILE_ENTITY_CACHE
+            if (this.cachedTileEntity != null) {
+                return this.cachedTileEntity;
             }
-            if (newTileEntityDataB != null) {
-                AddonHandler.logMessage("NewB: "+newTileEntityDataB.toString());
-            } else {
-                AddonHandler.logMessage("NewB: null");
-            }
+#endif
+            return TileEntity.createAndLoadEntity(this.storedTileEntityData);
         }
-#endif
-        
-        // Restore original value of scanningTileEntities
-        ((IWorldAccessMixins)self.worldObj).setScanningTileEntities(scanningTileEntitiesTemp);
-        
-#endif
+        return null;
     }
     
     @Overwrite
@@ -255,25 +203,14 @@ public abstract class BlockEntityPistonMixins extends TileEntity implements IBlo
                 this.worldObj.removeBlockTileEntity(this.xCoord, this.yCoord, this.zCoord);
                 this.invalidate();
                 
-                if (this.storedTileEntityData != null) {
-                    
-                    // Set scanningTileEntities to true
-                    // so that the tile entity is always
-                    // placed correctly
-                    //boolean scanningTileEntitiesTemp = ((IWorldAccessMixins)this.worldObj).getScanningTileEntities();
-                    //((IWorldAccessMixins)this.worldObj).setScanningTileEntities(true);
-                    
-                    TileEntity newTileEntity = TileEntity.createAndLoadEntity(this.storedTileEntityData);
+                TileEntity newTileEntity;
+                if ((newTileEntity = this.getStoredTileEntity()) != null) {
                     this.storedTileEntityData = null;
-                    
+#if ENABLE_PISTON_TILE_ENTITY_CACHE
+                    this.cachedTileEntity = null;
+                    newTileEntity.validate();
+#endif
                     this.worldObj.setBlockTileEntity(this.xCoord, this.yCoord, this.zCoord, newTileEntity);
-                    
-                    // Restore original value of scanningTileEntities
-                    //((IWorldAccessMixins)this.worldObj).setScanningTileEntities(scanningTileEntitiesTemp);
-                    
-                    //if (!scanningTileEntitiesTemp) {
-                        //this.worldObj.setBlockTileEntity(this.xCoord, this.yCoord, this.zCoord, newTileEntity);
-                    //}
                 }
             }
         }

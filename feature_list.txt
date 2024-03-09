@@ -144,6 +144,7 @@ Comparators:
 - Enabled rotation on turntables
 - Fixed placement from block dispensers
 - Fixed MC-8911, MC-10653, MC-12211, MC-63669, and MC-195351
+- Properly detect breaking/moving of blocks
 
 Repeaters:
 - Renders properly on top of transparent blocks

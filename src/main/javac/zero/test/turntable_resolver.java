@@ -14,6 +14,7 @@ import zero.test.IBlockMixins;
 import zero.test.mixin.IPistonBaseAccessMixins;
 import zero.test.IWorldMixins;
 import zero.test.IBlockEntityPistonMixins;
+import zero.test.ZeroUtil;
 
 #include "feature_flags.h"
 #include "util.h"
@@ -204,12 +205,17 @@ public class TurntableResolver {
                 packedPos = pillar_blocks[i];
                 BLOCK_POS_UNPACK(packedPos, x, y, z);
                 
-                if (Block.blocksList[BLOCK_STATE_SHORT_EXTRACT_ID(data_list[i])].hasTileEntity()) {
+                blockId = BLOCK_STATE_SHORT_EXTRACT_ID(data_list[i]);
+                Block block = Block.blocksList[blockId];
+                if (block.hasTileEntity()) {
                     tile_entity_list[tile_entity_index++] = world.getBlockTileEntity(x, y, z);
                     world.removeBlockTileEntity(x, y, z);
                 }
                 
                 world.setBlock(x, y, z, 0, 0, UPDATE_NEIGHBORS | UPDATE_CLIENTS);
+                if (block.hasComparatorInputOverride()) {
+                    world.func_96440_m(x, y, z, blockId);
+                }
             }
             
             for (int i = pillar_index_global; --i >= PILLAR_LIST_START_INDEX;) {
@@ -277,6 +283,9 @@ public class TurntableResolver {
 #endif
                 }
                 else {
+                    if (tile_entity != null) {
+                        ZeroUtil.break_tile_entity(world, x, y, z, tile_entity);
+                    }
                     // This seems like it could be an issue.
                     // Maybe destroy the block instead?
                     block.dropBlockAsItem(world, x, y, z, blockId, blockMeta);

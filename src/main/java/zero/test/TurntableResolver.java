@@ -11,6 +11,7 @@ import zero.test.IBlockMixins;
 import zero.test.mixin.IPistonBaseAccessMixins;
 import zero.test.IWorldMixins;
 import zero.test.IBlockEntityPistonMixins;
+import zero.test.ZeroUtil;
 // Block piston reactions
 public class TurntableResolver {
     private static final int TURNTABLE_HEIGHT_LIMIT =
@@ -158,11 +159,16 @@ public class TurntableResolver {
             for (int i = attachment_index_global; --i >= ATTACHMENT_LIST_START_INDEX;) {
                 packedPos = pillar_blocks[i];
                 {(x)=((int)((packedPos)<<26>>(64)-26));(z)=((int)((packedPos)>>(64)-26));(y)=((int)(packedPos)<<(32)-12>>(32)-12);};
-                if (Block.blocksList[((data_list[i])&0xFFF)].hasTileEntity()) {
+                blockId = ((data_list[i])&0xFFF);
+                Block block = Block.blocksList[blockId];
+                if (block.hasTileEntity()) {
                     tile_entity_list[tile_entity_index++] = world.getBlockTileEntity(x, y, z);
                     world.removeBlockTileEntity(x, y, z);
                 }
                 world.setBlock(x, y, z, 0, 0, 0x01 | 0x02);
+                if (block.hasComparatorInputOverride()) {
+                    world.func_96440_m(x, y, z, blockId);
+                }
             }
             for (int i = pillar_index_global; --i >= PILLAR_LIST_START_INDEX;) {
                 packedPos = pillar_blocks[i];
@@ -217,6 +223,9 @@ public class TurntableResolver {
                     }
                 }
                 else {
+                    if (tile_entity != null) {
+                        ZeroUtil.break_tile_entity(world, x, y, z, tile_entity);
+                    }
                     // This seems like it could be an issue.
                     // Maybe destroy the block instead?
                     block.dropBlockAsItem(world, x, y, z, blockId, blockMeta);

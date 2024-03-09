@@ -587,8 +587,11 @@ public class PistonResolver {
             
             PISTON_DEBUG("Push "+blockId+"."+blockMeta+"("+x+" "+y+" "+z+")");
             
+#if !ENABLE_PISTON_TILE_ENTITY_CACHE
             NBTTagCompound tileEntityData = BlockPistonBase.getBlockTileEntityData(world, x, y, z);
-            // Removing this seems to be safe...
+#else
+            TileEntity prevTileEntity = world.getBlockTileEntity(x, y, z);
+#endif
             world.removeBlockTileEntity(x, y, z);
             
             packedPos = BLOCK_POS_PACK(x + Facing.offsetsXForSide[direction], y + Facing.offsetsYForSide[direction], z + Facing.offsetsZForSide[direction]);
@@ -610,9 +613,15 @@ public class PistonResolver {
             z += Facing.offsetsZForSide[direction];
             world.setBlock(x, y, z, Block.pistonMoving.blockID, blockMeta, UPDATE_IMMEDIATE | UPDATE_SUPPRESS_DROPS | UPDATE_MOVE_BY_PISTON);
             TileEntity tileEntity = BlockPistonMoving.getTileEntity(blockId, blockMeta, direction, true, false);
+#if !ENABLE_PISTON_TILE_ENTITY_CACHE
             if (tileEntityData != null) {
                 ((TileEntityPiston)tileEntity).storeTileEntity(tileEntityData);
             }
+#else
+            if (prevTileEntity != null) {
+                ((IBlockEntityPistonMixins)tileEntity).storeTileEntity(prevTileEntity);
+            }
+#endif
             world.setBlockTileEntity(x, y, z, tileEntity);
         }
         
@@ -685,13 +694,17 @@ public class PistonResolver {
         for (int i = destroy_index_global; --i >= DESTROY_LIST_START_INDEX;) {
             // Set x,y,z to position of block in destroy list
             packedPos = pushed_blocks[i];
-            world.notifyBlocksOfNeighborChange(BLOCK_POS_UNPACK_ARGS(packedPos), BLOCK_STATE_EXTRACT_ID(data_list[i]));
+            //world.notifyBlocksOfNeighborChange(BLOCK_POS_UNPACK_ARGS(packedPos), BLOCK_STATE_EXTRACT_ID(data_list[i]));
+            blockId = BLOCK_STATE_EXTRACT_ID(data_list[i]);
+            ((IWorldMixins)world).notifyBlockChangeAndComparators(BLOCK_POS_UNPACK_ARGS(packedPos), blockId, blockId);
         }
         
         for (int i = push_index_global; --i >= PUSH_LIST_START_INDEX;) {
             // Set x,y,z to position of block in push list
             packedPos = pushed_blocks[i];
-            world.notifyBlocksOfNeighborChange(BLOCK_POS_UNPACK_ARGS(packedPos), BLOCK_STATE_EXTRACT_ID(data_list[i]));
+            //world.notifyBlocksOfNeighborChange(BLOCK_POS_UNPACK_ARGS(packedPos), BLOCK_STATE_EXTRACT_ID(data_list[i]));
+            blockId = BLOCK_STATE_EXTRACT_ID(data_list[i]);
+            ((IWorldMixins)world).notifyBlockChangeAndComparators(BLOCK_POS_UNPACK_ARGS(packedPos), blockId, blockId);
         }
         
         // START SHOVEL CODE

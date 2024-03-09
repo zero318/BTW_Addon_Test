@@ -490,7 +490,6 @@ public class PistonResolver {
             blockMeta = block.adjustMetadataForPistonMove(blockMeta);
                                                                              ;
             NBTTagCompound tileEntityData = BlockPistonBase.getBlockTileEntityData(world, x, y, z);
-            // Removing this seems to be safe...
             world.removeBlockTileEntity(x, y, z);
             packedPos = ((long)(z + Facing.offsetsZForSide[direction])<<12 +26|(long)((x + Facing.offsetsXForSide[direction])&0x3FFFFFF)<<12|((y + Facing.offsetsYForSide[direction])&0xFFF));
             int j = i;
@@ -578,12 +577,16 @@ public class PistonResolver {
         for (int i = destroy_index_global; --i >= DESTROY_LIST_START_INDEX;) {
             // Set x,y,z to position of block in destroy list
             packedPos = pushed_blocks[i];
-            world.notifyBlocksOfNeighborChange(((int)((packedPos)<<26>>(64)-26)),((int)(packedPos)<<(32)-12>>(32)-12),((int)((packedPos)>>(64)-26)), ((data_list[i])&0xFFFF));
+            //world.notifyBlocksOfNeighborChange(BLOCK_POS_UNPACK_ARGS(packedPos), BLOCK_STATE_EXTRACT_ID(data_list[i]));
+            blockId = ((data_list[i])&0xFFFF);
+            ((IWorldMixins)world).notifyBlockChangeAndComparators(((int)((packedPos)<<26>>(64)-26)),((int)(packedPos)<<(32)-12>>(32)-12),((int)((packedPos)>>(64)-26)), blockId, blockId);
         }
         for (int i = push_index_global; --i >= PUSH_LIST_START_INDEX;) {
             // Set x,y,z to position of block in push list
             packedPos = pushed_blocks[i];
-            world.notifyBlocksOfNeighborChange(((int)((packedPos)<<26>>(64)-26)),((int)(packedPos)<<(32)-12>>(32)-12),((int)((packedPos)>>(64)-26)), ((data_list[i])&0xFFFF));
+            //world.notifyBlocksOfNeighborChange(BLOCK_POS_UNPACK_ARGS(packedPos), BLOCK_STATE_EXTRACT_ID(data_list[i]));
+            blockId = ((data_list[i])&0xFFFF);
+            ((IWorldMixins)world).notifyBlockChangeAndComparators(((int)((packedPos)<<26>>(64)-26)),((int)(packedPos)<<(32)-12>>(32)-12),((int)((packedPos)>>(64)-26)), blockId, blockId);
         }
         // START SHOVEL CODE
         for (int i = shovel_index_global; --i >= SHOVEL_EJECT_LIST_START_INDEX;) {

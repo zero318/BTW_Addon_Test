@@ -1,6 +1,10 @@
 package zero.test;
 import net.minecraft.src.*;
+import btw.block.tileentity.*;
+import btw.item.util.ItemUtils;
+import btw.inventory.util.InventoryUtils;
 import btw.AddonHandler;
+import java.util.Random;
 // Block piston reactions
 public class ZeroUtil {
     public static final int[] rail_exit_directions = new int[] {
@@ -77,5 +81,31 @@ public class ZeroUtil {
             return angle + 360.0f;
         }
         return angle;
+    }
+    public static double triangle_random(Random random, double offset, double range) {
+        return offset + range * (random.nextDouble() - random.nextDouble());
+    }
+    public static void break_tile_entity(World world, int x, int y, int z, TileEntity tileEntity) {
+        if (tileEntity instanceof IInventory) {
+            InventoryUtils.ejectInventoryContents(world, x, y, z, (IInventory)tileEntity);
+        }
+        else if (tileEntity instanceof TileEntityRecordPlayer) {
+            ItemStack record;
+            if ((record = ((TileEntityRecordPlayer)tileEntity).func_96097_a()) != null) {
+                ItemUtils.ejectStackWithRandomOffset(world, x, y, z, record);
+            }
+        }
+        else if (tileEntity instanceof ArcaneVesselTileEntity) {
+            ((ArcaneVesselTileEntity)tileEntity).ejectContentsOnBlockBreak();
+        }
+        else if (tileEntity instanceof BasketTileEntity) {
+            ((BasketTileEntity)tileEntity).ejectContents();
+        }
+        else if (tileEntity instanceof PlacedToolTileEntity) {
+            ((PlacedToolTileEntity)tileEntity).ejectContents();
+        }
+        else if (tileEntity instanceof CampfireTileEntity) {
+            ((CampfireTileEntity)tileEntity).ejectContents();
+        }
     }
 }

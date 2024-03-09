@@ -22,6 +22,7 @@ import zero.test.IBlockMixins;
 import zero.test.IWorldMixins;
 //import zero.test.IBlockRailPoweredMixins;
 import zero.test.block.ActivatorRailShim;
+import zero.test.block.DropperShim;
 import zero.test.block.PoweredRailBlock;
 
 import java.util.List;
@@ -172,13 +173,15 @@ public abstract class BlockMixins implements IBlockMixins {
     )
     private static void static_init_inject(CallbackInfo info) {
 #if ENABLE_ACTIVATOR_RAILS
-        Block.railActivator = null;
-        Block.blocksList[157] = null;
+        Block.blocksList[157] = Block.railActivator = null;
         Block.railActivator = (new ActivatorRailShim(157)).setPicksEffectiveOn().setHardness(0.7F).setStepSound(Block.soundMetalFootstep).setUnlocalizedName("activatorRail");
 #endif
-        Block.railPowered = null;
-        Block.blocksList[27] = null;
+        Block.blocksList[27] = Block.railPowered = null;
         Block.railPowered = new PoweredRailBlock(27);
+#if ENABLE_NERFED_DROPPER
+        Block.blocksList[158] = Block.dropper = null;
+        Block.dropper = new DropperShim(158).setHardness(3.5F).setStepSound(Block.soundStoneFootstep).setUnlocalizedName("dropper");
+#endif
     }
 
 /*

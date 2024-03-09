@@ -17,7 +17,7 @@ import zero.test.item.SlimeBlockItem;
 public class ZeroTestAddon extends BTWAddon {
     private static ZeroTestAddon instance;
     private ZeroTestAddon() {
-        super("Zero Test Addon", "0.2.0", "ZeroTest");
+        super("Zero Test Addon", "0.2.1", "ZeroTest");
     }
     @Override
     public void initialize() {
@@ -268,6 +268,16 @@ public class ZeroTestAddon extends BTWAddon {
                 'N', BTWItems.ironNugget,
                 'M', new ItemStack(BTWItems.woodMouldingStubID, 1, InventoryUtils.IGNORE_METADATA),
                 'B', new ItemStack(BTWItems.stoneBrick, 1, InventoryUtils.IGNORE_METADATA)
+            }
+        );
+        RecipeManager.addRecipe(
+            new ItemStack(Block.dropper, 1),
+            new Object[] {
+                "###",
+                "# #",
+                "#R#",
+                '#', new ItemStack(BTWItems.stoneBrick, 1, InventoryUtils.IGNORE_METADATA),
+                'R', BTWItems.redstoneLatch
             }
         );
     }
