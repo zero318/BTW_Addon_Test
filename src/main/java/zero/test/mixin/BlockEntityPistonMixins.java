@@ -23,6 +23,7 @@ import zero.test.IBlockEntityPistonMixins;
 import zero.test.IBlockMixins;
 import zero.test.IEntityMixins;
 import zero.test.ZeroUtil;
+import zero.test.ZeroMetaUtil;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import org.lwjgl.Sys;
@@ -32,7 +33,10 @@ import java.util.List;
 // Block piston reactions
 //#define getInputSignal(...) func_94482_f(__VA_ARGS__)
 
-@Mixin(TileEntityPiston.class)
+@Mixin(
+    value = TileEntityPiston.class,
+    priority = 900
+)
 public abstract class BlockEntityPistonMixins extends TileEntity implements IBlockEntityPistonMixins {
     public long lastTicked;
     @Shadow
@@ -104,6 +108,10 @@ public abstract class BlockEntityPistonMixins extends TileEntity implements IBlo
     @Overwrite
     public void storeCachedTileEntity() {
     }
+    @Override
+    public void storeTileEntity(TileEntity tileEntity) {
+        tileEntity.writeToNBT(this.storedTileEntityData = new NBTTagCompound());
+    }
     @Overwrite
     public void restoreStoredBlock() {
         TileEntityPiston self = (TileEntityPiston)(Object)this;
@@ -111,18 +119,23 @@ public abstract class BlockEntityPistonMixins extends TileEntity implements IBlo
         int storedBlockId = self.getStoredBlockID();
         Block storedBlock = Block.blocksList[storedBlockId];
         int storedMeta = self.getBlockMetadata();
+        int extMeta = ZeroMetaUtil.getPistonTileEntityExtMeta(self);
         int newMeta = -1;
         if (!((storedBlock)==null)) {
             newMeta = ((IWorldMixins)self.worldObj).updateFromNeighborShapes(self.xCoord, self.yCoord, self.zCoord, storedBlockId, storedMeta);
         }
         if (newMeta >= 0) {
-            self.worldObj.setBlock(self.xCoord, self.yCoord, self.zCoord, storedBlockId, newMeta, 0x01 | 0x02 | 0x40);
+            ZeroMetaUtil.setBlockWithExtra(self.worldObj, self.xCoord, self.yCoord, self.zCoord, storedBlockId, newMeta, extMeta, 0x01 | 0x02 | 0x40);
             self.worldObj.notifyBlockOfNeighborChange(self.xCoord, self.yCoord, self.zCoord, storedBlockId);
         } else {
             // The block is going to be destroyed, 
             // so no need to render it on the client.
-            self.worldObj.setBlock(self.xCoord, self.yCoord, self.zCoord, storedBlockId, storedMeta, 0x04 | 0x10 | 0x40 | 0x80);
+            ZeroMetaUtil.setBlockWithExtra(self.worldObj, self.xCoord, self.yCoord, self.zCoord, storedBlockId, storedMeta, extMeta, 0x04 | 0x10 | 0x40 | 0x80);
             self.worldObj.destroyBlock(self.xCoord, self.yCoord, self.zCoord, true);
+        }
+        if (ZeroUtil.always_false) {
+            // Prevent extended metadata injected mixin failing
+            this.worldObj.setBlock(0, 0, 0, 0, 0, 0);
         }
     }
     public TileEntity getStoredTileEntity() {
@@ -154,6 +167,10 @@ public abstract class BlockEntityPistonMixins extends TileEntity implements IBlo
                     this.worldObj.setBlockTileEntity(this.xCoord, this.yCoord, this.zCoord, newTileEntity);
                 }
             }
+        }
+        if (ZeroUtil.always_false) {
+            // Prevent extended metadata injected mixin failing
+            this.worldObj.setBlock(0, 0, 0, 0, 0, 0);
         }
     }
     public long getLastTicked() {
@@ -491,7 +508,9 @@ public abstract class BlockEntityPistonMixins extends TileEntity implements IBlo
                         ((IEntityMixins)entity).moveEntityByPiston(
                             pushDistance * dX,
                             pushDistance * dY,
-                            pushDistance * dZ
+                            pushDistance * dZ,
+                            direction,
+                            true
                         );
                          ;
                         if (this.isRetractingBase()) {
@@ -530,7 +549,7 @@ public abstract class BlockEntityPistonMixins extends TileEntity implements IBlo
                     for (Entity entity : entityList) {
                         if ((((((IEntityMixins)entity).getPistonMobilityFlags(direction))&4)!=0)) {
                              ;
-                            ((IEntityMixins)entity).moveEntityByPiston(dX, dY, dZ);
+                            ((IEntityMixins)entity).moveEntityByPiston(dX, dY, dZ, direction, false);
                              ;
                         }
                     }
@@ -581,7 +600,9 @@ public abstract class BlockEntityPistonMixins extends TileEntity implements IBlo
                 ((IEntityMixins)entity).moveEntityByPiston(
                     pushDistance * (double)Facing.offsetsXForSide[direction],
                     pushDistance * (double)Facing.offsetsYForSide[direction],
-                    pushDistance * (double)Facing.offsetsZForSide[direction]
+                    pushDistance * (double)Facing.offsetsZForSide[direction],
+                    direction,
+                    false
                 );
             }
         }

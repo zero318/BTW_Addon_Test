@@ -3,6 +3,9 @@
 
 #include "util.h"
 
+MACRO_VOID(/* Add some items to help with testing things */)
+#define ENABLE_DEBUG_STICKS 1
+
 MACRO_VOID(/* Vanilla observers and shape updates */)
 #define ENABLE_DIRECTIONAL_UPDATES 1
 
@@ -298,17 +301,26 @@ MACRO_VOID(/* The worst version of scaffolding you've ever seen */)
 MACRO_VOID(/* Make detectors only update adjacent blocks */)
 #define ENABLE_NORMAL_DETECTOR_POWER_RANGE 1
 
-MACRO_VOID(/* */)
+MACRO_VOID(/* Allow turntables to rotate arbitrary blocks via slime */)
 #define ENABLE_TURNTABLE_SLIME_SUPPORT 1
 
-MACRO_VOID(/* */)
+MACRO_VOID(/* Allow more blocks to rotate on turntables like levers, doors, and tools */)
 #define ENABLE_MORE_TURNABLE_BLOCKS 1
 
 MACRO_VOID(/* */)
-#define ENABLE_MORE_AUTOMATION_RECIPES 0
+#define ENABLE_MORE_AUTOMATION_RECIPES 1
+
+MACRO_VOID(/* */)
+#define ENABLE_AUTOMATIC_COW_MILKING 1
+
+MACRO_VOID(/* */)
+#define ENABLE_MIXER_BLOCK 1
 
 MACRO_VOID(/* */)
 #define ENABLE_PISTON_TILE_ENTITY_CACHE 0
+
+MACRO_VOID(/* */)
+#define ENABLE_PLATFORM_TILE_ENTITY_CACHE 1
 
 MACRO_VOID(/* Use a different random curve for dispenser velocity */)
 #define ENABLE_MORE_RELIABLE_RANDOMS 1
@@ -319,6 +331,15 @@ MACRO_VOID(/* Reenable droppers but without the ability to insert into container
 MACRO_VOID(/* Breaking a moving piston will drop the items from a moved tile entity */)
 #define ENABLE_MOVING_PISTON_ITEM_DROPS 1
 
+MACRO_VOID(/* Try to be compatible with the metadata extension addon */)
+#define ENABLE_METADATA_EXTENSION_COMPAT 1
+
+MACRO_VOID(/* DO NOT ENABLE */)
+#define ENABLE_LIGHT_UPDATES_ON_METADATA_CHANGE 0
+
+MACRO_VOID(/* Special light update stick for testing */)
+#define ENABLE_LIGHT_STICKS 1
+
 #define ENABLE_DEBUG_STRING_JANK 0
 
 #if ENABLE_DEBUG_STRING_JANK
@@ -326,5 +347,15 @@ MACRO_VOID(/* Breaking a moving piston will drop the items from a moved tile ent
 #else
 #define DEBUG_PRINT(...)
 #endif
+
+MACRO_VOID(
+/// DECO FIXES
+)
+
+MACRO_VOID(
+// More accurate hitboxes for:
+// - Chairs
+)
+#define ENABLE_BETTER_DECO_HITBOXES 1
 
 #endif

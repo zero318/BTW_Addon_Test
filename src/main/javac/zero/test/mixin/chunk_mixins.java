@@ -17,24 +17,6 @@ import zero.test.ZeroUtil;
 
 @Mixin(Chunk.class)
 public abstract class ChunkMixins {
-    
-/*
-    @Redirect(
-        method = "setBlockIDWithMetadata(IIIII)Z",
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/src/ITileEntityProvider;createNewTileEntity(Lnet/minecraft/src/World;)Lnet/minecraft/src/TileEntity;"
-        )
-    )
-    public TileEntity make_tile_entity_redirect(ITileEntityProvider provider, World world) {
-        if (ZeroUtil.pistonTemp == null) {
-            return provider.createNewTileEntity(world);
-        }
-        TileEntity ret = ZeroUtil.pistonTemp;
-        ZeroUtil.pistonTemp = null;
-        return ret;
-    }
-*/
 
     @Redirect(
         method = { "setBlockIDWithMetadata(IIIII)Z", "setBlockMetadata(IIII)Z" },

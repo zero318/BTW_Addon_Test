@@ -27,6 +27,7 @@ import zero.test.IBlockEntityPistonMixins;
 import zero.test.IBlockMixins;
 import zero.test.IEntityMixins;
 import zero.test.ZeroUtil;
+import zero.test.ZeroMetaUtil;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -59,7 +60,16 @@ import java.util.List;
 
 #define NEW_TILE_ENTITY_LOGIC 1
 
-@Mixin(TileEntityPiston.class)
+#if ENABLE_METADATA_EXTENSION_COMPAT
+#define PISTON_SET_BLOCK(world, x, y, z, blockId, meta, extMeta, flags) ZeroMetaUtil.setBlockWithExtra(world, x, y, z, blockId, meta, extMeta, flags)
+#else
+#define PISTON_SET_BLOCK(world, x, y, z, blockId, meta, extMeta, flags) world.setBlock(x, y, z, blockId, meta, flags)
+#endif
+
+@Mixin(
+    value = TileEntityPiston.class,
+    priority = 900
+)
 public abstract class BlockEntityPistonMixins extends TileEntity implements IBlockEntityPistonMixins {
     
     public long lastTicked;
@@ -141,11 +151,14 @@ public abstract class BlockEntityPistonMixins extends TileEntity implements IBlo
     public void storeCachedTileEntity() {
     }
 
-#if ENABLE_PISTON_TILE_ENTITY_CACHE
+    @Override
     public void storeTileEntity(TileEntity tileEntity) {
+#if ENABLE_PISTON_TILE_ENTITY_CACHE
         (this.cachedTileEntity = tileEntity).writeToNBT(this.storedTileEntityData = new NBTTagCompound());
-    }
+#else
+        tileEntity.writeToNBT(this.storedTileEntityData = new NBTTagCompound());
 #endif
+    }
     
     @Overwrite
     public void restoreStoredBlock() {
@@ -156,20 +169,29 @@ public abstract class BlockEntityPistonMixins extends TileEntity implements IBlo
         int storedBlockId = self.getStoredBlockID();
         Block storedBlock = Block.blocksList[storedBlockId];
         int storedMeta = self.getBlockMetadata();
+#if ENABLE_METADATA_EXTENSION_COMPAT
+        int extMeta = ZeroMetaUtil.getPistonTileEntityExtMeta(self);
+#endif
         int newMeta = -1;
         if (!BLOCK_IS_AIR(storedBlock)) {
             newMeta = ((IWorldMixins)self.worldObj).updateFromNeighborShapes(self.xCoord, self.yCoord, self.zCoord, storedBlockId, storedMeta);
         }
         
         if (newMeta >= 0) {
-            self.worldObj.setBlock(self.xCoord, self.yCoord, self.zCoord, storedBlockId, newMeta, UPDATE_NEIGHBORS | UPDATE_CLIENTS | UPDATE_MOVE_BY_PISTON);
+            PISTON_SET_BLOCK(self.worldObj, self.xCoord, self.yCoord, self.zCoord, storedBlockId, newMeta, extMeta, UPDATE_NEIGHBORS | UPDATE_CLIENTS | UPDATE_MOVE_BY_PISTON);
             self.worldObj.notifyBlockOfNeighborChange(self.xCoord, self.yCoord, self.zCoord, storedBlockId);
         } else {
             // The block is going to be destroyed, 
             // so no need to render it on the client.
-            self.worldObj.setBlock(self.xCoord, self.yCoord, self.zCoord, storedBlockId, storedMeta, UPDATE_INVISIBLE | UPDATE_KNOWN_SHAPE | UPDATE_MOVE_BY_PISTON | UPDATE_SUPPRESS_LIGHT);
+            PISTON_SET_BLOCK(self.worldObj, self.xCoord, self.yCoord, self.zCoord, storedBlockId, storedMeta, extMeta, UPDATE_INVISIBLE | UPDATE_KNOWN_SHAPE | UPDATE_MOVE_BY_PISTON | UPDATE_SUPPRESS_LIGHT);
             self.worldObj.destroyBlock(self.xCoord, self.yCoord, self.zCoord, true);
         }
+#if ENABLE_METADATA_EXTENSION_COMPAT
+        if (ZeroUtil.always_false) {
+            // Prevent extended metadata injected mixin failing
+            this.worldObj.setBlock(0, 0, 0, 0, 0, 0);
+        }
+#endif
     }
     
     public TileEntity getStoredTileEntity() {
@@ -229,6 +251,12 @@ public abstract class BlockEntityPistonMixins extends TileEntity implements IBlo
                 this.restoreStoredBlock();
                 this.attemptToPackItems();
             }
+        }
+#endif
+#if ENABLE_METADATA_EXTENSION_COMPAT
+        if (ZeroUtil.always_false) {
+            // Prevent extended metadata injected mixin failing
+            this.worldObj.setBlock(0, 0, 0, 0, 0, 0);
         }
 #endif
     }
@@ -613,7 +641,9 @@ public abstract class BlockEntityPistonMixins extends TileEntity implements IBlo
                         ((IEntityMixins)entity).moveEntityByPiston(
                             pushDistance * dX,
                             pushDistance * dY,
-                            pushDistance * dZ
+                            pushDistance * dZ,
+                            direction,
+                            true
                         );
                         
                         PISTON_ENTITY_PUSH_DEBUG(
@@ -668,7 +698,7 @@ public abstract class BlockEntityPistonMixins extends TileEntity implements IBlo
                                 "\nZ: "+entity.posZ+" + "+dZ
                             );
                             
-                            ((IEntityMixins)entity).moveEntityByPiston(dX, dY, dZ);
+                            ((IEntityMixins)entity).moveEntityByPiston(dX, dY, dZ, direction, false);
                             
                             PISTON_ENTITY_PUSH_DEBUG(
                                 "Post-Entity moving sticky("+storedBlockId+"):"+
@@ -728,7 +758,9 @@ public abstract class BlockEntityPistonMixins extends TileEntity implements IBlo
                 ((IEntityMixins)entity).moveEntityByPiston(
                     pushDistance * (double)Facing.offsetsXForSide[direction],
                     pushDistance * (double)Facing.offsetsYForSide[direction],
-                    pushDistance * (double)Facing.offsetsZForSide[direction]
+                    pushDistance * (double)Facing.offsetsZForSide[direction],
+                    direction, 
+                    false
                 );
             }
         }

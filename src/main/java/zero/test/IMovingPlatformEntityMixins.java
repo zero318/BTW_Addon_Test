@@ -1,4 +1,5 @@
 package zero.test;
+import net.minecraft.src.*;
 // Block piston reactions
 
 public interface IMovingPlatformEntityMixins {
@@ -8,4 +9,5 @@ public interface IMovingPlatformEntityMixins {
     public int getBlockMeta();
     //public void setStickySides(int sides);
     //public int getStickySides();
+    public void storeTileEntity(TileEntity tileEntity);
 }

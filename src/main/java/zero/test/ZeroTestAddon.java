@@ -9,15 +9,17 @@ import btw.crafting.recipe.RecipeManager;
 import btw.inventory.util.InventoryUtils;
 import btw.crafting.manager.*;
 import zero.test.block.*;
+import zero.test.block.block_entity.*;
+import zero.test.item.*;
 import zero.test.command.*;
-import zero.test.block.ZeroTestBlocks;
-import zero.test.item.SlimeBlockItem;
+import zero.test.crafting.*;
+import zero.test.ZeroUtil;
 // Block piston reactions
 
 public class ZeroTestAddon extends BTWAddon {
     private static ZeroTestAddon instance;
     private ZeroTestAddon() {
-        super("Zero Test Addon", "0.2.1", "ZeroTest");
+        super("Zero Test Addon", "0.2.4", "ZeroTest");
     }
     @Override
     public void initialize() {
@@ -30,8 +32,10 @@ public class ZeroTestAddon extends BTWAddon {
         Item.itemsList[1320] = new SlimeBlockItem(1320 -256);
         ZeroTestBlocks.glue_block = new GlueBlock(1321);
         Item.itemsList[1321] = new ItemBlock(1321 -256);
-        ZeroTestBlocks.iron_trapdoor = new IronTrapDoor(1322);
-        Item.itemsList[1322] = new ItemBlock(1322 -256);
+        if (!ZeroUtil.isDecoLoaded()) {
+            ZeroTestBlocks.iron_trapdoor = new IronTrapDoor(3247);
+            Item.itemsList[3247] = new ItemBlock(3247 -256);
+        }
         ZeroTestBlocks.pull_only_test_block = new PullOnlyTestBlock(1323);
         Item.itemsList[1323] = new ItemBlock(1323 -256);
         ZeroTestBlocks.dead_coral_fan = new DeadCoralFan(1324);
@@ -48,21 +52,25 @@ public class ZeroTestAddon extends BTWAddon {
         Item.itemsList[1329] = new ItemBlock(1329 -256);
         ZeroTestBlocks.scaffolding = new ScaffoldingBlock(1330);
         Item.itemsList[1330] = new ItemBlock(1330 -256);
+        ZeroTestBlocks.mixer_block = new MixerBlock(1322);
+        Item.itemsList[1322] = new ItemBlock(1322 -256);
+        TileEntity.addMapping(MixerBlockEntity.class, "mixer");
+        ZeroTestItems.debug_stick = new DebugStick(31800 -256);
     }
     @Override
     public void postInitialize() {
         // TODO: Make this less lazy so it's not expensive
         // CUD Block
         RecipeManager.addShapelessRecipe(
-            new ItemStack(ZeroTestBlocks.cud_block, 1, 0),
+            new ItemStack(ZeroTestBlocks.cud_block),
             new ItemStack[] {
                 new ItemStack(Item.comparator),
-                new ItemStack(BTWBlocks.buddyBlock, 1, 0)
+                new ItemStack(BTWBlocks.buddyBlock)
             }
         );
         // Observer recipe
         RecipeManager.addSoulforgeRecipe(
-            new ItemStack(ZeroTestBlocks.observer_block, 1),
+            new ItemStack(ZeroTestBlocks.observer_block),
             new Object[] {
                 "##X#",
                 "XYY#",
@@ -76,29 +84,29 @@ public class ZeroTestAddon extends BTWAddon {
         // Slime block
         RecipeManager.addPistonPackingRecipe(
             ZeroTestBlocks.slime_block,
-            new ItemStack(Item.slimeBall, 9, 0)
+            new ItemStack(Item.slimeBall, 9)
         );
         RecipeManager.addStokedCauldronRecipe(
-            new ItemStack(Item.slimeBall, 9, 0),
+            new ItemStack(Item.slimeBall, 9),
             new ItemStack[] {
-                new ItemStack(ZeroTestBlocks.slime_block, 1, 0),
+                new ItemStack(ZeroTestBlocks.slime_block),
             }
         );
         // Glue block
         RecipeManager.addPistonPackingRecipe(
             ZeroTestBlocks.glue_block,
-            new ItemStack(BTWItems.glue, 4, 0)
+            new ItemStack(BTWItems.glue, 4)
         );
         RecipeManager.addStokedCauldronRecipe(
-            new ItemStack(BTWItems.glue, 4, 0),
+            new ItemStack(BTWItems.glue, 4),
             new ItemStack[] {
-                new ItemStack(ZeroTestBlocks.glue_block, 1, 0)
+                new ItemStack(ZeroTestBlocks.glue_block)
             }
         );
         RecipeManager.addSawRecipe(
             new ItemStack[] {
-                new ItemStack(ZeroTestBlocks.block_breaker, 1, 0),
-                new ItemStack(ZeroTestBlocks.block_placer, 1, 0)
+                new ItemStack(ZeroTestBlocks.block_breaker),
+                new ItemStack(ZeroTestBlocks.block_placer)
             },
             BTWBlocks.blockDispenser
         );
@@ -115,13 +123,13 @@ public class ZeroTestAddon extends BTWAddon {
             }
         );
         RecipeManager.addStokedCrucibleRecipe(
-            new ItemStack(BTWItems.ironNugget, 1),
+            new ItemStack(BTWItems.ironNugget),
             new ItemStack[] {
                 new ItemStack(Block.railActivator)
             }
         );
         RecipeManager.removeVanillaRecipe(
-            new ItemStack(Item.minecartPowered, 1),
+            new ItemStack(Item.minecartPowered),
             new Object[] {
                 "A",
                 "B",
@@ -130,7 +138,7 @@ public class ZeroTestAddon extends BTWAddon {
             }
         );
         RecipeManager.addRecipe(
-            new ItemStack(Item.minecartPowered, 1),
+            new ItemStack(Item.minecartPowered),
             new Object[] {
                 "A",
                 "B",
@@ -215,7 +223,7 @@ public class ZeroTestAddon extends BTWAddon {
             }
         );
         RecipeManager.addStokedCrucibleRecipe(
-            new ItemStack(BTWItems.steelNugget, 1),
+            new ItemStack(BTWItems.steelNugget),
             new ItemStack[] {
                 new ItemStack(ZeroTestBlocks.steel_rail, 2)
             }
@@ -260,7 +268,7 @@ public class ZeroTestAddon extends BTWAddon {
             new ItemStack(BTWItems.soap, 4)
         );
         RecipeManager.addRecipe(
-            new ItemStack(ZeroTestBlocks.buffer_stop, 1, 0),
+            new ItemStack(ZeroTestBlocks.buffer_stop),
             new Object[] {
                 "NMN",
                 "M M",
@@ -271,7 +279,7 @@ public class ZeroTestAddon extends BTWAddon {
             }
         );
         RecipeManager.addRecipe(
-            new ItemStack(Block.dropper, 1),
+            new ItemStack(Block.dropper),
             new Object[] {
                 "###",
                 "# #",
@@ -280,6 +288,18 @@ public class ZeroTestAddon extends BTWAddon {
                 'R', BTWItems.redstoneLatch
             }
         );
+        RecipeManager.addRecipe(
+            new ItemStack(ZeroTestBlocks.mixer_block),
+            new Object[] {
+                "#Y#",
+                "#X#",
+                "#Y#",
+                '#', Item.ingotIron,
+                'X', BTWItems.screw,
+                'Y', new ItemStack(BTWItems.woodCornerStubID, 1, InventoryUtils.IGNORE_METADATA)
+            }
+        );
+        MixerRecipeList.addRecipes();
     }
     // Is this important?
     // Also looks kinda backwards tbh (I tried fixing it)

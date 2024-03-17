@@ -23,6 +23,11 @@ Glue Blocks:
 - Can indefinitely support adjacent blocks that would otherwise need mortar
 - Can be used with pulleys/platforms to move blocks
 
+Blender Block:
+- Crafted from iron ingots, a screw, and wooden corners
+- Bulk crafting block that can create foods
+- Requires mechanical power instead of fire
+
 Observers:
 - Crafted at a soul forge similar to buddy blocks, but replacing the redstone torches with quartz
 - Retain the vanilla behavior of detecting block "shape" changes rather than block updates
@@ -95,6 +100,9 @@ Detector Blocks:
 Platforms:
 - Connect to other platforms when moved by pistons
 - Fixed broken code that prevented lifting redstone/rails
+
+Cows:
+- Can be milked automatically by squishing them against a block with a piston over a bucket
 
 Pistons:
 - Completely rewrote the implementation of block/entity pushing
@@ -189,5 +197,4 @@ Known Issues
 - Sloped rails don't flatten out when the rail they're connected to is moved down by a piston
 - Block placers/breakers have lazy texturing
 - Minecart hitboxes obstruct the rail they are placed on (maybe not an issue? Only needed for merged cart jank)
-- Platforms delete tile entities
 - This file doesn't really explain new platform mechanics

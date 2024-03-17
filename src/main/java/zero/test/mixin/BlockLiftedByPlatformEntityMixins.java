@@ -19,6 +19,8 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 import zero.test.IWorldMixins;
 import zero.test.IBlockMixins;
 import zero.test.IMovingPlatformEntityMixins;
+import zero.test.ZeroUtil;
+import zero.test.ZeroMetaUtil;
 import java.util.Random;
 import java.util.List;
 // Block piston reactions
@@ -63,7 +65,17 @@ public abstract class BlockLiftedByPlatformEntityMixins extends Entity {
             ((IBlockMixins)block_below).getPlatformMobilityFlag(self.worldObj, x, y, z) == 1 &&
             WorldUtils.isReplaceableBlock(self.worldObj, x, y, z)
         ) {
-            self.worldObj.setBlockAndMetadataWithNotify(x, y, z, self.getBlockID(), self.getBlockMetadata());
+            int blockId = self.getBlockID();
+            int blockMeta = self.getBlockMetadata();
+            int extMeta = ZeroMetaUtil.getBlockLiftedByPlatformEntityExtMeta(self);
+            int newMeta = ((IWorldMixins)this.worldObj).updateFromNeighborShapes(x, y, z, blockId, blockMeta);
+            if (newMeta >= 0) {
+                ZeroMetaUtil.setBlockWithExtra(this.worldObj, x, y, z, blockId, newMeta, extMeta, 0x01 | 0x02);
+                this.worldObj.notifyBlockOfNeighborChange(x, y, z, blockId);
+            } else {
+                ZeroMetaUtil.setBlockWithExtra(this.worldObj, x, y, z, blockId, blockMeta, extMeta, 0x04 | 0x10 | 0x80);
+                this.worldObj.destroyBlock(x, y, z, true);
+            }
             self.setDead();
         }
         else {

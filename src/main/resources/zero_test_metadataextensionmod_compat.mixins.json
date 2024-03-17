@@ -1,0 +1,20 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "zero.test.mixin.metadataextensionmod",
+  "compatibilityLevel": "JAVA_8",
+  "plugin": "zero.test.ZeroTestMetadataExtensionMixinPlugin",
+  "mixins": [
+    "NBTTagLongArrayMixins",
+    "ZeroMetaUtilMixins",
+    "BlockLiftedByPlatformEntityMixins",
+    "MovingPlatformEntityMixins",
+    "WorldMixins",
+    "TileEntityPistonMixins"
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

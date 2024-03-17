@@ -15,9 +15,7 @@ public interface IBlockEntityPistonMixins {
     public boolean hasCenterHardPointToFacing(int x, int y, int z, int direction, boolean ignoreTransparency);
 #endif
 
-#if ENABLE_PISTON_TILE_ENTITY_CACHE
     public void storeTileEntity(TileEntity tileEntity);
-#endif
 
 #if ENABLE_MOVING_PISTON_ITEM_DROPS
     public TileEntity getStoredTileEntity();

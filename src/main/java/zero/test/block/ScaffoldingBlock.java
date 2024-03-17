@@ -156,4 +156,12 @@ public class ScaffoldingBlock extends Block {
     public void renderBlockAsItem(RenderBlocks renderBlocks, int damage, float brightness) {
         normal_model.renderAsItemBlock(renderBlocks, this, damage);
     }
+    /*
+    @Override
+    @Environment(EnvType.CLIENT)
+    public void registerIcons(IconRegister register) {
+        // TEMPORARY HACK TO GET RID OF WARNING IN LOG
+        this.blockIcon = null;
+    }
+    */
 }

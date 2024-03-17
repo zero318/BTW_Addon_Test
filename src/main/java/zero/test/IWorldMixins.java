@@ -21,4 +21,5 @@ public interface IWorldMixins {
         return !((block)==null) && ((IBlockMixins)block).isRedstoneConductor(self, x, y, z);
     }
     public boolean isRailBlockWithExitTowards(int x, int y, int z, int direction);
+    public void setLightOverride(int x, int y, int z, int light);
 }

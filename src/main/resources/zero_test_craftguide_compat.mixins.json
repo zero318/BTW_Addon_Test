@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "zero.test.mixin.craftguide",
+  "compatibilityLevel": "JAVA_8",
+  "plugin": "zero.test.ZeroTestCraftguideMixinPlugin",
+  "mixins": [
+    "BTWRecipesMixins"
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

@@ -23,12 +23,20 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 import zero.test.IWorldMixins;
 import zero.test.IBlockMixins;
 import zero.test.IMovingPlatformEntityMixins;
+import zero.test.ZeroUtil;
+import zero.test.ZeroMetaUtil;
 
 import java.util.Random;
 import java.util.List;
 
 #include "..\feature_flags.h"
 #include "..\util.h"
+
+#if ENABLE_METADATA_EXTENSION_COMPAT
+#define PLATFORM_SET_BLOCK(world, x, y, z, blockId, meta, extMeta, flags) ZeroMetaUtil.setBlockWithExtra(world, x, y, z, blockId, meta, extMeta, flags)
+#else
+#define PLATFORM_SET_BLOCK(world, x, y, z, blockId, meta, extMeta, flags) world.setBlock(x, y, z, blockId, meta, flags)
+#endif
 
 @Mixin(BlockLiftedByPlatformEntity.class)
 public abstract class BlockLiftedByPlatformEntityMixins extends Entity {
@@ -80,7 +88,24 @@ public abstract class BlockLiftedByPlatformEntityMixins extends Entity {
             ((IBlockMixins)block_below).getPlatformMobilityFlag(self.worldObj, x, y, z) == PLATFORM_MAIN_SUPPORT &&
             WorldUtils.isReplaceableBlock(self.worldObj, x, y, z)
         ) {
-            self.worldObj.setBlockAndMetadataWithNotify(x, y, z, self.getBlockID(), self.getBlockMetadata());
+#if ENABLE_DIRECTIONAL_UPDATES
+            int blockId = self.getBlockID();
+            int blockMeta = self.getBlockMetadata();
+#if ENABLE_METADATA_EXTENSION_COMPAT
+            int extMeta = ZeroMetaUtil.getBlockLiftedByPlatformEntityExtMeta(self);
+#endif
+            int newMeta = ((IWorldMixins)this.worldObj).updateFromNeighborShapes(x, y, z, blockId, blockMeta);
+            
+            if (newMeta >= 0) {
+                PLATFORM_SET_BLOCK(this.worldObj, x, y, z, blockId, newMeta, extMeta, UPDATE_NEIGHBORS | UPDATE_CLIENTS);
+                this.worldObj.notifyBlockOfNeighborChange(x, y, z, blockId);
+            } else {
+                PLATFORM_SET_BLOCK(this.worldObj, x, y, z, blockId, blockMeta, extMeta, UPDATE_INVISIBLE | UPDATE_KNOWN_SHAPE | UPDATE_SUPPRESS_LIGHT);
+                this.worldObj.destroyBlock(x, y, z, true);
+            }
+#else
+            PLATFORM_SET_BLOCK(self.worldObj, x, y, z, self.getBlockID(), self.getBlockMetadata(), ZeroMetaUtil.getBlockLiftedByPlatformEntityExtMeta(self), UPDATE_NEIGHBORS | UPDATE_CLIENTS);
+#endif       
             self.setDead();
         }
         else {

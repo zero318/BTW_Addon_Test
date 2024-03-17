@@ -70,7 +70,7 @@ public abstract class NetClientHandlerMixins {
         if (platform_block_state != 0) {
             int blockId;
             int blockMeta;
-            {(blockId)=((platform_block_state)&0xFFFF);(blockMeta)=((platform_block_state)>>>16);};
+            {(blockId)=((int)(platform_block_state)&0xFFFF);(blockMeta)=((int)(platform_block_state)>>>16);};
             platform_block_state = 0;
             ((IMovingPlatformEntityMixins)object).setBlockId(blockId);
             ((IMovingPlatformEntityMixins)object).setBlockMeta(blockMeta);

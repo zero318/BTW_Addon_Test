@@ -35,4 +35,7 @@ public class ZeroTestBlocks {
 #if ENABLE_SCAFFOLDING
     public static Block scaffolding;
 #endif
+#if ENABLE_MIXER_BLOCK
+    public static Block mixer_block;
+#endif
 }

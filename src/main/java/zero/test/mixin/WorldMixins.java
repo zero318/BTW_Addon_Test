@@ -23,13 +23,6 @@ import java.util.List;
 @Mixin(World.class)
 public class WorldMixins implements IWorldMixins {
     /*
-    public boolean is_handling_piston_move = false;
-    
-    public boolean get_is_handling_piston_move() {
-        return this.is_handling_piston_move;
-    }
-    */
-    /*
         Changes:
         - Added getWeakChanges instead of hardcoding the comparator ID
     */
@@ -240,11 +233,6 @@ public class WorldMixins implements IWorldMixins {
                     //}
                 }
             }
-            /*
-            if (!world.isRemote) {
-                is_handling_piston_move = prev_handling_piston;
-            }
-            */
             return blockChanged;
         }
         return false;
@@ -256,21 +244,7 @@ public class WorldMixins implements IWorldMixins {
             Chunk chunk = world.getChunkFromChunkCoords(x >> 4, z >> 4);
             boolean blockChanged = chunk.setBlockMetadata(x & 0xF, y, z & 0xF, meta);
             // Should this be enabled?
-            /*
-            if ((flags & UPDATE_SUPPRESS_LIGHT) == 0) {
-                world.theProfiler.startSection("checkLight");
-                world.updateAllLightTypes(x, y, z);
-                world.theProfiler.endSection();
-            }
-            */
             if (blockChanged) {
-                /*
-                boolean prev_handling_piston = false;
-                if (!world.isRemote) {
-                    prev_handling_piston= is_handling_piston_move;
-                    is_handling_piston_move = (flags & UPDATE_MOVE_BY_PISTON) != 0;
-                }
-                */
                 //int currentBlockId = 0;
                 //if (
                     //(flags & (UPDATE_NEIGHBORS | UPDATE_KNOWN_SHAPE)) != UPDATE_KNOWN_SHAPE
@@ -312,11 +286,6 @@ public class WorldMixins implements IWorldMixins {
                     //}
                     this.updateNeighbourShapes(x, y, z, flags & ~(0x01 | 0x20));
                 }
-                /*
-                if (!world.isRemote) {
-                    is_handling_piston_move = prev_handling_piston;
-                }
-                */
             }
             return blockChanged;
         }
@@ -519,5 +488,71 @@ public class WorldMixins implements IWorldMixins {
             return ZeroUtil.rail_exit_directions[meta] == direction || ZeroUtil.rail_exit_directions[meta + 1] == direction;
         }
         return false;
+    }
+    public long lightOverrideCoord = 137438953472L;
+    public int lightOverride;
+    @Override
+    public void setLightOverride(int x, int y, int z, int light) {
+        World self = (World)(Object)this;
+        //Chunk chunk = self.getChunkFromChunkCoords(x >> 4, z >> 4);
+        //boolean modified = chunk.isModified;
+        this.lightOverrideCoord = ((long)(z)<<12 +26^(long)(x)<<12^(y));
+        this.lightOverride = light;
+        self.updateAllLightTypes(x, y, z);
+        //self.markBlockForRenderUpdate(x, y, z);
+        //if (self.isRemote) {
+            //self.markBlockForUpdate(x, y, z);
+            //self.notifyBlockChange(x, y, z, self.getBlockId(x, y, z));
+        //}
+        this.lightOverrideCoord = 137438953472L;
+        //chunk.isModified = modified;
+        //
+    }
+    @Overwrite
+    public int computeLightValue(int x, int y, int z, EnumSkyBlock lightType) {
+        World self = (World)(Object)this;
+        if (
+            lightType != EnumSkyBlock.Sky ||
+            !self.canBlockSeeTheSky(x, y, z)
+        ) {
+            int blockId = self.getBlockId(x, y, z);
+            Block block = Block.blocksList[blockId];
+            int light = 0;
+            if (lightType != EnumSkyBlock.Sky) {
+                light = Block.getLightValueForBlock(self, x, y, z, block);
+                if (
+                    light < this.lightOverride &&
+                    this.lightOverrideCoord == ((long)(z)<<12 +26^(long)(x)<<12^(y))
+                ) {
+                    light = this.lightOverride;
+                }
+            }
+            int opacity = Block.lightOpacity[blockId];
+            if (opacity >= 15) {
+                if (Block.getLightValueForBlock(self, x, y, z, block) <= 0) {
+                    return 0;
+                }
+                opacity = 1;
+            }
+            else if (opacity <= 0) {
+                opacity = 1;
+            }
+            if (light < 14) {
+                int facing = 0;
+                do {
+                    light = Math.max(
+                        light,
+                        self.getSavedLightValue(
+                            lightType,
+                            x + Facing.offsetsXForSide[facing],
+                            y + Facing.offsetsYForSide[facing],
+                            z + Facing.offsetsZForSide[facing]
+                        ) - opacity
+                    );
+                } while (light < 14 && ++facing <= 5);
+            }
+            return light;
+        }
+        return 15;
     }
 }

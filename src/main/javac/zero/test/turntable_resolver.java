@@ -15,9 +15,26 @@ import zero.test.mixin.IPistonBaseAccessMixins;
 import zero.test.IWorldMixins;
 import zero.test.IBlockEntityPistonMixins;
 import zero.test.ZeroUtil;
+import zero.test.ZeroMetaUtil;
 
 #include "feature_flags.h"
 #include "util.h"
+
+#if ENABLE_METADATA_EXTENSION_COMPAT
+#define blockstate_t long
+#define TURNTABLE_BLOCK_STATE_PACK(...) BLOCK_STATE_PACK_LONG(__VA_ARGS__)
+#define TURNTABLE_BLOCK_STATE_UNPACK(...) BLOCK_STATE_UNPACK_LONG(__VA_ARGS__)
+#define TURNTABLE_BLOCK_STATE_EXTRACT_ID(...) BLOCK_STATE_LONG_EXTRACT_ID(__VA_ARGS__)
+#define TURNTABLE_BLOCK_STATE_EXTRACT_META(...) BLOCK_STATE_LONG_EXTRACT_META(__VA_ARGS__)
+#define TURNTABLE_SET_BLOCK(world, x, y, z, blockId, meta, extMeta, flags) ZeroMetaUtil.setBlockWithExtra(world, x, y, z, blockId, meta, extMeta, flags)
+#else
+#define blockstate_t int
+#define TURNTABLE_BLOCK_STATE_PACK(...) BLOCK_STATE_PACK(__VA_ARGS__)
+#define TURNTABLE_BLOCK_STATE_UNPACK(...) BLOCK_STATE_UNPACK(__VA_ARGS__)
+#define TURNTABLE_BLOCK_STATE_EXTRACT_ID(...) BLOCK_STATE_EXTRACT_ID(__VA_ARGS__)
+#define TURNTABLE_BLOCK_STATE_EXTRACT_META(...) BLOCK_STATE_EXTRACT_META(__VA_ARGS__)
+#define TURNTABLE_SET_BLOCK(world, x, y, z, blockId, meta, extMeta, flags) world.setBlock(x, y, z, blockId, meta, flags)
+#endif
 
 public class TurntableResolver {
 #if ENABLE_TURNTABLE_SLIME_SUPPORT
@@ -57,7 +74,7 @@ public class TurntableResolver {
     };
     
     private final long[] pillar_blocks = new long[PILLAR_LIST_LENGTH + ATTACHMENT_LIST_LENGTH];
-    private final int[] data_list = new int[PILLAR_ID_LIST_LENGTH + ATTACHMENT_STATE_LIST_LENGTH + SPIN_OFFSET_LIST_LENGTH];
+    private final blockstate_t[] data_list = new blockstate_t[PILLAR_ID_LIST_LENGTH + ATTACHMENT_STATE_LIST_LENGTH + SPIN_OFFSET_LIST_LENGTH];
     private final TileEntity[] tile_entity_list = new TileEntity[ATTACHMENT_STATE_LIST_LENGTH];
     
     private int max_height;
@@ -97,7 +114,11 @@ public class TurntableResolver {
         
         // getNewMetadataRotatedAroundBlockOnTurntableToFacing
         // is an awful function and this is simpler without it.
-        data_list[attachment_index_global] = BLOCK_STATE_PACK(blockId, world.getBlockMetadata(x, y, z));
+        data_list[attachment_index_global] = TURNTABLE_BLOCK_STATE_PACK(
+            blockId,
+            world.getBlockMetadata(x, y, z),
+            ZeroMetaUtil.getBlockExtMetadata(world, x, y, z)
+        );
         
         data_list[attachment_index_global + SPIN_OFFSET_LIST_OFFSET] = direction;
         ++attachment_index_global;
@@ -198,14 +219,17 @@ public class TurntableResolver {
             long packedPos;
             int blockId;
             int blockMeta;
-            int blockState;
+#if ENABLE_METADATA_EXTENSION_COMPAT
+            int blockExtMeta;
+#endif
+            blockstate_t blockState;
             int tile_entity_index = 0;
             
             for (int i = attachment_index_global; --i >= ATTACHMENT_LIST_START_INDEX;) {
                 packedPos = pillar_blocks[i];
                 BLOCK_POS_UNPACK(packedPos, x, y, z);
                 
-                blockId = BLOCK_STATE_SHORT_EXTRACT_ID(data_list[i]);
+                blockId = TURNTABLE_BLOCK_STATE_EXTRACT_ID(data_list[i]);
                 Block block = Block.blocksList[blockId];
                 if (block.hasTileEntity()) {
                     tile_entity_list[tile_entity_index++] = world.getBlockTileEntity(x, y, z);
@@ -220,7 +244,7 @@ public class TurntableResolver {
             
             for (int i = pillar_index_global; --i >= PILLAR_LIST_START_INDEX;) {
                 packedPos = pillar_blocks[i];
-                crafting_counter = Block.blocksList[data_list[i]].rotateOnTurntable(world, BLOCK_POS_UNPACK_ARGS(packedPos), reverse, crafting_counter);
+                crafting_counter = Block.blocksList[(int)data_list[i]].rotateOnTurntable(world, BLOCK_POS_UNPACK_ARGS(packedPos), reverse, crafting_counter);
             }
             
             tile_entity_index = 0;
@@ -230,11 +254,11 @@ public class TurntableResolver {
                 BLOCK_POS_UNPACK(packedPos, x, y, z);
                 
                 blockState = data_list[i];
-                BLOCK_STATE_UNPACK(blockState, blockId, blockMeta);
+                TURNTABLE_BLOCK_STATE_UNPACK(blockState, blockId, blockMeta, blockExtMeta);
                 
                 Block block = Block.blocksList[blockId];
                 
-                int spin_index = DIRECTION_TO_FLAT_DIRECTION(data_list[i + SPIN_OFFSET_LIST_OFFSET]);
+                int spin_index = DIRECTION_TO_FLAT_DIRECTION((int)data_list[i + SPIN_OFFSET_LIST_OFFSET]);
                 if (reverse) {
                     ++spin_index;
                 }
@@ -272,14 +296,14 @@ public class TurntableResolver {
                         // and most of the side effects of rotateAroundJAxis
                         // are already handled by setting the block itself.
                         // Major exception is mechanical power not snapping axles.
-                        world.setBlock(nextX, y, nextZ, blockId, block.rotateMetadataAroundJAxis(newMeta, BOOL_INVERT(reverse)), UPDATE_NEIGHBORS | UPDATE_CLIENTS);
+                        TURNTABLE_SET_BLOCK(world, nextX, y, nextZ, blockId, block.rotateMetadataAroundJAxis(newMeta, BOOL_INVERT(reverse)), blockExtMeta, UPDATE_NEIGHBORS | UPDATE_CLIENTS);
                     }
                     else {
-                        world.setBlock(nextX, y, nextZ, blockId, blockMeta, UPDATE_INVISIBLE | UPDATE_KNOWN_SHAPE | UPDATE_MOVE_BY_PISTON | UPDATE_SUPPRESS_LIGHT);
+                        TURNTABLE_SET_BLOCK(world, nextX, y, nextZ, blockId, blockMeta, blockExtMeta, UPDATE_INVISIBLE | UPDATE_KNOWN_SHAPE | UPDATE_MOVE_BY_PISTON | UPDATE_SUPPRESS_LIGHT);
                         world.destroyBlock(nextX, y, nextZ, true);
                     }
 #else
-                    world.setBlock(nextX, y, nextZ, blockId, block.rotateMetadataAroundJAxis(blockMeta, BOOL_INVERT(reverse)), UPDATE_NEIGHBORS | UPDATE_CLIENTS);
+                    TURNTABLE_SET_BLOCK(world, nextX, y, nextZ, blockId, block.rotateMetadataAroundJAxis(blockMeta, BOOL_INVERT(reverse)), blockExtMeta, UPDATE_NEIGHBORS | UPDATE_CLIENTS);
 #endif
                 }
                 else {

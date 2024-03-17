@@ -22,6 +22,9 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 import zero.test.IWorldMixins;
 import zero.test.IBlockMixins;
 import zero.test.IMovingPlatformEntityMixins;
+import zero.test.ZeroUtil;
+import zero.test.ZeroMetaUtil;
+import zero.test.mixin.IWorldAccessMixins;
 import java.util.Random;
 // Block piston reactions
 @Mixin(MovingPlatformEntity.class)
@@ -32,6 +35,8 @@ public abstract class MovingPlatformEntityMixins extends Entity implements IMovi
     public int block_id;
     public int block_meta;
     //public int sticky_sides;
+    public NBTTagCompound storedTileEntityData = null;
+    public TileEntity cachedTileEntity = null;
     public void setBlockId(int blockId) {
         this.block_id = blockId;
     }
@@ -43,6 +48,18 @@ public abstract class MovingPlatformEntityMixins extends Entity implements IMovi
     }
     public int getBlockMeta() {
         return this.block_meta;
+    }
+    public void storeTileEntity(TileEntity tileEntity) {
+        (this.cachedTileEntity = tileEntity).writeToNBT(this.storedTileEntityData = new NBTTagCompound());
+    }
+    public TileEntity getStoredTileEntity() {
+        if (this.storedTileEntityData != null) {
+            if (this.cachedTileEntity != null) {
+                return this.cachedTileEntity;
+            }
+            return TileEntity.createAndLoadEntity(this.storedTileEntityData);
+        }
+        return null;
     }
     public boolean setBoundingBox() {
         int x = MathHelper.floor_double(this.posX);
@@ -91,6 +108,7 @@ public abstract class MovingPlatformEntityMixins extends Entity implements IMovi
     public void writeEntityToNBT_inject(NBTTagCompound nbttagcompound, CallbackInfo info) {
         nbttagcompound.setInteger("BlockId", this.block_id);
         nbttagcompound.setInteger("BlockMeta", this.block_meta);
+        nbttagcompound.setCompoundTag("TileEntityData", this.storedTileEntityData);
     }
     @Inject(
         method = "readEntityFromNBT(Lnet/minecraft/src/NBTTagCompound;)V",
@@ -105,21 +123,30 @@ public abstract class MovingPlatformEntityMixins extends Entity implements IMovi
         if (nbttagcompound.hasKey("BlockMeta")) {
             this.block_meta = nbttagcompound.getInteger("BlockMeta");
         }
+        if (nbttagcompound.hasKey("TileEntityData")) {
+            this.storedTileEntityData = nbttagcompound.getCompoundTag("TileEntityData");
+        }
     }
     @Overwrite(remap=false)
     public Packet getSpawnPacketForThisEntity() {
+        // Send the block state info for proper rendering
         return new Packet23VehicleSpawn(this, 103, (((this.block_id)&0xFFFF)|((this.block_meta))<<16));
     }
     @Overwrite(remap=false)
     public void destroyPlatformWithDrop() {
         if (!this.worldObj.isRemote) {
-            ItemUtils.ejectStackWithRandomOffset(
+            int x = MathHelper.floor_double(this.posX);
+            int y = MathHelper.floor_double(this.posY);
+            int z = MathHelper.floor_double(this.posZ);
+            Block.blocksList[this.block_id].dropBlockAsItem(
                 this.worldObj,
-                MathHelper.floor_double(this.posX),
-                MathHelper.floor_double(this.posY),
-                MathHelper.floor_double(this.posZ),
-                new ItemStack(Block.blocksList[this.block_id])
+                x, y, z,
+                this.block_id, this.block_meta
             );
+            TileEntity tileEntity;
+            if ((tileEntity = this.getStoredTileEntity()) != null) {
+                ZeroUtil.break_tile_entity(this.worldObj, x, y, z, tileEntity);
+            }
         }
      this.setDead();
     }
@@ -127,39 +154,71 @@ public abstract class MovingPlatformEntityMixins extends Entity implements IMovi
     public void convertToBlock(int x, int y, int z, MovingAnchorEntity associatedAnchor, boolean movingUpwards) {
         MovingPlatformEntity self = (MovingPlatformEntity)(Object)this;
      int destBlockId = this.worldObj.getBlockId(x, y, z);
-     if (WorldUtils.isReplaceableBlock(this.worldObj, x, y, z)) {
-      //this.worldObj.setBlockWithNotify(x, y, z, this.block_id);
-            this.worldObj.setBlock(x, y, z, this.block_id, this.block_meta, 0x01 | 0x02);
-     }
-     else if (
-            !Block.blocksList[destBlockId].blockMaterial.isSolid() ||
-            destBlockId == Block.web.blockID ||
-      destBlockId == BTWBlocks.web.blockID
+        TileEntity tileEntity = this.getStoredTileEntity();
+        //this.storedTileEntityData = null;
+        this.cachedTileEntity = null;
+        boolean isReplaceable = WorldUtils.isReplaceableBlock(this.worldObj, x, y, z);
+        if (
+            isReplaceable ||
+            (
+                !Block.blocksList[destBlockId].blockMaterial.isSolid() ||
+                destBlockId == Block.web.blockID ||
+                destBlockId == BTWBlocks.web.blockID
+            )
         ) {
-      int targetMetadata = this.worldObj.getBlockMetadata(x, y, z);
-      Block.blocksList[destBlockId].dropBlockAsItem(
-    this.worldObj,
-                x, y, z,
-                targetMetadata,
-                0
-            );
-         this.worldObj.playAuxSFX(
-                BTWEffectManager.DESTROY_BLOCK_RESPECT_PARTICLE_SETTINGS_EFFECT_ID,
-          x, y, z,
-                destBlockId + (targetMetadata << 12)
-            );
-      //this.worldObj.setBlockWithNotify(x, y, z, this.block_id);
-            this.worldObj.setBlock(x, y, z, this.block_id, this.block_meta, 0x01 | 0x02);
-  }
+            if (!isReplaceable) {
+                int targetMetadata = this.worldObj.getBlockMetadata(x, y, z);
+                Block.blocksList[destBlockId].dropBlockAsItem(
+                    this.worldObj,
+                    x, y, z,
+                    //destBlockId,
+                    targetMetadata
+                    ,0
+                );
+                this.worldObj.playAuxSFX(
+                    BTWEffectManager.DESTROY_BLOCK_RESPECT_PARTICLE_SETTINGS_EFFECT_ID,
+                    x, y, z,
+                    destBlockId + (targetMetadata << 12)
+                );
+            }
+            int newMeta = ((IWorldMixins)this.worldObj).updateFromNeighborShapes(x, y, z, this.block_id, this.block_meta);
+            int extMeta = ZeroMetaUtil.getMovingPlatformEntityExtMeta(self);
+            // Set scanningTileEntities to true so
+            // that the tile entity is placed correctly.
+            // This is still necessary for platforms
+            // because entities are parsed during a
+            // different part of a tick than pistons.
+            boolean scanningTileEntitiesTemp = ((IWorldAccessMixins)this.worldObj).getScanningTileEntities();
+            ((IWorldAccessMixins)this.worldObj).setScanningTileEntities(true);
+            if (tileEntity != null) {
+                //tileEntity.xCoord = x;
+                //tileEntity.yCoord = y;
+                //tileEntity.zCoord = z;
+                tileEntity.validate();
+                                                                 ;
+                this.worldObj.setBlockTileEntity(x, y, z, tileEntity);
+            }
+            if (newMeta >= 0) {
+                ZeroMetaUtil.setBlockWithExtra(this.worldObj, x, y, z, this.block_id, newMeta, extMeta, 0x01 | 0x02);
+                this.worldObj.notifyBlockOfNeighborChange(x, y, z, this.block_id);
+            } else {
+                ZeroMetaUtil.setBlockWithExtra(this.worldObj, x, y, z, this.block_id, this.block_meta, extMeta, 0x04 | 0x10 | 0x80);
+                this.worldObj.destroyBlock(x, y, z, true);
+            }
+            // Restore original value of scanningTileEntities
+            ((IWorldAccessMixins)this.worldObj).setScanningTileEntities(scanningTileEntitiesTemp);
+        }
      else {
       // this shouldn't usually happen, but if the block is already occupied, eject the platform
       // as an item
-   ItemUtils.ejectSingleItemWithRandomOffset(
+            Block.blocksList[this.block_id].dropBlockAsItem(
                 this.worldObj,
                 x, y, z,
-                this.block_id,
-                0
+                this.block_id, this.block_meta
             );
+            if (tileEntity != null) {
+                ZeroUtil.break_tile_entity(this.worldObj, x, y, z, tileEntity);
+            }
      }
      MiscUtils.positionAllNonPlayerMoveableEntitiesOutsideOfLocation(this.worldObj, x, y, z);
   // FCTODO: hacky way of making sure players don't fall through platforms when they stop

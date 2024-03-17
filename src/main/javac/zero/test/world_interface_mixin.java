@@ -40,4 +40,8 @@ public interface IWorldMixins {
 #endif
 
     public boolean isRailBlockWithExitTowards(int x, int y, int z, int direction);
+    
+#if ENABLE_LIGHT_STICKS
+    public void setLightOverride(int x, int y, int z, int light);
+#endif
 }

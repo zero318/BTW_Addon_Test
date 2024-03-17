@@ -7,6 +7,11 @@ MACRO_VOID(
 /// Utility Macro Defs
 )
 
+#ifdef NDEBUG
+#define DEBUG_BUILD 0
+#else
+#define DEBUG_BUILD 1
+#endif
 
 #define MACRO_CAT_RAW(arg1, arg2) arg1 ## arg2
 #define MACRO_CAT(arg1, arg2) MACRO_CAT_RAW(arg1, arg2)
@@ -866,6 +871,7 @@ MACRO_VOID(
 #define UPDATE_ALL				(UPDATE_NEIGHBORS | UPDATE_CLIENTS)
 #define UPDATE_NONE				(UPDATE_INVISIBLE)
 #define UPDATE_ALL_IMMEDIATE	(UPDATE_NEIGHBORS | UPDATE_CLIENTS | UPDATE_IMMEDIATE)
+#define UPDATE_QUIET			(UPDATE_CLIENTS | UPDATE_KNOWN_SHAPE)
 
 #define MAX_REDSTONE_POWER 15
 
@@ -1760,12 +1766,12 @@ BLOCK_POS_EXTRACT_Z(pos)
 
 #define BLOCK_STATE_PACK_SHORT_RAW(id,meta)\
 ((short)((id)|(meta)<<BLOCK_ID_BITS))
-#define BLOCK_STATE_PACK_SHORT(id,meta)\
+#define BLOCK_STATE_PACK_SHORT(id,meta,...)\
 BLOCK_STATE_PACK_SHORT_RAW((id)&BLOCK_ID_MASK,(meta))
 
 #define BLOCK_STATE_PACK_RAW(id,meta)\
 ((id)|(meta)<<16)
-#define BLOCK_STATE_PACK(id,meta)\
+#define BLOCK_STATE_PACK(id,meta,...)\
 BLOCK_STATE_PACK_RAW((id)&0xFFFF,(meta))
 
 #define BLOCK_STATE_PACK_LONG_RAW(id,meta,extmeta)\
@@ -1786,20 +1792,20 @@ BLOCK_STATE_PACK_LONG_RAW((id)&0xFFFF,meta,extmeta)
 BLOCK_STATE_SHORT_EXTRACT_ID(state),\
 BLOCK_STATE_SHORT_EXTRACT_META(state)
 
-#define BLOCK_STATE_UNPACK_SHORT(state,id,meta)\
+#define BLOCK_STATE_UNPACK_SHORT(state,id,meta,...)\
 _BLOCK_STATE_UNPACK(id,meta,BLOCK_STATE_UNPACK_SHORT_ARGS(state))
 
 #define BLOCK_STATE_EXTRACT_ID(state)\
-((state)&0xFFFF)
+((int)(state)&0xFFFF)
 
 #define BLOCK_STATE_EXTRACT_META(state)\
-((state)>>>16)
+((int)(state)>>>16)
 
 #define BLOCK_STATE_UNPACK_ARGS(state)\
 BLOCK_STATE_EXTRACT_ID(state),\
 BLOCK_STATE_EXTRACT_META(state)
 
-#define BLOCK_STATE_UNPACK(state,id,meta)\
+#define BLOCK_STATE_UNPACK(state,id,meta,...)\
 _BLOCK_STATE_UNPACK(id,meta,BLOCK_STATE_UNPACK_ARGS(state))
 
 #define BLOCK_STATE_LONG_EXTRACT_ID(state)\

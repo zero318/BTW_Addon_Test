@@ -6,7 +6,7 @@ import btw.block.model.BlockModel;
 import btw.util.PrimitiveAABBWithBenefits;
 import btw.util.PrimitiveQuad;
 
-import zero.test.block.model.TexturedBox;
+//import zero.test.block.model.TexturedBox;
 
 #include "..\..\util.h"
 #include "..\..\feature_flags.h"

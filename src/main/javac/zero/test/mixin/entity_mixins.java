@@ -19,14 +19,14 @@ import zero.test.IEntityMixins;
 #include "..\feature_flags.h"
 
 @Mixin(Entity.class)
-public class EntityMixins implements IEntityMixins {
+public abstract class EntityMixins implements IEntityMixins {
 
     public long timeOfLastPistonPush;
     public double pistonX;
     public double pistonY;
     public double pistonZ;
     
-    public void moveEntityByPiston(double x, double y, double z) {
+    public void moveEntityByPiston(double x, double y, double z, int direction, boolean isRegularPush) {
         Entity self = (Entity)(Object)this;
         if (x * x + y * y + z * z > 1.0E-7D) {
             long time = self.worldObj.getTotalWorldTime();

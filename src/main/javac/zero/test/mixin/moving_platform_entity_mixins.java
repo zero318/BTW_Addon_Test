@@ -26,6 +26,9 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 import zero.test.IWorldMixins;
 import zero.test.IBlockMixins;
 import zero.test.IMovingPlatformEntityMixins;
+import zero.test.ZeroUtil;
+import zero.test.ZeroMetaUtil;
+import zero.test.mixin.IWorldAccessMixins;
 
 import java.util.Random;
 
@@ -33,6 +36,22 @@ import java.util.Random;
 #include "..\util.h"
 
 #define ENABLE_GROSS_METADATA_HACK 1
+
+#define BREAK_BLOCK_WHEN_FAILING 1
+
+#define PLATFORM_TILE_ENTITY_PRINT_DEBUGGING 0
+
+#if PLATFORM_TILE_ENTITY_PRINT_DEBUGGING
+#define PLATFORM_TILE_ENTITY_DEBUG(...) AddonHandler.logMessage(__VA_ARGS__)
+#else
+#define PLATFORM_TILE_ENTITY_DEBUG(...)
+#endif
+
+#if ENABLE_METADATA_EXTENSION_COMPAT
+#define PLATFORM_SET_BLOCK(world, x, y, z, blockId, meta, extMeta, flags) ZeroMetaUtil.setBlockWithExtra(world, x, y, z, blockId, meta, extMeta, flags)
+#else
+#define PLATFORM_SET_BLOCK(world, x, y, z, blockId, meta, extMeta, flags) world.setBlock(x, y, z, blockId, meta, flags)
+#endif
 
 @Mixin(MovingPlatformEntity.class)
 public abstract class MovingPlatformEntityMixins extends Entity implements IMovingPlatformEntityMixins {
@@ -46,6 +65,11 @@ public abstract class MovingPlatformEntityMixins extends Entity implements IMovi
     public int block_meta;
     //public int sticky_sides;
     
+    public NBTTagCompound storedTileEntityData = null;
+#if ENABLE_PLATFORM_TILE_ENTITY_CACHE
+    public TileEntity cachedTileEntity = null;
+#endif
+    
     public void setBlockId(int blockId) {
         this.block_id = blockId;
     }
@@ -57,6 +81,26 @@ public abstract class MovingPlatformEntityMixins extends Entity implements IMovi
     }
     public int getBlockMeta() {
         return this.block_meta;
+    }
+    
+    public void storeTileEntity(TileEntity tileEntity) {
+#if ENABLE_PLATFORM_TILE_ENTITY_CACHE
+        (this.cachedTileEntity = tileEntity).writeToNBT(this.storedTileEntityData = new NBTTagCompound());
+#else
+        tileEntity.writeToNBT(this.storedTileEntityData = new NBTTagCompound());
+#endif
+    }
+    
+    public TileEntity getStoredTileEntity() {
+        if (this.storedTileEntityData != null) {
+#if ENABLE_PLATFORM_TILE_ENTITY_CACHE
+            if (this.cachedTileEntity != null) {
+                return this.cachedTileEntity;
+            }
+#endif
+            return TileEntity.createAndLoadEntity(this.storedTileEntityData);
+        }
+        return null;
     }
     
     public boolean setBoundingBox() {
@@ -121,6 +165,7 @@ public abstract class MovingPlatformEntityMixins extends Entity implements IMovi
     public void writeEntityToNBT_inject(NBTTagCompound nbttagcompound, CallbackInfo info) {
         nbttagcompound.setInteger("BlockId", this.block_id);
         nbttagcompound.setInteger("BlockMeta", this.block_meta);
+        nbttagcompound.setCompoundTag("TileEntityData", this.storedTileEntityData);
     }
     
     @Inject(
@@ -136,23 +181,42 @@ public abstract class MovingPlatformEntityMixins extends Entity implements IMovi
         if (nbttagcompound.hasKey("BlockMeta")) {
             this.block_meta = nbttagcompound.getInteger("BlockMeta");
         }
+        if (nbttagcompound.hasKey("TileEntityData")) {
+            this.storedTileEntityData = nbttagcompound.getCompoundTag("TileEntityData");
+        }
     }
     
     @Overwrite(remap=false)
     public Packet getSpawnPacketForThisEntity() {
+        // Send the block state info for proper rendering
         return new Packet23VehicleSpawn(this, 103, BLOCK_STATE_PACK(this.block_id, this.block_meta));
     }
     
     @Overwrite(remap=false)
     public void destroyPlatformWithDrop() {
         if (!this.worldObj.isRemote) {
+            int x = MathHelper.floor_double(this.posX);
+            int y = MathHelper.floor_double(this.posY);
+            int z = MathHelper.floor_double(this.posZ);
+            
+#if !BREAK_BLOCK_WHEN_FAILING
             ItemUtils.ejectStackWithRandomOffset(
                 this.worldObj,
-                MathHelper.floor_double(this.posX),
-                MathHelper.floor_double(this.posY),
-                MathHelper.floor_double(this.posZ),
+                x, y, z,
                 new ItemStack(Block.blocksList[this.block_id])
             );
+#else
+            Block.blocksList[this.block_id].dropBlockAsItem(
+                this.worldObj,
+                x, y, z,
+                this.block_id, this.block_meta
+            );
+#endif
+            
+            TileEntity tileEntity;
+            if ((tileEntity = this.getStoredTileEntity()) != null) {
+                ZeroUtil.break_tile_entity(this.worldObj, x, y, z, tileEntity);
+            }
         }
 		
     	this.setDead();
@@ -163,44 +227,130 @@ public abstract class MovingPlatformEntityMixins extends Entity implements IMovi
         MovingPlatformEntity self = (MovingPlatformEntity)(Object)this;
         
     	int destBlockId = this.worldObj.getBlockId(x, y, z);
+        TileEntity tileEntity = this.getStoredTileEntity();
+        //this.storedTileEntityData = null;
+#if ENABLE_PLATFORM_TILE_ENTITY_CACHE
+        this.cachedTileEntity = null;
+#endif
     	
-    	if (WorldUtils.isReplaceableBlock(this.worldObj, x, y, z)) {
-    		//this.worldObj.setBlockWithNotify(x, y, z, this.block_id);
-            this.worldObj.setBlock(x, y, z, this.block_id, this.block_meta, UPDATE_NEIGHBORS | UPDATE_CLIENTS);
-    	}
-    	else if (
-            !Block.blocksList[destBlockId].blockMaterial.isSolid() ||
-            destBlockId == Block.web.blockID ||
-    		destBlockId == BTWBlocks.web.blockID
+        boolean isReplaceable = WorldUtils.isReplaceableBlock(this.worldObj, x, y, z);
+        
+        if (
+            isReplaceable ||
+            (
+                !Block.blocksList[destBlockId].blockMaterial.isSolid() ||
+                destBlockId == Block.web.blockID ||
+                destBlockId == BTWBlocks.web.blockID
+            )
         ) {
-    		int targetMetadata = this.worldObj.getBlockMetadata(x, y, z);
+            if (!isReplaceable) {
+                int targetMetadata = this.worldObj.getBlockMetadata(x, y, z);
     		
-    		Block.blocksList[destBlockId].dropBlockAsItem( 
-				this.worldObj,
-                x, y, z,
-                targetMetadata,
-                0
-            );
-    		
-	        this.worldObj.playAuxSFX(
-                BTWEffectManager.DESTROY_BLOCK_RESPECT_PARTICLE_SETTINGS_EFFECT_ID,
-	        	x, y, z,
-                destBlockId + (targetMetadata << 12)
-            );
-	        
-    		//this.worldObj.setBlockWithNotify(x, y, z, this.block_id);
-            this.worldObj.setBlock(x, y, z, this.block_id, this.block_meta, UPDATE_NEIGHBORS | UPDATE_CLIENTS);
-		}
+                Block.blocksList[destBlockId].dropBlockAsItem( 
+                    this.worldObj,
+                    x, y, z,
+                    //destBlockId,
+                    targetMetadata
+                    ,0
+                );
+                
+                this.worldObj.playAuxSFX(
+                    BTWEffectManager.DESTROY_BLOCK_RESPECT_PARTICLE_SETTINGS_EFFECT_ID,
+                    x, y, z,
+                    destBlockId + (targetMetadata << 12)
+                );
+            }
+            
+            int newMeta = ((IWorldMixins)this.worldObj).updateFromNeighborShapes(x, y, z, this.block_id, this.block_meta);
+#if ENABLE_METADATA_EXTENSION_COMPAT
+            int extMeta = ZeroMetaUtil.getMovingPlatformEntityExtMeta(self);
+#endif
+            
+                
+            // Set scanningTileEntities to true so
+            // that the tile entity is placed correctly.
+            // This is still necessary for platforms
+            // because entities are parsed during a
+            // different part of a tick than pistons.
+            boolean scanningTileEntitiesTemp = ((IWorldAccessMixins)this.worldObj).getScanningTileEntities();
+            ((IWorldAccessMixins)this.worldObj).setScanningTileEntities(true);
+            
+#if PLATFORM_TILE_ENTITY_PRINT_DEBUGGING
+            TileEntity newTileEntityA = null;
+#endif
+            if (tileEntity != null) {
+                //tileEntity.xCoord = x;
+                //tileEntity.yCoord = y;
+                //tileEntity.zCoord = z;
+                tileEntity.validate();
+                PLATFORM_TILE_ENTITY_DEBUG("Placing tile entity");
+                
+                this.worldObj.setBlockTileEntity(x, y, z, tileEntity);
+                
+#if PLATFORM_TILE_ENTITY_PRINT_DEBUGGING
+                newTileEntityA = this.worldObj.getBlockTileEntity(x, y, z);
+#endif
+            }
+            
+            if (newMeta >= 0) {
+                PLATFORM_SET_BLOCK(this.worldObj, x, y, z, this.block_id, newMeta, extMeta, UPDATE_NEIGHBORS | UPDATE_CLIENTS);
+                this.worldObj.notifyBlockOfNeighborChange(x, y, z, this.block_id);
+            } else {
+                PLATFORM_SET_BLOCK(this.worldObj, x, y, z, this.block_id, this.block_meta, extMeta, UPDATE_INVISIBLE | UPDATE_KNOWN_SHAPE | UPDATE_SUPPRESS_LIGHT);
+                this.worldObj.destroyBlock(x, y, z, true);
+            }
+
+#if PLATFORM_TILE_ENTITY_PRINT_DEBUGGING
+            if (tileEntity != null) {
+                TileEntity newTileEntityB = this.worldObj.getBlockTileEntity(x, y, z);
+                
+                NBTTagCompound newTileEntityDataA = null;
+                NBTTagCompound newTileEntityDataB = null;
+                if (newTileEntityA != null) {
+                    newTileEntityA.writeToNBT(newTileEntityDataA = new NBTTagCompound());
+                }
+                if (newTileEntityB != null) {
+                    newTileEntityB.writeToNBT(newTileEntityDataB = new NBTTagCompound());
+                }
+                if (!this.storedTileEntityData.equals(newTileEntityDataB)) {
+                    AddonHandler.logMessage("FAIL");
+                    AddonHandler.logMessage("Old : "+this.storedTileEntityData.toString());
+                    if (newTileEntityDataA != null) {
+                        AddonHandler.logMessage("NewA: "+newTileEntityDataA.toString());
+                    } else {
+                        AddonHandler.logMessage("NewA: null");
+                    }
+                    if (newTileEntityDataB != null) {
+                        AddonHandler.logMessage("NewB: "+newTileEntityDataB.toString());
+                    } else {
+                        AddonHandler.logMessage("NewB: null");
+                    }
+                }
+            }
+#endif
+            // Restore original value of scanningTileEntities
+            ((IWorldAccessMixins)this.worldObj).setScanningTileEntities(scanningTileEntitiesTemp);
+        }
     	else {
     		// this shouldn't usually happen, but if the block is already occupied, eject the platform
     		// as an item
-    		
+#if !BREAK_BLOCK_WHEN_FAILING
 			ItemUtils.ejectSingleItemWithRandomOffset(
                 this.worldObj,
                 x, y, z,
                 this.block_id,
-                0
+                this.block_meta
             );
+#else
+            Block.blocksList[this.block_id].dropBlockAsItem(
+                this.worldObj,
+                x, y, z,
+                this.block_id, this.block_meta
+            );
+#endif
+            if (tileEntity != null) {
+                ZeroUtil.break_tile_entity(this.worldObj, x, y, z, tileEntity);
+            }
     	}
     	
     	MiscUtils.positionAllNonPlayerMoveableEntitiesOutsideOfLocation(this.worldObj, x, y, z);

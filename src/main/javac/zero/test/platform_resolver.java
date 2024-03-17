@@ -27,6 +27,8 @@ import zero.test.IWorldMixins;
 import zero.test.IBlockMixins;
 import zero.test.IMovingPlatformEntityMixins;
 //import zero.test.mixin.IAnchorBlockAccessMixins;
+import zero.test.ZeroUtil;
+import zero.test.ZeroMetaUtil;
 
 import java.util.Random;
 
@@ -46,6 +48,22 @@ import java.util.Random;
 
 // I mean... they're already solid, right?
 #define USE_PLATFORM_ENTITY_FOR_ALL_BLOCKS 1
+
+#if ENABLE_METADATA_EXTENSION_COMPAT
+#define blockstate_t long
+#define PLATFORM_BLOCK_STATE_PACK(...) BLOCK_STATE_PACK_LONG(__VA_ARGS__)
+#define PLATFORM_BLOCK_STATE_UNPACK(...) BLOCK_STATE_UNPACK_LONG(__VA_ARGS__)
+#define PLATFORM_BLOCK_STATE_EXTRACT_ID(...) BLOCK_STATE_LONG_EXTRACT_ID(__VA_ARGS__)
+#define PLATFORM_BLOCK_STATE_EXTRACT_META(...) BLOCK_STATE_LONG_EXTRACT_META(__VA_ARGS__)
+#define PLATFORM_SET_BLOCK(world, x, y, z, blockId, meta, extMeta, flags) ZeroMetaUtil.setBlockWithExtra(world, x, y, z, blockId, meta, extMeta, flags)
+#else
+#define blockstate_t int
+#define PLATFORM_BLOCK_STATE_PACK(...) BLOCK_STATE_PACK(__VA_ARGS__)
+#define PLATFORM_BLOCK_STATE_UNPACK(...) BLOCK_STATE_UNPACK(__VA_ARGS__)
+#define PLATFORM_BLOCK_STATE_EXTRACT_ID(...) BLOCK_STATE_EXTRACT_ID(__VA_ARGS__)
+#define PLATFORM_BLOCK_STATE_EXTRACT_META(...) BLOCK_STATE_EXTRACT_META(__VA_ARGS__)
+#define PLATFORM_SET_BLOCK(world, x, y, z, blockId, meta, extMeta, flags) world.setBlock(x, y, z, blockId, meta, flags)
+#endif
 
 public class PlatformResolver {
     
@@ -77,7 +95,7 @@ public class PlatformResolver {
     private static final int LIFT_STATE_LIST_START_INDEX = PLATFORM_STATE_LIST_START_INDEX + PLATFORM_STATE_LIST_LENGTH;
     
     private final long[] platform_blocks = new long[PLATFORM_LIST_LENGTH + LIFT_LIST_LENGTH];
-    private final int[] data_list = new int[PLATFORM_STATE_LIST_LENGTH + LIFT_STATE_LIST_LENGTH];
+    private final blockstate_t[] data_list = new blockstate_t[PLATFORM_STATE_LIST_LENGTH + LIFT_STATE_LIST_LENGTH];
     
     private long anchor_position;
 #if ENABLE_PLATFORM_MAX_DISTANCE
@@ -116,7 +134,11 @@ public class PlatformResolver {
         }
         
         platform_blocks[platform_index_global] = packedPos;
-        data_list[platform_index_global] = BLOCK_STATE_PACK(blockId, world.getBlockMetadata(x, y, z));
+        data_list[platform_index_global] = PLATFORM_BLOCK_STATE_PACK(
+            blockId,
+            world.getBlockMetadata(x, y, z),
+            ZeroMetaUtil.getBlockExtMetadata(world, x, y, z)
+        );
         ++platform_index_global;
         
         int move_direction = isExtending ? DIRECTION_DOWN : DIRECTION_UP;
@@ -178,7 +200,11 @@ public class PlatformResolver {
                             do {
                                 if (--i < LIFT_LIST_START_INDEX) {
                                     platform_blocks[lift_index_global] = packedPos;
-                                    data_list[lift_index_global] = BLOCK_STATE_PACK(neighborId, world.getBlockMetadata(nextX, nextY, nextZ));
+                                    data_list[lift_index_global] = PLATFORM_BLOCK_STATE_PACK(
+                                        neighborId,
+                                        world.getBlockMetadata(nextX, nextY, nextZ),
+                                        ZeroMetaUtil.getBlockExtMetadata(world, nextX, nextY, nextZ)
+                                    );
                                     ++lift_index_global;
                                     break;
                                 }
@@ -220,18 +246,19 @@ public class PlatformResolver {
                 
                 int blockId;
                 int blockMeta;
-                int blockState = data_list[i];
-                BLOCK_STATE_UNPACK(blockState, blockId, blockMeta);
+#if ENABLE_METADATA_EXTENSION_COMPAT
+                int blockExtMeta;
+#endif
+                blockstate_t blockState = data_list[i];
+                PLATFORM_BLOCK_STATE_UNPACK(blockState, blockId, blockMeta, blockExtMeta);
                 Block block = Block.blocksList[blockId];
                 
                 blockMeta = ((IBlockMixins)block).adjustMetadataForPlatformMove(blockMeta);
                 
 #if USE_PLATFORM_ENTITY_FOR_ALL_BLOCKS
                 if (
-#if ENABLE_RAIL_BUFFER_STOP
-                    //blockId != BUFFER_STOP_ID &&
-#endif
                     ((IBlockMixins)block).getMobilityFlag(world, x, y, z) != PISTON_CAN_BREAK &&
+                    // Rails just don't render correctly as a platform block
                     !(block instanceof BlockRailBase)
                 ) {
                     MovingPlatformEntity lifted_entity = (MovingPlatformEntity)EntityList.createEntityOfType(
@@ -242,6 +269,15 @@ public class PlatformResolver {
                     
                     ((IMovingPlatformEntityMixins)lifted_entity).setBlockId(blockId);
                     ((IMovingPlatformEntityMixins)lifted_entity).setBlockMeta(blockMeta);
+#if ENABLE_METADATA_EXTENSION_COMPAT
+                    ZeroMetaUtil.addExtMetaToMovingPlatformEntity(lifted_entity, blockExtMeta);
+#endif
+                    
+                    TileEntity tileEntity;
+                    if ((tileEntity = world.getBlockTileEntity(x, y, z)) != null) {
+                        world.removeBlockTileEntity(x, y, z);
+                        ((IMovingPlatformEntityMixins)lifted_entity).storeTileEntity(tileEntity);
+                    }
                     world.spawnEntityInWorld(lifted_entity);
                 }
                 else {
@@ -252,6 +288,9 @@ public class PlatformResolver {
                     );
                     lifted_entity.setBlockID(blockId);
                     lifted_entity.setBlockMetadata(blockMeta);
+#if ENABLE_METADATA_EXTENSION_COMPAT
+                    ZeroMetaUtil.addExtMetaToLiftedBlockEntity(lifted_entity, blockExtMeta);
+#endif
                     world.spawnEntityInWorld(lifted_entity);
 #if USE_PLATFORM_ENTITY_FOR_ALL_BLOCKS
                 }
@@ -273,11 +312,19 @@ public class PlatformResolver {
                 
                 int blockId;
                 int blockMeta;
-                int blockState = data_list[i];
-                BLOCK_STATE_UNPACK(blockState, blockId, blockMeta);
+#if ENABLE_METADATA_EXTENSION_COMPAT
+                int blockExtMeta;
+#endif
+                blockstate_t blockState = data_list[i];
+                PLATFORM_BLOCK_STATE_UNPACK(blockState, blockId, blockMeta, blockExtMeta);
                 
                 ((IMovingPlatformEntityMixins)moving_entity).setBlockId(blockId);
                 ((IMovingPlatformEntityMixins)moving_entity).setBlockMeta(blockMeta);
+#if ENABLE_METADATA_EXTENSION_COMPAT
+                ZeroMetaUtil.addExtMetaToMovingPlatformEntity(moving_entity, blockExtMeta);
+#endif
+
+                // Blocks in this list shouldn't need to check tile entities, right?
                 
                 world.spawnEntityInWorld(moving_entity);
                 
@@ -287,14 +334,18 @@ public class PlatformResolver {
             for (int i = lift_index_global; --i >= LIFT_LIST_START_INDEX;) {
                 // Set x,y,z to position of block in lift list
                 packedPos = platform_blocks[i];
-                world.notifyBlocksOfNeighborChange(BLOCK_POS_UNPACK_ARGS(packedPos), BLOCK_STATE_EXTRACT_ID(data_list[i]));
+                //world.notifyBlocksOfNeighborChange(BLOCK_POS_UNPACK_ARGS(packedPos), PLATFORM_BLOCK_STATE_EXTRACT_ID(data_list[i]));
                 //world.setBlock(BLOCK_POS_UNPACK_ARGS(packedPos), 0, 0, UPDATE_NEIGHBORS | UPDATE_CLIENTS | UPDATE_IMMEDIATE | UPDATE_SUPPRESS_DROPS | UPDATE_MOVE_BY_PISTON);
+                int blockId = PLATFORM_BLOCK_STATE_EXTRACT_ID(data_list[i]);
+                ((IWorldMixins)world).notifyBlockChangeAndComparators(BLOCK_POS_UNPACK_ARGS(packedPos), blockId, blockId);
             }
             for (int i = platform_index_global; --i >= PLATFORM_LIST_START_INDEX;) {
                 // Set x,y,z to position of block in platform list
                 packedPos = platform_blocks[i];
-                world.notifyBlocksOfNeighborChange(BLOCK_POS_UNPACK_ARGS(packedPos), BLOCK_STATE_EXTRACT_ID(data_list[i]));
+                //world.notifyBlocksOfNeighborChange(BLOCK_POS_UNPACK_ARGS(packedPos), PLATFORM_BLOCK_STATE_EXTRACT_ID(data_list[i]));
                 //world.setBlock(BLOCK_POS_UNPACK_ARGS(packedPos), 0, 0, UPDATE_NEIGHBORS | UPDATE_CLIENTS | UPDATE_IMMEDIATE | UPDATE_SUPPRESS_DROPS | UPDATE_MOVE_BY_PISTON);
+                int blockId = PLATFORM_BLOCK_STATE_EXTRACT_ID(data_list[i]);
+                ((IWorldMixins)world).notifyBlockChangeAndComparators(BLOCK_POS_UNPACK_ARGS(packedPos), blockId, blockId);
             }
         }
     }

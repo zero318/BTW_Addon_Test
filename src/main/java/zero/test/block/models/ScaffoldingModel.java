@@ -3,7 +3,7 @@ import net.minecraft.src.*;
 import btw.block.model.BlockModel;
 import btw.util.PrimitiveAABBWithBenefits;
 import btw.util.PrimitiveQuad;
-import zero.test.block.model.TexturedBox;
+//import zero.test.block.model.TexturedBox;
 // Block piston reactions
 
 public class ScaffoldingModel extends BlockModel {

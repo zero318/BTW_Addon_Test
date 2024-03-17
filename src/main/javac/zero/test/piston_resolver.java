@@ -13,6 +13,8 @@ import zero.test.IBlockMixins;
 import zero.test.mixin.IPistonBaseAccessMixins;
 import zero.test.IWorldMixins;
 import zero.test.IBlockEntityPistonMixins;
+import zero.test.ZeroUtil;
+import zero.test.ZeroMetaUtil;
 
 #include "func_aliases.h"
 #include "feature_flags.h"
@@ -37,6 +39,26 @@ import zero.test.IBlockEntityPistonMixins;
 #define SHOVEL_DEBUG(...) if (!world.isRemote) AddonHandler.logMessage(__VA_ARGS__)
 #else
 #define SHOVEL_DEBUG(...)
+#endif
+
+#if ENABLE_METADATA_EXTENSION_COMPAT
+#define blockstate_t long
+#define PISTON_BLOCK_STATE_PACK(...) BLOCK_STATE_PACK_LONG(__VA_ARGS__)
+#define PISTON_BLOCK_STATE_UNPACK(...) BLOCK_STATE_UNPACK_LONG(__VA_ARGS__)
+#define PISTON_BLOCK_STATE_EXTRACT_ID(...) BLOCK_STATE_LONG_EXTRACT_ID(__VA_ARGS__)
+#define PISTON_BLOCK_STATE_EXTRACT_META(...) BLOCK_STATE_LONG_EXTRACT_META(__VA_ARGS__)
+#define PISTON_SET_BLOCK(world, x, y, z, blockId, meta, extMeta, flags) ZeroMetaUtil.setBlockWithExtra(world, x, y, z, blockId, meta, extMeta, flags)
+#define PISTON_GET_TILE_ENTITY(blockId, meta, extMeta, direction, isExtending, isBase) ZeroMetaUtil.getPistonTileEntity(blockId, meta, extMeta, direction, isExtending, isBase)
+#define PISTON_GET_SHOVEL_TILE_ENTITY(blockId, meta, extMeta, direction) ZeroMetaUtil.getShoveledTileEntity(blockId, meta, extMeta, direction)
+#else
+#define blockstate_t int
+#define PISTON_BLOCK_STATE_PACK(...) BLOCK_STATE_PACK(__VA_ARGS__)
+#define PISTON_BLOCK_STATE_UNPACK(...) BLOCK_STATE_UNPACK(__VA_ARGS__)
+#define PISTON_BLOCK_STATE_EXTRACT_ID(...) BLOCK_STATE_EXTRACT_ID(__VA_ARGS__)
+#define PISTON_BLOCK_STATE_EXTRACT_META(...) BLOCK_STATE_EXTRACT_META(__VA_ARGS__)
+#define PISTON_SET_BLOCK(world, x, y, z, blockId, meta, extMeta, flags) world.setBlock(x, y, z, blockId, meta, flags)
+#define PISTON_GET_TILE_ENTITY(blockId, meta, extMeta, direction, isExtending, isBase) BlockPistonMoving.getTileEntity(blockId, meta, direction, isExtending, isBase)
+#define PISTON_GET_SHOVEL_TILE_ENTITY(blockId, meta, extMeta, direction) PistonBlockMoving.getShoveledTileEntity(blockId, meta, direction)
 #endif
 
 public class PistonResolver {
@@ -116,7 +138,7 @@ public class PistonResolver {
     // The destroy list can't be longer than the push list, right?
     // TODO: TEST THIS ASSUMPTION
     private final long[] pushed_blocks = new long[PUSH_LIST_LENGTH + DESTROY_LIST_LENGTH + SHOVEL_EJECT_LIST_LENGTH + SHOVEL_LIST_LENGTH];
-    private final int[] data_list = new int[PUSH_BLOCK_STATE_LIST_LENGTH + DESTROY_BLOCK_STATE_LIST_LENGTH + SHOVEL_BLOCK_STATE_LIST_LENGTH + SHOVEL_DIRECTION_LIST_LENGTH];
+    private final blockstate_t[] data_list = new blockstate_t[PUSH_BLOCK_STATE_LIST_LENGTH + DESTROY_BLOCK_STATE_LIST_LENGTH + SHOVEL_BLOCK_STATE_LIST_LENGTH + SHOVEL_DIRECTION_LIST_LENGTH];
     
     // Position of the piston 
     private long piston_position;
@@ -289,7 +311,11 @@ public class PistonResolver {
         do {
             // Index back towards the start
             PISTON_DEBUG("AddPush ("+nextX+" "+nextY+" "+nextZ+")");
-            data_list[pushIndex] = BLOCK_STATE_PACK(nextBlockId, world.getBlockMetadata(nextX, nextY, nextZ));
+            data_list[pushIndex] = PISTON_BLOCK_STATE_PACK(
+                nextBlockId,
+                world.getBlockMetadata(nextX, nextY, nextZ),
+                ZeroMetaUtil.getBlockExtMetadata(world, nextX, nextY, nextZ)
+            );
             pushed_blocks[pushIndex++] = nextPackedPos;
             nextX += Facing.offsetsXForSide[direction];
             nextY += Facing.offsetsYForSide[direction];
@@ -338,9 +364,15 @@ public class PistonResolver {
                     int swapMax = pushIndex - gcd(pushIndex -= i, pushCount);
                     pushWriteIndex = pushCount - i;
                     
+#if ENABLE_METADATA_EXTENSION_COMPAT
+#define tempState nextPackedPos
+#else
+#define tempState blockId
+#endif
+                    
                     for (int j = i; j < swapMax; ++j) {
                         int k = j;
-                        blockId = data_list[j];
+                        tempState = data_list[j];
                         packedPos = pushed_blocks[j];
                         loop {
                             int d = i + (k + pushWriteIndex) % pushIndex;
@@ -351,10 +383,12 @@ public class PistonResolver {
                             pushed_blocks[k] = pushed_blocks[d];
                             k = d;
                         }
-                        data_list[k] = blockId;
+                        data_list[k] = tempState;
                         pushed_blocks[k] = packedPos;
                     }
                     i += pushCount;
+                    
+#undef tempState
                     
                     //PISTON_DEBUG(""+" "+pushed_blocks[PUSH_LIST_START_INDEX]+" "+pushed_blocks[PUSH_LIST_START_INDEX+1]+" "+pushed_blocks[PUSH_LIST_START_INDEX+2]+" "+pushed_blocks[PUSH_LIST_START_INDEX+3]+" "+pushed_blocks[PUSH_LIST_START_INDEX+4]+" "+pushed_blocks[PUSH_LIST_START_INDEX+5]+" "+pushed_blocks[PUSH_LIST_START_INDEX+6]+" "+pushed_blocks[PUSH_LIST_START_INDEX+7]+" "+pushed_blocks[PUSH_LIST_START_INDEX+8]+" "+pushed_blocks[PUSH_LIST_START_INDEX+9]+" "+pushed_blocks[PUSH_LIST_START_INDEX+10]+" "+pushed_blocks[PUSH_LIST_START_INDEX+11]);
                     
@@ -395,8 +429,11 @@ public class PistonResolver {
             }
             
             int nextBlockMeta = world.getBlockMetadata(nextX, nextY, nextZ);
+#if ENABLE_METADATA_EXTENSION_COMPAT
+            int nextBlockExtMeta = ZeroMetaUtil.getBlockExtMetadata(world, nextX, nextY, nextZ);
+#endif
             if (nextBlock.getMobilityFlag() == PISTON_CAN_BREAK) {
-                data_list[destroy_index_global] = BLOCK_STATE_PACK(nextBlockId, nextBlockMeta);
+                data_list[destroy_index_global] = PISTON_BLOCK_STATE_PACK(nextBlockId, nextBlockMeta, nextBlockExtMeta);
                 pushed_blocks[destroy_index_global++] = nextPackedPos;
                 return true;
             }
@@ -423,7 +460,7 @@ public class PistonResolver {
                         int i = shovel_index_global;
                         do {
                             if (--i < SHOVEL_EJECT_LIST_START_INDEX) {
-                                data_list[shovel_index_global] = BLOCK_STATE_PACK(nextBlockId, nextBlockMeta);
+                                data_list[shovel_index_global] = PISTON_BLOCK_STATE_PACK(nextBlockId, nextBlockMeta, nextBlockExtMeta);
                                 data_list[shovel_index_global + SHOVEL_DIRECTION_LIST_OFFSET] = ejectDirection;
                                 pushed_blocks[shovel_index_global] = packedPos;
                                 pushed_blocks[shovel_index_global + SHOVEL_LIST_OFFSET] = nextPackedPos;
@@ -442,7 +479,7 @@ public class PistonResolver {
                 return false;
             }
             
-            data_list[pushIndex] = BLOCK_STATE_PACK(nextBlockId, nextBlockMeta);
+            data_list[pushIndex] = PISTON_BLOCK_STATE_PACK(nextBlockId, nextBlockMeta, nextBlockExtMeta);
             pushed_blocks[pushIndex++] = nextPackedPos;
             ++pushCount;
             // Set x,y,z to the position of the currently
@@ -482,7 +519,11 @@ public class PistonResolver {
             ) {
                 // Add destroy
                 PISTON_DEBUG("Resolve destroy ("+x+" "+y+" "+z+")");
-                data_list[destroy_index_global] = BLOCK_STATE_PACK(blockId, world.getBlockMetadata(x, y, z));
+                data_list[destroy_index_global] = PISTON_BLOCK_STATE_PACK(
+                    blockId,
+                    world.getBlockMetadata(x, y, z),
+                    ZeroMetaUtil.getBlockExtMetadata(world, x, y, z)
+                );
                 pushed_blocks[destroy_index_global++] = packedPos;
                 return true;
             }
@@ -552,7 +593,10 @@ public class PistonResolver {
         long packedPos;
         int blockId;
         int blockMeta;
-        int blockState;
+#if ENABLE_METADATA_EXTENSION_COMPAT
+        int blockExtMeta;
+#endif
+        blockstate_t blockState;
         Block block;
         
         PISTON_DEBUG("DestroyIndex "+destroy_index_global);
@@ -563,6 +607,7 @@ public class PistonResolver {
             
             // Get data about destroyed block
             blockState = data_list[i];
+            // This one doesn't care about extMeta
             BLOCK_STATE_UNPACK(blockState, blockId, blockMeta);
             block = Block.blocksList[blockId];
             blockMeta = block.adjustMetadataForPistonMove(blockMeta);
@@ -581,17 +626,13 @@ public class PistonResolver {
             
             // Get data about pushed block
             blockState = data_list[i];
-            BLOCK_STATE_UNPACK(blockState, blockId, blockMeta);
+            PISTON_BLOCK_STATE_UNPACK(blockState, blockId, blockMeta, blockExtMeta);
             block = Block.blocksList[blockId];
             blockMeta = block.adjustMetadataForPistonMove(blockMeta);
             
             PISTON_DEBUG("Push "+blockId+"."+blockMeta+"("+x+" "+y+" "+z+")");
             
-#if !ENABLE_PISTON_TILE_ENTITY_CACHE
-            NBTTagCompound tileEntityData = BlockPistonBase.getBlockTileEntityData(world, x, y, z);
-#else
             TileEntity prevTileEntity = world.getBlockTileEntity(x, y, z);
-#endif
             world.removeBlockTileEntity(x, y, z);
             
             packedPos = BLOCK_POS_PACK(x + Facing.offsetsXForSide[direction], y + Facing.offsetsYForSide[direction], z + Facing.offsetsZForSide[direction]);
@@ -611,17 +652,11 @@ public class PistonResolver {
             x += Facing.offsetsXForSide[direction];
             y += Facing.offsetsYForSide[direction];
             z += Facing.offsetsZForSide[direction];
-            world.setBlock(x, y, z, Block.pistonMoving.blockID, blockMeta, UPDATE_IMMEDIATE | UPDATE_SUPPRESS_DROPS | UPDATE_MOVE_BY_PISTON);
-            TileEntity tileEntity = BlockPistonMoving.getTileEntity(blockId, blockMeta, direction, true, false);
-#if !ENABLE_PISTON_TILE_ENTITY_CACHE
-            if (tileEntityData != null) {
-                ((TileEntityPiston)tileEntity).storeTileEntity(tileEntityData);
-            }
-#else
+            PISTON_SET_BLOCK(world, x, y, z, Block.pistonMoving.blockID, blockMeta, blockExtMeta, UPDATE_IMMEDIATE | UPDATE_SUPPRESS_DROPS | UPDATE_MOVE_BY_PISTON);
+            TileEntity tileEntity = PISTON_GET_TILE_ENTITY(blockId, blockMeta, blockExtMeta, direction, true, false);
             if (prevTileEntity != null) {
                 ((IBlockEntityPistonMixins)tileEntity).storeTileEntity(prevTileEntity);
             }
-#endif
             world.setBlockTileEntity(x, y, z, tileEntity);
         }
         
@@ -630,7 +665,7 @@ public class PistonResolver {
             blockMeta = direction | (isSticky ? 8 : 0);
             PISTON_DEBUG("PistonHead "+Block.pistonMoving.blockID+"."+blockMeta+"("+headX+" "+headY+" "+headZ+")");
             world.setBlock(headX, headY, headZ, Block.pistonMoving.blockID, blockMeta, UPDATE_IMMEDIATE | UPDATE_SUPPRESS_DROPS | UPDATE_MOVE_BY_PISTON);
-            world.setBlockTileEntity(headX, headY, headZ, BlockPistonMoving.getTileEntity(Block.pistonExtension.blockID, blockMeta, direction, true, true));
+            world.setBlockTileEntity(headX, headY, headZ, PISTON_GET_TILE_ENTITY(Block.pistonExtension.blockID, blockMeta, 0, direction, true, true));
         }
         
         // START SHOVEL CODE
@@ -641,10 +676,10 @@ public class PistonResolver {
             Block targetBlock = Block.blocksList[world.getBlockId(x, y, z)];
             
             blockState = data_list[i];
-            BLOCK_STATE_UNPACK(blockState, blockId, blockMeta);
+            PISTON_BLOCK_STATE_UNPACK(blockState, blockId, blockMeta, blockExtMeta);
             block = Block.blocksList[blockId];
             blockMeta =  block.adjustMetadataForPistonMove(blockMeta);
-            int ejectDirection = data_list[i + SHOVEL_DIRECTION_LIST_OFFSET];
+            int ejectDirection = (int)data_list[i + SHOVEL_DIRECTION_LIST_OFFSET];
             
             boolean breakTarget = false;
             if (
@@ -655,8 +690,8 @@ public class PistonResolver {
                 if (breakTarget) {
                     targetBlock.dropBlockAsItem(world, x, y, z, world.getBlockMetadata(x, y, z), 0);
                 }
-                world.setBlock(x, y, z, Block.pistonMoving.blockID, blockMeta, UPDATE_IMMEDIATE | UPDATE_SUPPRESS_DROPS | UPDATE_MOVE_BY_PISTON);
-                world.setBlockTileEntity(x, y, z, PistonBlockMoving.getShoveledTileEntity(blockId, blockMeta, ejectDirection));
+                PISTON_SET_BLOCK(world, x, y, z, Block.pistonMoving.blockID, blockMeta, blockExtMeta, UPDATE_IMMEDIATE | UPDATE_SUPPRESS_DROPS | UPDATE_MOVE_BY_PISTON);
+                world.setBlockTileEntity(x, y, z, PISTON_GET_SHOVEL_TILE_ENTITY(blockId, blockMeta, blockExtMeta, ejectDirection));
             }
             else if (
                 !world.isRemote &&
@@ -694,16 +729,16 @@ public class PistonResolver {
         for (int i = destroy_index_global; --i >= DESTROY_LIST_START_INDEX;) {
             // Set x,y,z to position of block in destroy list
             packedPos = pushed_blocks[i];
-            //world.notifyBlocksOfNeighborChange(BLOCK_POS_UNPACK_ARGS(packedPos), BLOCK_STATE_EXTRACT_ID(data_list[i]));
-            blockId = BLOCK_STATE_EXTRACT_ID(data_list[i]);
+            //world.notifyBlocksOfNeighborChange(BLOCK_POS_UNPACK_ARGS(packedPos), PISTON_BLOCK_STATE_EXTRACT_ID(data_list[i]));
+            blockId = PISTON_BLOCK_STATE_EXTRACT_ID(data_list[i]);
             ((IWorldMixins)world).notifyBlockChangeAndComparators(BLOCK_POS_UNPACK_ARGS(packedPos), blockId, blockId);
         }
         
         for (int i = push_index_global; --i >= PUSH_LIST_START_INDEX;) {
             // Set x,y,z to position of block in push list
             packedPos = pushed_blocks[i];
-            //world.notifyBlocksOfNeighborChange(BLOCK_POS_UNPACK_ARGS(packedPos), BLOCK_STATE_EXTRACT_ID(data_list[i]));
-            blockId = BLOCK_STATE_EXTRACT_ID(data_list[i]);
+            //world.notifyBlocksOfNeighborChange(BLOCK_POS_UNPACK_ARGS(packedPos), PISTON_BLOCK_STATE_EXTRACT_ID(data_list[i]));
+            blockId = PISTON_BLOCK_STATE_EXTRACT_ID(data_list[i]);
             ((IWorldMixins)world).notifyBlockChangeAndComparators(BLOCK_POS_UNPACK_ARGS(packedPos), blockId, blockId);
         }
         
@@ -711,7 +746,7 @@ public class PistonResolver {
         for (int i = shovel_index_global; --i >= SHOVEL_EJECT_LIST_START_INDEX;) {
             // Set x,y,z to position of block in shovel eject list
             packedPos = pushed_blocks[i];
-            world.notifyBlocksOfNeighborChange(BLOCK_POS_UNPACK_ARGS(packedPos), BLOCK_STATE_EXTRACT_ID(data_list[i]));
+            world.notifyBlocksOfNeighborChange(BLOCK_POS_UNPACK_ARGS(packedPos), PISTON_BLOCK_STATE_EXTRACT_ID(data_list[i]));
         }
         // END SHOVEL CODE
         

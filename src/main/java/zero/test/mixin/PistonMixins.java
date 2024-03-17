@@ -25,7 +25,10 @@ import zero.test.IBlockEntityPistonMixins;
 // Block piston reactions
 //#define getInputSignal(...) func_94482_f(__VA_ARGS__)
 import zero.test.PistonResolver;
-@Mixin(PistonBlockBase.class)
+@Mixin(
+    value = PistonBlockBase.class,
+    priority = 1100
+)
 public abstract class PistonMixins extends BlockPistonBase {
     public PistonMixins() {
         super(0, false);

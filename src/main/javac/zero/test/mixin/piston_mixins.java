@@ -55,7 +55,10 @@ import zero.test.IBlockEntityPistonMixins;
 
 import zero.test.PistonResolver;
 
-@Mixin(PistonBlockBase.class)
+@Mixin(
+    value = PistonBlockBase.class,
+    priority = 1100
+)
 public abstract class PistonMixins extends BlockPistonBase {
 
     public PistonMixins() {

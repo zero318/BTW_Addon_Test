@@ -4,7 +4,7 @@
   "version": "${version}",
 
   "name": "Zero BTW Addon Test",
-  "description": "This is an example description! Tell everyone what your mod is about!",
+  "description": "Adds slime blocks and bunch of other BS",
   "authors": [
     "zero318"
   ],
@@ -14,7 +14,7 @@
   },
 
   "license": "CC0-1.0",
-  "icon": "assets/zero_btw_addon_test/icon.png",
+  "icon": "zero_btw_addon_test/icon.png",
 
   "environment": "*",
   "entrypoints": {
@@ -26,7 +26,10 @@
     ]
   },
   "mixins": [
-    "zero_test.mixins.json"
+    "zero_test.mixins.json",
+    "zero_test_deco_compat.mixins.json",
+    "zero_test_craftguide_compat.mixins.json",
+    "zero_test_metadataextensionmod_compat.mixins.json"
   ],
 
   "depends": {
