@@ -7,7 +7,6 @@ import net.minecraft.src.IBlockAccess;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import java.util.List;
-// Block piston reactions
 
 public interface IBlockMixins {
     // Whether or not the block should have onNeighborBlockChange

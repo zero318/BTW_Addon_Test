@@ -14,7 +14,6 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 //import zero.test.mixin.IBlockComparatorAccessMixins;
 import java.util.Random;
 import zero.test.IWorldMixins;
-// Block piston reactions
 //updateNeighbourShapes
 @Mixin(NoteBlock.class)
 public abstract class NoteBlockMixins extends Block {

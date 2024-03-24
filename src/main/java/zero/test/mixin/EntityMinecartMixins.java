@@ -18,7 +18,6 @@ import zero.test.mixin.IEntityMinecartAccessMixins;
 import zero.test.IBaseRailBlockMixins;
 import zero.test.ZeroUtil;
 import java.util.List;
-// Block piston reactions
 
 // For rails
 // For buffer stops

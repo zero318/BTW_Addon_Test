@@ -12,7 +12,6 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import zero.test.IWorldMixins;
-// Block piston reactions
 @Mixin(BlockChest.class)
 public abstract class ChestMixins {
     @Overwrite

@@ -32,7 +32,6 @@ import zero.test.IBlockRedstoneWireMixins;
 import zero.test.IBlockRedstoneLogicMixins;
 //import zero.test.mixin.IRenderBlocksAccessMixins;
 import zero.test.IRenderBlocksMixins;
-// Block piston reactions
 //#define getInputSignal(...) func_94482_f(__VA_ARGS__)
 @Mixin(RenderBlocks.class)
 public abstract class RenderBlocksMixins implements IRenderBlocksMixins {

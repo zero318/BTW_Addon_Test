@@ -11,7 +11,6 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 import zero.test.IBlockMixins;
 import java.util.List;
 import java.util.ArrayList;
-// Block piston reactions
 //#define getInputSignal(...) func_94482_f(__VA_ARGS__)
 @Mixin(World.class)
 public interface IWorldAccessMixins {

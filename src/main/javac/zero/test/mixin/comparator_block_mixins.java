@@ -23,6 +23,11 @@ import zero.test.mixin.IBlockRedstoneLogicAccessMixins;
 import zero.test.IBlockRedstoneLogicMixins;
 import zero.test.IRenderBlocksMixins;
 
+#include "..\util.h"
+#include "..\feature_flags.h"
+
+// THIS IS CURRENTLY A CLIENT-ONLY MIXIN
+
 @Mixin(ComparatorBlock.class)
 public abstract class ComparatorBlockMixins  extends BlockComparator {
     public ComparatorBlockMixins() {

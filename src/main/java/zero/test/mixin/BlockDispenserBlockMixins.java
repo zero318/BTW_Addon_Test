@@ -11,7 +11,6 @@ import java.util.Random;
 import java.util.Collections;
 import zero.test.IBlockMixins;
 import zero.test.IWorldMixins;
-// Block piston reactions
 @Mixin(BlockDispenserBlock.class)
 public abstract class BlockDispenserBlockMixins extends BlockContainer {
     public BlockDispenserBlockMixins() {

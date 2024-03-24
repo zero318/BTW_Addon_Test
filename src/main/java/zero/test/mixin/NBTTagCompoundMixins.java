@@ -15,7 +15,6 @@ import zero.test.INBTBaseMixins;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-// Block piston reactions
 
 @Mixin(NBTTagCompound.class)
 public abstract class NBTTagCompoundMixins extends NBTBase implements INBTBaseMixins {

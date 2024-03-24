@@ -23,10 +23,9 @@ import zero.test.IWorldMixins;
 import zero.test.IBlockMixins;
 import zero.test.IMovingPlatformEntityMixins;
 import zero.test.ZeroUtil;
-import zero.test.ZeroMetaUtil;
+import zero.test.ZeroCompatUtil;
 import zero.test.mixin.IWorldAccessMixins;
 import java.util.Random;
-// Block piston reactions
 @Mixin(MovingPlatformEntity.class)
 public abstract class MovingPlatformEntityMixins extends Entity implements IMovingPlatformEntityMixins {
     public MovingPlatformEntityMixins() {
@@ -182,7 +181,7 @@ public abstract class MovingPlatformEntityMixins extends Entity implements IMovi
                 );
             }
             int newMeta = ((IWorldMixins)this.worldObj).updateFromNeighborShapes(x, y, z, this.block_id, this.block_meta);
-            int extMeta = ZeroMetaUtil.getMovingPlatformEntityExtMeta(self);
+            int extMeta = ZeroCompatUtil.getMovingPlatformEntityExtMeta(self);
             // Set scanningTileEntities to true so
             // that the tile entity is placed correctly.
             // This is still necessary for platforms
@@ -199,10 +198,10 @@ public abstract class MovingPlatformEntityMixins extends Entity implements IMovi
                 this.worldObj.setBlockTileEntity(x, y, z, tileEntity);
             }
             if (newMeta >= 0) {
-                ZeroMetaUtil.setBlockWithExtra(this.worldObj, x, y, z, this.block_id, newMeta, extMeta, 0x01 | 0x02);
+                ZeroCompatUtil.setBlockWithExtra(this.worldObj, x, y, z, this.block_id, newMeta, extMeta, 0x01 | 0x02);
                 this.worldObj.notifyBlockOfNeighborChange(x, y, z, this.block_id);
             } else {
-                ZeroMetaUtil.setBlockWithExtra(this.worldObj, x, y, z, this.block_id, this.block_meta, extMeta, 0x04 | 0x10 | 0x80);
+                ZeroCompatUtil.setBlockWithExtra(this.worldObj, x, y, z, this.block_id, this.block_meta, extMeta, 0x04 | 0x10 | 0x80);
                 this.worldObj.destroyBlock(x, y, z, true);
             }
             // Restore original value of scanningTileEntities

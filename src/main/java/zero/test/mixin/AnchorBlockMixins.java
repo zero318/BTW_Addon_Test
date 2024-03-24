@@ -25,7 +25,6 @@ import zero.test.IBlockMixins;
 import zero.test.IMovingPlatformEntityMixins;
 //import zero.test.mixin.IAnchorBlockAccessMixins;
 import java.util.Random;
-// Block piston reactions
 @Mixin(AnchorBlock.class)
 public abstract class AnchorBlockMixins extends Block {
     public AnchorBlockMixins() {

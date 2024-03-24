@@ -13,7 +13,6 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import zero.test.ZeroUtil;
 import java.util.List;
-// Block piston reactions
 @Mixin(CommandServerPublishLocal.class)
 public abstract class CommandServerPublishLocalMixins extends CommandBase {
     @Override

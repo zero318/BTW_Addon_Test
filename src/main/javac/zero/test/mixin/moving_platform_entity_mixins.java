@@ -27,7 +27,7 @@ import zero.test.IWorldMixins;
 import zero.test.IBlockMixins;
 import zero.test.IMovingPlatformEntityMixins;
 import zero.test.ZeroUtil;
-import zero.test.ZeroMetaUtil;
+import zero.test.ZeroCompatUtil;
 import zero.test.mixin.IWorldAccessMixins;
 
 import java.util.Random;
@@ -48,7 +48,7 @@ import java.util.Random;
 #endif
 
 #if ENABLE_METADATA_EXTENSION_COMPAT
-#define PLATFORM_SET_BLOCK(world, x, y, z, blockId, meta, extMeta, flags) ZeroMetaUtil.setBlockWithExtra(world, x, y, z, blockId, meta, extMeta, flags)
+#define PLATFORM_SET_BLOCK(world, x, y, z, blockId, meta, extMeta, flags) ZeroCompatUtil.setBlockWithExtra(world, x, y, z, blockId, meta, extMeta, flags)
 #else
 #define PLATFORM_SET_BLOCK(world, x, y, z, blockId, meta, extMeta, flags) world.setBlock(x, y, z, blockId, meta, flags)
 #endif
@@ -263,7 +263,7 @@ public abstract class MovingPlatformEntityMixins extends Entity implements IMovi
             
             int newMeta = ((IWorldMixins)this.worldObj).updateFromNeighborShapes(x, y, z, this.block_id, this.block_meta);
 #if ENABLE_METADATA_EXTENSION_COMPAT
-            int extMeta = ZeroMetaUtil.getMovingPlatformEntityExtMeta(self);
+            int extMeta = ZeroCompatUtil.getMovingPlatformEntityExtMeta(self);
 #endif
             
                 

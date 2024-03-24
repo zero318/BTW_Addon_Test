@@ -1,7 +1,6 @@
 package zero.test;
 import net.minecraft.src.*;
 import java.util.List;
-// Block piston reactions
 
 public interface IBlockEntityPistonMixins {
     public long getLastTicked();

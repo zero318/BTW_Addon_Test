@@ -11,8 +11,7 @@ import zero.test.mixin.IPistonBaseAccessMixins;
 import zero.test.IWorldMixins;
 import zero.test.IBlockEntityPistonMixins;
 import zero.test.ZeroUtil;
-import zero.test.ZeroMetaUtil;
-// Block piston reactions
+import zero.test.ZeroCompatUtil;
 //#define getInputSignal(...) func_94482_f(__VA_ARGS__)
 public class PistonResolver {
     private static final int PISTON_PUSH_LIMIT =
@@ -231,7 +230,7 @@ public class PistonResolver {
         do {
             // Index back towards the start
                                                                    ;
-            data_list[pushIndex] = ((long)(((nextBlockId)&0xFFFF)|(world.getBlockMetadata(nextX, nextY, nextZ))<<16)|(long)ZeroMetaUtil.getBlockExtMetadata(world, nextX, nextY, nextZ)<<32);
+            data_list[pushIndex] = ((long)(((nextBlockId)&0xFFFF)|(world.getBlockMetadata(nextX, nextY, nextZ))<<16)|(long)ZeroCompatUtil.getBlockExtMetadata(world, nextX, nextY, nextZ)<<32);
             pushed_blocks[pushIndex++] = nextPackedPos;
             nextX += Facing.offsetsXForSide[direction];
             nextY += Facing.offsetsYForSide[direction];
@@ -323,7 +322,7 @@ public class PistonResolver {
                 return false;
             }
             int nextBlockMeta = world.getBlockMetadata(nextX, nextY, nextZ);
-            int nextBlockExtMeta = ZeroMetaUtil.getBlockExtMetadata(world, nextX, nextY, nextZ);
+            int nextBlockExtMeta = ZeroCompatUtil.getBlockExtMetadata(world, nextX, nextY, nextZ);
             if (nextBlock.getMobilityFlag() == 1) {
                 data_list[destroy_index_global] = ((long)(((nextBlockId)&0xFFFF)|(nextBlockMeta)<<16)|(long)nextBlockExtMeta<<32);
                 pushed_blocks[destroy_index_global++] = nextPackedPos;
@@ -405,7 +404,7 @@ public class PistonResolver {
             ) {
                 // Add destroy
                                                                    ;
-                data_list[destroy_index_global] = ((long)(((blockId)&0xFFFF)|(world.getBlockMetadata(x, y, z))<<16)|(long)ZeroMetaUtil.getBlockExtMetadata(world, x, y, z)<<32);
+                data_list[destroy_index_global] = ((long)(((blockId)&0xFFFF)|(world.getBlockMetadata(x, y, z))<<16)|(long)ZeroCompatUtil.getBlockExtMetadata(world, x, y, z)<<32);
                 pushed_blocks[destroy_index_global++] = packedPos;
                 return true;
             }
@@ -511,8 +510,8 @@ public class PistonResolver {
             x += Facing.offsetsXForSide[direction];
             y += Facing.offsetsYForSide[direction];
             z += Facing.offsetsZForSide[direction];
-            ZeroMetaUtil.setBlockWithExtra(world, x, y, z, Block.pistonMoving.blockID, blockMeta, blockExtMeta, 0x08 | 0x20 | 0x40);
-            TileEntity tileEntity = ZeroMetaUtil.getPistonTileEntity(blockId, blockMeta, blockExtMeta, direction, true, false);
+            ZeroCompatUtil.setBlockWithExtra(world, x, y, z, Block.pistonMoving.blockID, blockMeta, blockExtMeta, 0x08 | 0x20 | 0x40);
+            TileEntity tileEntity = ZeroCompatUtil.getPistonTileEntity(blockId, blockMeta, blockExtMeta, direction, true, false);
             if (prevTileEntity != null) {
                 ((IBlockEntityPistonMixins)tileEntity).storeTileEntity(prevTileEntity);
             }
@@ -523,7 +522,7 @@ public class PistonResolver {
             blockMeta = direction | (isSticky ? 8 : 0);
                                                                                                                   ;
             world.setBlock(headX, headY, headZ, Block.pistonMoving.blockID, blockMeta, 0x08 | 0x20 | 0x40);
-            world.setBlockTileEntity(headX, headY, headZ, ZeroMetaUtil.getPistonTileEntity(Block.pistonExtension.blockID, blockMeta, 0, direction, true, true));
+            world.setBlockTileEntity(headX, headY, headZ, ZeroCompatUtil.getPistonTileEntity(Block.pistonExtension.blockID, blockMeta, 0, direction, true, true));
         }
         // START SHOVEL CODE
         for (int i = shovel_index_global; --i >= SHOVEL_EJECT_LIST_START_INDEX;) {
@@ -545,8 +544,8 @@ public class PistonResolver {
                 if (breakTarget) {
                     targetBlock.dropBlockAsItem(world, x, y, z, world.getBlockMetadata(x, y, z), 0);
                 }
-                ZeroMetaUtil.setBlockWithExtra(world, x, y, z, Block.pistonMoving.blockID, blockMeta, blockExtMeta, 0x08 | 0x20 | 0x40);
-                world.setBlockTileEntity(x, y, z, ZeroMetaUtil.getShoveledTileEntity(blockId, blockMeta, blockExtMeta, ejectDirection));
+                ZeroCompatUtil.setBlockWithExtra(world, x, y, z, Block.pistonMoving.blockID, blockMeta, blockExtMeta, 0x08 | 0x20 | 0x40);
+                world.setBlockTileEntity(x, y, z, ZeroCompatUtil.getShoveledTileEntity(blockId, blockMeta, blockExtMeta, ejectDirection));
             }
             else if (
                 !world.isRemote &&

@@ -20,7 +20,6 @@ import zero.test.block.ActivatorRailShim;
 import zero.test.block.DropperShim;
 import zero.test.block.PoweredRailBlock;
 import java.util.List;
-// Block piston reactions
 @Mixin(Block.class)
 public abstract class BlockMixins implements IBlockMixins {
     @Overwrite

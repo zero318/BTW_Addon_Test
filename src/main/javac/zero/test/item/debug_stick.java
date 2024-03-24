@@ -16,7 +16,7 @@ import zero.test.IBlockMixins;
 import zero.test.IWorldMixins;
 import zero.test.INBTBaseMixins;
 import zero.test.ZeroUtil;
-import zero.test.ZeroMetaUtil;
+import zero.test.ZeroCompatUtil;
 
 import zero.test.mixin.ISpiderEntityAccessMixins;
 import zero.test.mixin.ICowEntityAccessMixins;
@@ -25,7 +25,7 @@ import zero.test.mixin.ICowEntityAccessMixins;
 #include "..\feature_flags.h"
 
 #if ENABLE_METADATA_EXTENSION_COMPAT
-#define DBG_GET_BLOCK_METADATA(world, x, y, z) ZeroMetaUtil.getBlockFullMetadata(world, x, y, z)
+#define DBG_GET_BLOCK_METADATA(world, x, y, z) ZeroCompatUtil.getBlockFullMetadata(world, x, y, z)
 #else
 #define DBG_GET_BLOCK_METADATA(world, x, y, z) world.getBlockMetadata(x, y, z)
 #endif

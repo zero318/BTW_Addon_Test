@@ -4,7 +4,6 @@ import btw.block.blocks.PaneBlock;
 import btw.AddonHandler;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
-// Block piston reactions
 @Mixin(PaneBlock.class)
 public abstract class PaneBlockMixins {
     // The original function passed x,y,z to

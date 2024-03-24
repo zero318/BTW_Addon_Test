@@ -1,10 +1,11 @@
 package zero.test.crafting;
 import net.minecraft.src.*;
 import btw.block.BTWBlocks;
+import btw.crafting.recipe.RecipeManager;
 import btw.item.BTWItems;
 import btw.inventory.util.InventoryUtils;
+import zero.test.ZeroUtil;
 import zero.test.crafting.MixerRecipeManager;
-// Block piston reactions
 // Recipes get prioritized from top to bottom
 public class MixerRecipeList {
     public static void addRecipes() {
@@ -157,10 +158,25 @@ public class MixerRecipeList {
         );
         /// Non-foods
         // Wicker
+        // Why TF would "wickerPane" be separate
+        // things in BTWBlocks and BTWItems?
         manager.addRecipe(
-            new ItemStack(BTWBlocks.wickerPane),
+            new ItemStack(BTWItems.wickerPane),
             new ItemStack(Item.reed, 4)
         );
+        if (ZeroUtil.isDecoLoaded()) {
+            // This doesn't work. Neat
+            RecipeManager.removeSoulforgeRecipe(
+                new ItemStack(BTWItems.wickerPane, 2),
+                new Object[] {
+                    "X X ",
+                    " X X",
+                    "X X ",
+                    " X X",
+                    'X', Item.reed
+                }
+            );
+        }
         // Candle
         manager.addRecipe(
             new ItemStack(BTWItems.candle, 4, 16),

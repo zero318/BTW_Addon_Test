@@ -88,7 +88,6 @@
     "BlockJukeBoxMixins",
     "PlacedToolTileEntityMixins",
     "CookingVesselTileEntityAccessMixins",
-    "BTWContainersMixins",
     "NBTBaseMixins",
     "NBTTagByteArrayMixins",
     "NBTTagByteMixins",
@@ -113,7 +112,8 @@
     "BlockLiftedByPlatformRendererMixins",
     "MovingPlatformRendererMixins",
     "HttpUtilMixins",
-    "RenderMinecartMixins"
+    "RenderMinecartMixins",
+    "BTWContainersMixins"
   ],
   "injectors": {
     "defaultRequire": 1

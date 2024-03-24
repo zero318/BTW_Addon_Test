@@ -23,7 +23,6 @@ import zero.test.IBlockEntityPistonMixins;
 import zero.test.ZeroUtil;
 import java.util.List;
 import java.util.ArrayList;
-// Block piston reactions
 //#define getInputSignal(...) func_94482_f(__VA_ARGS__)
 @Mixin(PistonBlockMoving.class)
 public abstract class BlockPistonMovingMixins extends BlockPistonMoving {

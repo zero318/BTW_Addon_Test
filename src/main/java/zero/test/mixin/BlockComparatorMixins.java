@@ -11,7 +11,6 @@ import zero.test.mixin.IBlockRedstoneLogicAccessMixins;
 import zero.test.IBlockRedstoneLogicMixins;
 import zero.test.IBlockMixins;
 import java.util.Random;
-// Block piston reactions
 @Mixin(BlockComparator.class)
 public abstract class BlockComparatorMixins extends BlockRedstoneLogic {
     public BlockComparatorMixins() {

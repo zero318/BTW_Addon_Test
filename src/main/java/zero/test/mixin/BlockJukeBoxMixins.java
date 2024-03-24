@@ -10,7 +10,6 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.gen.Invoker;
-// Block piston reactions
 
 @Mixin(BlockJukeBox.class)
 public abstract class BlockJukeBoxMixins {

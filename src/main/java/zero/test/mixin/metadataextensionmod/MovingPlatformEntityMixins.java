@@ -22,7 +22,6 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 import zero.test.ZeroUtil;
 import zero.test.metadata_compat.IMovingPlatformEntityMixins;
 import java.util.Random;
-// Block piston reactions
 @Mixin(
     value = MovingPlatformEntity.class,
     priority = 1100

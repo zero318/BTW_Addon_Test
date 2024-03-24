@@ -334,6 +334,9 @@ MACRO_VOID(/* Breaking a moving piston will drop the items from a moved tile ent
 MACRO_VOID(/* Try to be compatible with the metadata extension addon */)
 #define ENABLE_METADATA_EXTENSION_COMPAT 1
 
+MACRO_VOID(/* Try to be compatible with craftguide */)
+#define ENABLE_CRAFTGUIDE_COMPAT 1
+
 MACRO_VOID(/* DO NOT ENABLE */)
 #define ENABLE_LIGHT_UPDATES_ON_METADATA_CHANGE 0
 

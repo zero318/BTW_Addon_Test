@@ -3,7 +3,6 @@ import net.minecraft.src.*;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import zero.test.IBaseRailBlockMixins;
-// Block piston reactions
 public class SteelRailBlock extends BlockRail implements IBaseRailBlockMixins {
     public SteelRailBlock(int blockId) {
         super(blockId);

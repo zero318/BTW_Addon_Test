@@ -10,7 +10,6 @@ import btw.AddonHandler;
 import net.fabricmc.loader.api.FabricLoader;
 //import zero.test.mixin.IBlockAccessMixins;
 import java.util.Random;
-// Block piston reactions
 public class ZeroUtil {
     public static boolean always_false = false;
     public static boolean always_true = true;

@@ -12,7 +12,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import zero.test.INBTBaseMixins;
-// Block piston reactions
 
 @Mixin(NBTTagIntArray.class)
 public abstract class NBTTagIntArrayMixins implements INBTBaseMixins {

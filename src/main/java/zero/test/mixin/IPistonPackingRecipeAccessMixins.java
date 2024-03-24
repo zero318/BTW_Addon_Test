@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-// Block piston reactions
 @Mixin(PistonPackingRecipe.class)
 public interface IPistonPackingRecipeAccessMixins {
     @Accessor

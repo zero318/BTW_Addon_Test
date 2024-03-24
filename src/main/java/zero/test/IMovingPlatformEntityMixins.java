@@ -1,6 +1,5 @@
 package zero.test;
 import net.minecraft.src.*;
-// Block piston reactions
 
 public interface IMovingPlatformEntityMixins {
     public void setBlockId(int blockId);

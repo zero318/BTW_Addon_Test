@@ -13,7 +13,6 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.gen.Invoker;
 import zero.test.IWorldMixins;
-// Block piston reactions
 @Mixin(
     value = World.class,
     priority = 1100

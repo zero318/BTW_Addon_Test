@@ -1,1 +1,1 @@
-#define MOD_VERSION 0.2.4
+#define MOD_VERSION 0.2.6

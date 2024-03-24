@@ -20,7 +20,6 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 import zero.test.IEntityMixins;
 import zero.test.mixin.EntityMixins;
 import zero.test.ICowMixins;
-// Block piston reactions
 
 @Mixin(EntityCow.class)
 public abstract class EntityCowMixins extends EntityMixins {

@@ -24,7 +24,7 @@ import zero.test.IWorldMixins;
 import zero.test.IBlockMixins;
 import zero.test.IMovingPlatformEntityMixins;
 import zero.test.ZeroUtil;
-import zero.test.ZeroMetaUtil;
+import zero.test.ZeroCompatUtil;
 
 import java.util.Random;
 import java.util.List;
@@ -33,7 +33,7 @@ import java.util.List;
 #include "..\util.h"
 
 #if ENABLE_METADATA_EXTENSION_COMPAT
-#define PLATFORM_SET_BLOCK(world, x, y, z, blockId, meta, extMeta, flags) ZeroMetaUtil.setBlockWithExtra(world, x, y, z, blockId, meta, extMeta, flags)
+#define PLATFORM_SET_BLOCK(world, x, y, z, blockId, meta, extMeta, flags) ZeroCompatUtil.setBlockWithExtra(world, x, y, z, blockId, meta, extMeta, flags)
 #else
 #define PLATFORM_SET_BLOCK(world, x, y, z, blockId, meta, extMeta, flags) world.setBlock(x, y, z, blockId, meta, flags)
 #endif
@@ -92,7 +92,7 @@ public abstract class BlockLiftedByPlatformEntityMixins extends Entity {
             int blockId = self.getBlockID();
             int blockMeta = self.getBlockMetadata();
 #if ENABLE_METADATA_EXTENSION_COMPAT
-            int extMeta = ZeroMetaUtil.getBlockLiftedByPlatformEntityExtMeta(self);
+            int extMeta = ZeroCompatUtil.getBlockLiftedByPlatformEntityExtMeta(self);
 #endif
             int newMeta = ((IWorldMixins)this.worldObj).updateFromNeighborShapes(x, y, z, blockId, blockMeta);
             
@@ -104,7 +104,7 @@ public abstract class BlockLiftedByPlatformEntityMixins extends Entity {
                 this.worldObj.destroyBlock(x, y, z, true);
             }
 #else
-            PLATFORM_SET_BLOCK(self.worldObj, x, y, z, self.getBlockID(), self.getBlockMetadata(), ZeroMetaUtil.getBlockLiftedByPlatformEntityExtMeta(self), UPDATE_NEIGHBORS | UPDATE_CLIENTS);
+            PLATFORM_SET_BLOCK(self.worldObj, x, y, z, self.getBlockID(), self.getBlockMetadata(), ZeroCompatUtil.getBlockLiftedByPlatformEntityExtMeta(self), UPDATE_NEIGHBORS | UPDATE_CLIENTS);
 #endif       
             self.setDead();
         }

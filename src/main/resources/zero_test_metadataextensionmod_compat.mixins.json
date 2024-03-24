@@ -6,11 +6,12 @@
   "plugin": "zero.test.ZeroTestMetadataExtensionMixinPlugin",
   "mixins": [
     "NBTTagLongArrayMixins",
-    "ZeroMetaUtilMixins",
+    "ZeroCompatUtilMixins",
     "BlockLiftedByPlatformEntityMixins",
     "MovingPlatformEntityMixins",
     "WorldMixins",
-    "TileEntityPistonMixins"
+    "TileEntityPistonMixins",
+    "ChunkMixins"
   ],
   "client": [
   ],

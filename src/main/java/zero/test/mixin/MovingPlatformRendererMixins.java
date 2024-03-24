@@ -37,7 +37,6 @@ import zero.test.IBlockRedstoneLogicMixins;
 import zero.test.IRenderBlocksMixins;
 import zero.test.IMovingPlatformEntityMixins;
 import zero.test.GenericBlockRenderer;
-// Block piston reactions
 //#define getInputSignal(...) func_94482_f(__VA_ARGS__)
 @Mixin(MovingPlatformRenderer.class)
 public abstract class MovingPlatformRendererMixins extends Render {

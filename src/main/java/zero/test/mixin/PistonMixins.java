@@ -22,7 +22,6 @@ import zero.test.IBlockMixins;
 import zero.test.mixin.IPistonBaseAccessMixins;
 import zero.test.IWorldMixins;
 import zero.test.IBlockEntityPistonMixins;
-// Block piston reactions
 //#define getInputSignal(...) func_94482_f(__VA_ARGS__)
 import zero.test.PistonResolver;
 @Mixin(

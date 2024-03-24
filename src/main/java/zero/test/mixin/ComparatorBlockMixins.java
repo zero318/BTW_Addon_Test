@@ -17,6 +17,8 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 import zero.test.mixin.IBlockRedstoneLogicAccessMixins;
 import zero.test.IBlockRedstoneLogicMixins;
 import zero.test.IRenderBlocksMixins;
+
+// THIS IS CURRENTLY A CLIENT-ONLY MIXIN
 @Mixin(ComparatorBlock.class)
 public abstract class ComparatorBlockMixins extends BlockComparator {
     public ComparatorBlockMixins() {

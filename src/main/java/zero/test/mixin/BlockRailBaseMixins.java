@@ -12,7 +12,6 @@ import zero.test.IWorldMixins;
 import zero.test.IBlockBaseRailLogicMixins;
 import zero.test.mixin.IBlockBaseRailLogicAccessMixins;
 import zero.test.IBaseRailBlockMixins;
-// Block piston reactions
 @Mixin(BlockRailBase.class)
 public abstract class BlockRailBaseMixins extends Block implements IBaseRailBlockMixins {
     public BlockRailBaseMixins() {

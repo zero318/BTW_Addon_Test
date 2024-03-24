@@ -2,7 +2,6 @@ package zero.test;
 import net.minecraft.src.*;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-// Block piston reactions
 
 public interface IBlockRedstoneWireMixins {
     public int getConnectingSides(IBlockAccess blockAccess, int x, int y, int z, boolean forRendering);

@@ -15,7 +15,6 @@ import zero.test.ZeroUtil;
 import java.io.IOException;
 import java.util.List;
 import java.net.ServerSocket;
-// Block piston reactions
 
 @Mixin(HttpUtil.class)
 public class HttpUtilMixins {

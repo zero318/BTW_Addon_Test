@@ -17,7 +17,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.gen.Invoker;
 import zero.test.IEntityMinecartFurnaceMixins;
 import java.util.List;
-// Block piston reactions
 @Mixin(HopperTileEntity.class)
 public abstract class HopperTileEntityMixins extends TileEntity /*implements IInventory, TileEntityDataPacketHandler*/ {
     @Shadow

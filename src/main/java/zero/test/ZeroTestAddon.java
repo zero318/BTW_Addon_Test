@@ -14,12 +14,12 @@ import zero.test.item.*;
 import zero.test.command.*;
 import zero.test.crafting.*;
 import zero.test.ZeroUtil;
-// Block piston reactions
+import zero.test.ZeroCompatUtil;
 
 public class ZeroTestAddon extends BTWAddon {
     private static ZeroTestAddon instance;
     private ZeroTestAddon() {
-        super("Zero Test Addon", "0.2.4", "ZeroTest");
+        super("Zero Test Addon", "0.2.6", "ZeroTest");
     }
     @Override
     public void initialize() {
@@ -300,6 +300,7 @@ public class ZeroTestAddon extends BTWAddon {
             }
         );
         MixerRecipeList.addRecipes();
+        ZeroCompatUtil.initCraftguide();
     }
     // Is this important?
     // Also looks kinda backwards tbh (I tried fixing it)

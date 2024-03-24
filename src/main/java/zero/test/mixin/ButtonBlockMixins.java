@@ -12,7 +12,6 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.gen.Invoker;
-// Block piston reactions
 @Mixin(ButtonBlock.class)
 public abstract class ButtonBlockMixins extends BlockButton {
     public ButtonBlockMixins() {

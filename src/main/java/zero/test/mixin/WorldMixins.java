@@ -18,7 +18,6 @@ import zero.test.IWorldMixins;
 import zero.test.IEntityMixins;
 import zero.test.ZeroUtil;
 import java.util.List;
-// Block piston reactions
 //#define getInputSignal(...) func_94482_f(__VA_ARGS__)
 @Mixin(World.class)
 public class WorldMixins implements IWorldMixins {

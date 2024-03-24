@@ -13,7 +13,6 @@ import btw.item.util.ItemUtils;
 import zero.test.block.MixerBlock;
 import zero.test.crafting.MixerRecipeManager;
 import zero.test.mixin.CookingVesselTileEntityAccessMixins;
-// Block piston reactions
 public class MixerBlockEntity
 extends CookingVesselTileEntity
 {

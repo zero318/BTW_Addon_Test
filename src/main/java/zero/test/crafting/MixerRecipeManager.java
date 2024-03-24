@@ -1,7 +1,6 @@
 package zero.test.crafting;
 import net.minecraft.src.*;
 import btw.crafting.manager.BulkCraftingManager;
-// Block piston reactions
 
 public class MixerRecipeManager
 extends BulkCraftingManager

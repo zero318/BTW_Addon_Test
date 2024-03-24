@@ -6,7 +6,6 @@ import btw.block.tileentity.CookingVesselTileEntity;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import org.lwjgl.opengl.GL11;
-// Block piston reactions
 
 @Environment(EnvType.CLIENT)
 public class MixerGui

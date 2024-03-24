@@ -6,6 +6,7 @@ import btw.community.arminias.metadata.extension.ChunkExtension;
 import btw.community.arminias.metadata.extension.WorldExtension;
 import btw.community.arminias.metadata.extension.ExtendedBlockStorageExtension;
 import btw.community.arminias.metadata.extension.TileEntityExtension;
+import btw.community.arminias.metadata.mixin.ChunkMixin;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -36,7 +37,7 @@ public abstract class ChunkMixins
 {
     
 #if !USE_OVERRIDES
-/*
+
     @Redirect(
         method = { "setBlockIDWithMetadataAndExtraMetadata(IIIIII)Z", "setBlockExtraMetadata(IIII)Z" },
         at = @At(
@@ -48,9 +49,9 @@ public abstract class ChunkMixins
     public TileEntity make_tile_entity_redirect(Chunk chunk, int x, int y, int z) {
         return chunk.worldObj.getBlockTileEntity((chunk.xPosition << 4) + x, y, (chunk.zPosition << 4) + z);
     }
-    */
-#else
     
+#else
+    /*
     @Shadow
     public ExtendedBlockStorage[] storageArrays;
 
@@ -162,5 +163,6 @@ public abstract class ChunkMixins
         }
         return false;
     }
+    */
 #endif
 }

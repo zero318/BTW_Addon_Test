@@ -15,7 +15,7 @@ import zero.test.mixin.IPistonBaseAccessMixins;
 import zero.test.IWorldMixins;
 import zero.test.IBlockEntityPistonMixins;
 import zero.test.ZeroUtil;
-import zero.test.ZeroMetaUtil;
+import zero.test.ZeroCompatUtil;
 
 #include "feature_flags.h"
 #include "util.h"
@@ -26,7 +26,7 @@ import zero.test.ZeroMetaUtil;
 #define TURNTABLE_BLOCK_STATE_UNPACK(...) BLOCK_STATE_UNPACK_LONG(__VA_ARGS__)
 #define TURNTABLE_BLOCK_STATE_EXTRACT_ID(...) BLOCK_STATE_LONG_EXTRACT_ID(__VA_ARGS__)
 #define TURNTABLE_BLOCK_STATE_EXTRACT_META(...) BLOCK_STATE_LONG_EXTRACT_META(__VA_ARGS__)
-#define TURNTABLE_SET_BLOCK(world, x, y, z, blockId, meta, extMeta, flags) ZeroMetaUtil.setBlockWithExtra(world, x, y, z, blockId, meta, extMeta, flags)
+#define TURNTABLE_SET_BLOCK(world, x, y, z, blockId, meta, extMeta, flags) ZeroCompatUtil.setBlockWithExtra(world, x, y, z, blockId, meta, extMeta, flags)
 #else
 #define blockstate_t int
 #define TURNTABLE_BLOCK_STATE_PACK(...) BLOCK_STATE_PACK(__VA_ARGS__)
@@ -117,7 +117,7 @@ public class TurntableResolver {
         data_list[attachment_index_global] = TURNTABLE_BLOCK_STATE_PACK(
             blockId,
             world.getBlockMetadata(x, y, z),
-            ZeroMetaUtil.getBlockExtMetadata(world, x, y, z)
+            ZeroCompatUtil.getBlockExtMetadata(world, x, y, z)
         );
         
         data_list[attachment_index_global + SPIN_OFFSET_LIST_OFFSET] = direction;

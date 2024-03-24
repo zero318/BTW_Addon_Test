@@ -13,7 +13,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.lwjgl.opengl.GL11;
 import zero.test.mixin.IEntityMinecartAccessMixins;
 import zero.test.ZeroUtil;
-// Block piston reactions
 @Mixin(RenderMinecart.class)
 public abstract class RenderMinecartMixins extends Render {
     @Redirect(

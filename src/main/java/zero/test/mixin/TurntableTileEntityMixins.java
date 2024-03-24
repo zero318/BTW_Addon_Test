@@ -11,7 +11,6 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.gen.Invoker;
 import zero.test.TurntableResolver;
-// Block piston reactions
 @Mixin(TurntableTileEntity.class)
 public abstract class TurntableTileEntityMixins extends TileEntity {
     private static final TurntableResolver server_resolver = new TurntableResolver();

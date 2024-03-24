@@ -8,7 +8,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.src.*;
 import java.util.Random;
-// Block piston reactions
 
 public class CUDBlock extends BuddyBlock {
     public CUDBlock(int blockId) {

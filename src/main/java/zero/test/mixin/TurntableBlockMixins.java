@@ -13,7 +13,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.gen.Invoker;
 import zero.test.IWorldMixins;
 import java.util.Random;
-// Block piston reactions
 @Mixin(TurntableBlock.class)
 public abstract class TurntableBlockMixins {
     @Redirect(

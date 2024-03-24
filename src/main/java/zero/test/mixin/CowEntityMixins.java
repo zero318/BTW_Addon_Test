@@ -22,7 +22,6 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 import zero.test.IEntityMixins;
 import zero.test.mixin.EntityMixins;
 import zero.test.ICowMixins;
-// Block piston reactions
 @Mixin(CowEntity.class)
 public abstract class CowEntityMixins extends EntityCow implements ICowMixins {
     public CowEntityMixins() {
@@ -33,6 +32,8 @@ public abstract class CowEntityMixins extends EntityCow implements ICowMixins {
     public abstract void setGotMilk(boolean value);
     @Override
     public void pistonMilk() {
+        // Just for testing
+        this.setGotMilk(true);
         if (((CowEntity)(Object)this).gotMilk()) {
             int x = MathHelper.floor_double(this.posX);
             int y = MathHelper.floor_double(this.posY);

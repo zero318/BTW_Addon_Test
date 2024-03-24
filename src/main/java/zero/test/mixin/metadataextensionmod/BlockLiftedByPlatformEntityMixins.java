@@ -20,7 +20,6 @@ import zero.test.metadata_compat.IBlockLiftedByPlatformEntityMixins;
 import zero.test.ZeroUtil;
 import java.util.Random;
 import java.util.List;
-// Block piston reactions
 @Mixin(
     value = BlockLiftedByPlatformEntity.class,
     priority = 1100

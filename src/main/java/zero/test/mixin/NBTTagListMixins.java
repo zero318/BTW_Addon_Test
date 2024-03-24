@@ -14,7 +14,6 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 import zero.test.INBTBaseMixins;
 import java.util.ArrayList;
 import java.util.List;
-// Block piston reactions
 
 @Mixin(NBTTagList.class)
 public abstract class NBTTagListMixins implements INBTBaseMixins {

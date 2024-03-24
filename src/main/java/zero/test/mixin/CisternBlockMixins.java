@@ -8,7 +8,6 @@ import java.util.Random;
 import java.util.List;
 import zero.test.IBlockMixins;
 import zero.test.IEntityMixins;
-// Block piston reactions
 @Mixin(CisternBlock.class)
 public abstract class CisternBlockMixins {
     @Overwrite(remap=false)

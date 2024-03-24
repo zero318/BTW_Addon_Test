@@ -13,7 +13,6 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import deco.block.blocks.TerracottaBlock;
 import deco.block.blocks.GlazedTerracottaBlock;
-// Block piston reactions
 
 @Mixin(GlazedTerracottaBlock.class)
 public abstract class GlazedTerracottaBlockMixins /*extends TerracottaBlock*/ {

@@ -5,7 +5,7 @@
   "compatibilityLevel": "JAVA_8",
   "plugin": "zero.test.ZeroTestCraftguideMixinPlugin",
   "mixins": [
-    "BTWRecipesMixins"
+    "ZeroCompatUtilMixins"
   ],
   "client": [
   ],

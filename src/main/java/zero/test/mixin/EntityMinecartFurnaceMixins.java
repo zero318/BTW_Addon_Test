@@ -16,7 +16,6 @@ import zero.test.IEntityMixins;
 //import zero.test.mixin.IEntityMinecartFurnaceAccessMixins;
 import zero.test.IEntityMinecartFurnaceMixins;
 import java.util.List;
-// Block piston reactions
 @Mixin(EntityMinecartFurnace.class)
 public abstract class EntityMinecartFurnaceMixins extends EntityMinecart implements IEntityMinecartFurnaceMixins {
     public EntityMinecartFurnaceMixins(World world) {

@@ -1,6 +1,5 @@
 package zero.test.block;
 import net.minecraft.src.Block;
-// Block piston reactions
 
 public class ZeroTestBlocks {
     public static Block cud_block;

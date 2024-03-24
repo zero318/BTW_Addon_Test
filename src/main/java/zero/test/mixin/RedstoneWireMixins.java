@@ -14,7 +14,6 @@ import zero.test.IBlockMixins;
 import zero.test.IWorldMixins;
 import zero.test.IBlockRedstoneWireMixins;
 //import zero.test.mixin.IRedstoneWireAccessMixins;
-// Block piston reactions
 //#define getInputSignal(...) func_94482_f(__VA_ARGS__)
 @Mixin(BlockRedstoneWire.class)
 public abstract class RedstoneWireMixins implements IBlockRedstoneWireMixins {

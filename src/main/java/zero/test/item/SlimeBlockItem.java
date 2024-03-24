@@ -5,7 +5,6 @@ import btw.AddonHandler;
 import zero.test.block.SlimeBlock;
 import zero.test.IEntityMixins;
 import java.util.List;
-// Block piston reactions
 public class SlimeBlockItem extends ItemBlock {
     public SlimeBlockItem(int block_id) {
         super(block_id);

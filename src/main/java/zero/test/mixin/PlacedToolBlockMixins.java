@@ -13,7 +13,6 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.gen.Invoker;
-// Block piston reactions
 
 @Mixin(PlacedToolBlock.class)
 public abstract class PlacedToolBlockMixins extends BlockContainer {

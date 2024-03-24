@@ -11,7 +11,6 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.gen.Invoker;
 import zero.test.ZeroUtil;
-// Block piston reactions
 
 @Mixin(BehaviorDefaultDispenseItem.class)
 public abstract class BehaviorDefaultDispenseItemMixins {

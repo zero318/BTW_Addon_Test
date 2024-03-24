@@ -12,7 +12,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.gen.Invoker;
 import org.objectweb.asm.Opcodes;
 //import zero.test.mixin.IDataWatcherAccessMixins;
-// Block piston reactions
 @Mixin(EntityTrackerEntry.class)
 public abstract class EntityTrackerEntryMixins {
     @Shadow

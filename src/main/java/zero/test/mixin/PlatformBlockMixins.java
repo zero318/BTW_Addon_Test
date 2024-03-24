@@ -16,7 +16,6 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 import zero.test.IWorldMixins;
 import zero.test.IBlockMixins;
 import java.util.Random;
-// Block piston reactions
 @Mixin(PlatformBlock.class)
 public abstract class PlatformBlockMixins {
     public boolean isStickyForBlocks(World world, int x, int y, int z, int direction) {

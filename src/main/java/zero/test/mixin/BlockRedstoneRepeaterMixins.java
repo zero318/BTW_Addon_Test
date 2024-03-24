@@ -5,7 +5,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Overwrite;
 import java.util.Random;
 import zero.test.mixin.IBlockRedstoneLogicAccessMixins;
-// Block piston reactions
 @Mixin(BlockRedstoneRepeater.class)
 public abstract class BlockRedstoneRepeaterMixins extends BlockRedstoneLogic {
     public BlockRedstoneRepeaterMixins() {

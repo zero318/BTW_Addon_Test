@@ -16,7 +16,6 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import zero.test.block.block_entity.MixerBlockEntity;
 import zero.test.gui.MixerGui;
-// Block piston reactions
 
 @Mixin(BTWContainers.class)
 public abstract class BTWContainersMixins {

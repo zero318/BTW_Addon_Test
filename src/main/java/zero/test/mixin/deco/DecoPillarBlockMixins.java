@@ -16,7 +16,6 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import deco.block.blocks.DecoPillarBlock;
 import zero.test.ZeroUtil;
-// Block piston reactions
 
 @Mixin(DecoPillarBlock.class)
 public abstract class DecoPillarBlockMixins {

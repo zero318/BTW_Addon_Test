@@ -3,7 +3,6 @@ import net.minecraft.src.*;
 import btw.block.model.BlockModel;
 import btw.util.PrimitiveAABBWithBenefits;
 import btw.util.PrimitiveQuad;
-// Block piston reactions
 public class MixerBladesModel
 extends BlockModel
 {

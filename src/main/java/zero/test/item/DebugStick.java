@@ -10,10 +10,9 @@ import zero.test.IBlockMixins;
 import zero.test.IWorldMixins;
 import zero.test.INBTBaseMixins;
 import zero.test.ZeroUtil;
-import zero.test.ZeroMetaUtil;
+import zero.test.ZeroCompatUtil;
 import zero.test.mixin.ISpiderEntityAccessMixins;
 import zero.test.mixin.ICowEntityAccessMixins;
-// Block piston reactions
 // 
 // Block::updateTick
 // Block::randomUpdateTick
@@ -198,7 +197,7 @@ extends Item
                                 .append('(')
                                 .append(block != null ? block.getUnlocalizedName() : "tile.air")
                                 .append(")[meta=")
-                                .append(ZeroMetaUtil.getBlockFullMetadata(world, x, y, z))
+                                .append(ZeroCompatUtil.getBlockFullMetadata(world, x, y, z))
                                 .append(']');
                             if (printTile) {
                                 NBTTagCompound tileEntityData = new NBTTagCompound();

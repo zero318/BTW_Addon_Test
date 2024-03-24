@@ -17,6 +17,7 @@ import zero.test.item.*;
 import zero.test.command.*;
 import zero.test.crafting.*;
 import zero.test.ZeroUtil;
+import zero.test.ZeroCompatUtil;
 
 #include "ids.h"
 #include "feature_flags.h"
@@ -370,6 +371,10 @@ public class ZeroTestAddon extends BTWAddon {
             }
         );
         MixerRecipeList.addRecipes();
+#endif
+
+#if ENABLE_CRAFTGUIDE_COMPAT
+        ZeroCompatUtil.initCraftguide();
 #endif
     }
 

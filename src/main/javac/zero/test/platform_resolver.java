@@ -28,7 +28,7 @@ import zero.test.IBlockMixins;
 import zero.test.IMovingPlatformEntityMixins;
 //import zero.test.mixin.IAnchorBlockAccessMixins;
 import zero.test.ZeroUtil;
-import zero.test.ZeroMetaUtil;
+import zero.test.ZeroCompatUtil;
 
 import java.util.Random;
 
@@ -55,7 +55,7 @@ import java.util.Random;
 #define PLATFORM_BLOCK_STATE_UNPACK(...) BLOCK_STATE_UNPACK_LONG(__VA_ARGS__)
 #define PLATFORM_BLOCK_STATE_EXTRACT_ID(...) BLOCK_STATE_LONG_EXTRACT_ID(__VA_ARGS__)
 #define PLATFORM_BLOCK_STATE_EXTRACT_META(...) BLOCK_STATE_LONG_EXTRACT_META(__VA_ARGS__)
-#define PLATFORM_SET_BLOCK(world, x, y, z, blockId, meta, extMeta, flags) ZeroMetaUtil.setBlockWithExtra(world, x, y, z, blockId, meta, extMeta, flags)
+#define PLATFORM_SET_BLOCK(world, x, y, z, blockId, meta, extMeta, flags) ZeroCompatUtil.setBlockWithExtra(world, x, y, z, blockId, meta, extMeta, flags)
 #else
 #define blockstate_t int
 #define PLATFORM_BLOCK_STATE_PACK(...) BLOCK_STATE_PACK(__VA_ARGS__)
@@ -137,7 +137,7 @@ public class PlatformResolver {
         data_list[platform_index_global] = PLATFORM_BLOCK_STATE_PACK(
             blockId,
             world.getBlockMetadata(x, y, z),
-            ZeroMetaUtil.getBlockExtMetadata(world, x, y, z)
+            ZeroCompatUtil.getBlockExtMetadata(world, x, y, z)
         );
         ++platform_index_global;
         
@@ -203,7 +203,7 @@ public class PlatformResolver {
                                     data_list[lift_index_global] = PLATFORM_BLOCK_STATE_PACK(
                                         neighborId,
                                         world.getBlockMetadata(nextX, nextY, nextZ),
-                                        ZeroMetaUtil.getBlockExtMetadata(world, nextX, nextY, nextZ)
+                                        ZeroCompatUtil.getBlockExtMetadata(world, nextX, nextY, nextZ)
                                     );
                                     ++lift_index_global;
                                     break;
@@ -270,7 +270,7 @@ public class PlatformResolver {
                     ((IMovingPlatformEntityMixins)lifted_entity).setBlockId(blockId);
                     ((IMovingPlatformEntityMixins)lifted_entity).setBlockMeta(blockMeta);
 #if ENABLE_METADATA_EXTENSION_COMPAT
-                    ZeroMetaUtil.addExtMetaToMovingPlatformEntity(lifted_entity, blockExtMeta);
+                    ZeroCompatUtil.addExtMetaToMovingPlatformEntity(lifted_entity, blockExtMeta);
 #endif
                     
                     TileEntity tileEntity;
@@ -289,7 +289,7 @@ public class PlatformResolver {
                     lifted_entity.setBlockID(blockId);
                     lifted_entity.setBlockMetadata(blockMeta);
 #if ENABLE_METADATA_EXTENSION_COMPAT
-                    ZeroMetaUtil.addExtMetaToLiftedBlockEntity(lifted_entity, blockExtMeta);
+                    ZeroCompatUtil.addExtMetaToLiftedBlockEntity(lifted_entity, blockExtMeta);
 #endif
                     world.spawnEntityInWorld(lifted_entity);
 #if USE_PLATFORM_ENTITY_FOR_ALL_BLOCKS
@@ -321,7 +321,7 @@ public class PlatformResolver {
                 ((IMovingPlatformEntityMixins)moving_entity).setBlockId(blockId);
                 ((IMovingPlatformEntityMixins)moving_entity).setBlockMeta(blockMeta);
 #if ENABLE_METADATA_EXTENSION_COMPAT
-                ZeroMetaUtil.addExtMetaToMovingPlatformEntity(moving_entity, blockExtMeta);
+                ZeroCompatUtil.addExtMetaToMovingPlatformEntity(moving_entity, blockExtMeta);
 #endif
 
                 // Blocks in this list shouldn't need to check tile entities, right?

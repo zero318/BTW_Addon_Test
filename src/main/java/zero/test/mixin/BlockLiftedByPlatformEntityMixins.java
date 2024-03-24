@@ -20,10 +20,9 @@ import zero.test.IWorldMixins;
 import zero.test.IBlockMixins;
 import zero.test.IMovingPlatformEntityMixins;
 import zero.test.ZeroUtil;
-import zero.test.ZeroMetaUtil;
+import zero.test.ZeroCompatUtil;
 import java.util.Random;
 import java.util.List;
-// Block piston reactions
 @Mixin(BlockLiftedByPlatformEntity.class)
 public abstract class BlockLiftedByPlatformEntityMixins extends Entity {
     public BlockLiftedByPlatformEntityMixins() {
@@ -67,13 +66,13 @@ public abstract class BlockLiftedByPlatformEntityMixins extends Entity {
         ) {
             int blockId = self.getBlockID();
             int blockMeta = self.getBlockMetadata();
-            int extMeta = ZeroMetaUtil.getBlockLiftedByPlatformEntityExtMeta(self);
+            int extMeta = ZeroCompatUtil.getBlockLiftedByPlatformEntityExtMeta(self);
             int newMeta = ((IWorldMixins)this.worldObj).updateFromNeighborShapes(x, y, z, blockId, blockMeta);
             if (newMeta >= 0) {
-                ZeroMetaUtil.setBlockWithExtra(this.worldObj, x, y, z, blockId, newMeta, extMeta, 0x01 | 0x02);
+                ZeroCompatUtil.setBlockWithExtra(this.worldObj, x, y, z, blockId, newMeta, extMeta, 0x01 | 0x02);
                 this.worldObj.notifyBlockOfNeighborChange(x, y, z, blockId);
             } else {
-                ZeroMetaUtil.setBlockWithExtra(this.worldObj, x, y, z, blockId, blockMeta, extMeta, 0x04 | 0x10 | 0x80);
+                ZeroCompatUtil.setBlockWithExtra(this.worldObj, x, y, z, blockId, blockMeta, extMeta, 0x04 | 0x10 | 0x80);
                 this.worldObj.destroyBlock(x, y, z, true);
             }
             self.setDead();

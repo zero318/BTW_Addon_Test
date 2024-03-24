@@ -12,7 +12,6 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.gen.Invoker;
-// Block piston reactions
 // This doesn't work, but consistency is cool
 @Mixin(DoorBlock.class)
 public abstract class DoorBlockMixins extends BlockDoor {

@@ -9,7 +9,6 @@ import java.util.Random;
 import java.util.List;
 import zero.test.block.model.ScaffoldingModel;
 import zero.test.block.model.ScaffoldingBottomModel;
-// Block piston reactions
 public class ScaffoldingBlock extends Block {
     public ScaffoldingBlock(int blockId) {
         super(blockId, Material.circuits);

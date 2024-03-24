@@ -9,7 +9,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import zero.test.mixin.IBlockDispenserBlockAccessMixins;
 import java.util.Random;
-// Block piston reactions
 public class BlockPlacer extends BlockDispenserBlock {
     public BlockPlacer(int block_id) {
         super(block_id);

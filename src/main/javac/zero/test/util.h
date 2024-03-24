@@ -1657,7 +1657,9 @@ MACRO_VOID(
 /// Misc. Flags
 )
 
+MACRO_VOID(
 // Block piston reactions
+)
 #define PISTON_CAN_PUSH 0
 #define PISTON_CAN_BREAK 1
 #define PISTON_CANNOT_PUSH 2

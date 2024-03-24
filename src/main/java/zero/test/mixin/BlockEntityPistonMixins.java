@@ -23,14 +23,13 @@ import zero.test.IBlockEntityPistonMixins;
 import zero.test.IBlockMixins;
 import zero.test.IEntityMixins;
 import zero.test.ZeroUtil;
-import zero.test.ZeroMetaUtil;
+import zero.test.ZeroCompatUtil;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import org.lwjgl.Sys;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-// Block piston reactions
 //#define getInputSignal(...) func_94482_f(__VA_ARGS__)
 
 @Mixin(
@@ -119,18 +118,18 @@ public abstract class BlockEntityPistonMixins extends TileEntity implements IBlo
         int storedBlockId = self.getStoredBlockID();
         Block storedBlock = Block.blocksList[storedBlockId];
         int storedMeta = self.getBlockMetadata();
-        int extMeta = ZeroMetaUtil.getPistonTileEntityExtMeta(self);
+        int extMeta = ZeroCompatUtil.getPistonTileEntityExtMeta(self);
         int newMeta = -1;
         if (!((storedBlock)==null)) {
             newMeta = ((IWorldMixins)self.worldObj).updateFromNeighborShapes(self.xCoord, self.yCoord, self.zCoord, storedBlockId, storedMeta);
         }
         if (newMeta >= 0) {
-            ZeroMetaUtil.setBlockWithExtra(self.worldObj, self.xCoord, self.yCoord, self.zCoord, storedBlockId, newMeta, extMeta, 0x01 | 0x02 | 0x40);
+            ZeroCompatUtil.setBlockWithExtra(self.worldObj, self.xCoord, self.yCoord, self.zCoord, storedBlockId, newMeta, extMeta, 0x01 | 0x02 | 0x40);
             self.worldObj.notifyBlockOfNeighborChange(self.xCoord, self.yCoord, self.zCoord, storedBlockId);
         } else {
             // The block is going to be destroyed, 
             // so no need to render it on the client.
-            ZeroMetaUtil.setBlockWithExtra(self.worldObj, self.xCoord, self.yCoord, self.zCoord, storedBlockId, storedMeta, extMeta, 0x04 | 0x10 | 0x40 | 0x80);
+            ZeroCompatUtil.setBlockWithExtra(self.worldObj, self.xCoord, self.yCoord, self.zCoord, storedBlockId, storedMeta, extMeta, 0x04 | 0x10 | 0x40 | 0x80);
             self.worldObj.destroyBlock(self.xCoord, self.yCoord, self.zCoord, true);
         }
         if (ZeroUtil.always_false) {

@@ -27,7 +27,7 @@ import zero.test.IBlockEntityPistonMixins;
 import zero.test.IBlockMixins;
 import zero.test.IEntityMixins;
 import zero.test.ZeroUtil;
-import zero.test.ZeroMetaUtil;
+import zero.test.ZeroCompatUtil;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -61,7 +61,7 @@ import java.util.List;
 #define NEW_TILE_ENTITY_LOGIC 1
 
 #if ENABLE_METADATA_EXTENSION_COMPAT
-#define PISTON_SET_BLOCK(world, x, y, z, blockId, meta, extMeta, flags) ZeroMetaUtil.setBlockWithExtra(world, x, y, z, blockId, meta, extMeta, flags)
+#define PISTON_SET_BLOCK(world, x, y, z, blockId, meta, extMeta, flags) ZeroCompatUtil.setBlockWithExtra(world, x, y, z, blockId, meta, extMeta, flags)
 #else
 #define PISTON_SET_BLOCK(world, x, y, z, blockId, meta, extMeta, flags) world.setBlock(x, y, z, blockId, meta, flags)
 #endif
@@ -170,7 +170,7 @@ public abstract class BlockEntityPistonMixins extends TileEntity implements IBlo
         Block storedBlock = Block.blocksList[storedBlockId];
         int storedMeta = self.getBlockMetadata();
 #if ENABLE_METADATA_EXTENSION_COMPAT
-        int extMeta = ZeroMetaUtil.getPistonTileEntityExtMeta(self);
+        int extMeta = ZeroCompatUtil.getPistonTileEntityExtMeta(self);
 #endif
         int newMeta = -1;
         if (!BLOCK_IS_AIR(storedBlock)) {

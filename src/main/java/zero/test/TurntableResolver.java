@@ -12,8 +12,7 @@ import zero.test.mixin.IPistonBaseAccessMixins;
 import zero.test.IWorldMixins;
 import zero.test.IBlockEntityPistonMixins;
 import zero.test.ZeroUtil;
-import zero.test.ZeroMetaUtil;
-// Block piston reactions
+import zero.test.ZeroCompatUtil;
 public class TurntableResolver {
     private static final int TURNTABLE_HEIGHT_LIMIT =
     12;
@@ -70,7 +69,7 @@ public class TurntableResolver {
         pillar_blocks[attachment_index_global] = ((long)(z)<<12 +26|(long)((x)&0x3FFFFFF)<<12|((y)&0xFFF));
         // getNewMetadataRotatedAroundBlockOnTurntableToFacing
         // is an awful function and this is simpler without it.
-        data_list[attachment_index_global] = ((long)(((blockId)&0xFFFF)|(world.getBlockMetadata(x, y, z))<<16)|(long)ZeroMetaUtil.getBlockExtMetadata(world, x, y, z)<<32);
+        data_list[attachment_index_global] = ((long)(((blockId)&0xFFFF)|(world.getBlockMetadata(x, y, z))<<16)|(long)ZeroCompatUtil.getBlockExtMetadata(world, x, y, z)<<32);
         data_list[attachment_index_global + SPIN_OFFSET_LIST_OFFSET] = direction;
         ++attachment_index_global;
         return true;
@@ -217,10 +216,10 @@ public class TurntableResolver {
                         // and most of the side effects of rotateAroundJAxis
                         // are already handled by setting the block itself.
                         // Major exception is mechanical power not snapping axles.
-                        ZeroMetaUtil.setBlockWithExtra(world, nextX, y, nextZ, blockId, block.rotateMetadataAroundJAxis(newMeta, ((reverse)^true)), blockExtMeta, 0x01 | 0x02);
+                        ZeroCompatUtil.setBlockWithExtra(world, nextX, y, nextZ, blockId, block.rotateMetadataAroundJAxis(newMeta, ((reverse)^true)), blockExtMeta, 0x01 | 0x02);
                     }
                     else {
-                        ZeroMetaUtil.setBlockWithExtra(world, nextX, y, nextZ, blockId, blockMeta, blockExtMeta, 0x04 | 0x10 | 0x40 | 0x80);
+                        ZeroCompatUtil.setBlockWithExtra(world, nextX, y, nextZ, blockId, blockMeta, blockExtMeta, 0x04 | 0x10 | 0x40 | 0x80);
                         world.destroyBlock(nextX, y, nextZ, true);
                     }
                 }

@@ -12,7 +12,6 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import zero.test.IWorldMixins;
 import java.util.List;
-// Block piston reactions
 @Mixin(MinecartItem.class)
 public abstract class ItemMinecartMixins extends ItemMinecart {
     public ItemMinecartMixins() {

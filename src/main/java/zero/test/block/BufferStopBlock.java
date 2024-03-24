@@ -6,7 +6,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import java.util.List;
 import zero.test.block.model.BufferStopModel;
-// Block piston reactions
 // Yes, this is offset 3 just so it can share
 // preprocessor code with rail powered state
 public class BufferStopBlock extends Block {

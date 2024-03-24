@@ -6,7 +6,6 @@ import btw.AddonHandler;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import zero.test.sound.ZeroTestSounds;
-// Block piston reactions
 
 public class SlimeBlock extends Block {
     public SlimeBlock(int blockId) {

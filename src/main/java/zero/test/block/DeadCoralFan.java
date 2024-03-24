@@ -1,5 +1,4 @@
 package zero.test.block;
-// Block piston reactions
 
 import net.minecraft.src.*;
 import btw.AddonHandler;

@@ -13,7 +13,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import deco.block.blocks.IronTrapDoorBlock;
-// Block piston reactions
 
 @Mixin(IronTrapDoorBlock.class)
 public abstract class IronTrapDoorBlockMixins extends TrapDoorBlock {

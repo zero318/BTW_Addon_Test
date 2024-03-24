@@ -7,7 +7,6 @@ import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 import java.util.List;
 import java.util.Set;
 import zero.test.ZeroUtil;
-// Block piston reactions
 
 public class ZeroTestDecoMixinPlugin implements IMixinConfigPlugin {
     @Override

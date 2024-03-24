@@ -13,7 +13,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import deco.block.util.WoodTypeHelper;
-// Block piston reactions
 
 @Mixin(
     value = WoodMouldingDecorativeStubBlockItem.class,

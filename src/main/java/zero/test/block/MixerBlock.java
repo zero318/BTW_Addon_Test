@@ -17,7 +17,6 @@ import net.fabricmc.api.Environment;
 import java.util.Random;
 import zero.test.block.model.MixerBladesModel;
 import zero.test.block.block_entity.MixerBlockEntity;
-// Block piston reactions
 public class MixerBlock
 extends CookingVesselBlock
 {

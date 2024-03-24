@@ -34,7 +34,6 @@ import zero.test.IBlockRedstoneWireMixins;
 import zero.test.IBlockRedstoneLogicMixins;
 //import zero.test.mixin.IRenderBlocksAccessMixins;
 import zero.test.IRenderBlocksMixins;
-// Block piston reactions
 //#define getInputSignal(...) func_94482_f(__VA_ARGS__)
 public class GenericBlockRenderer {
     private static RenderBlocks renderBlocks = new RenderBlocks();

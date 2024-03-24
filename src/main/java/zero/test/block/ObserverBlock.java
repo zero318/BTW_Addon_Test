@@ -8,7 +8,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.src.*;
 import btw.AddonHandler;
 import java.util.Random;
-// Block piston reactions
 public class ObserverBlock extends BuddyBlock {
     public ObserverBlock(int blockId) {
         super(blockId);

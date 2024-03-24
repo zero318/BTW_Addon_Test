@@ -1,7 +1,6 @@
 package zero.test;
 import btw.AddonHandler;
 import net.minecraft.src.*;
-// Block piston reactions
 public interface IEntityMixins {
     public void moveEntityByPiston(double x, double y, double z, int direction, boolean isRegularPush);
     default public int getPistonMobilityFlags(int direction) {

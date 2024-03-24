@@ -5,7 +5,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import zero.test.IBlockMixins;
 import zero.test.IBlockEntityPistonMixins;
-// Block piston reactions
 @Mixin(BuddyBlock.class)
 public abstract class BuddyBlockMixins extends Block {
     public BuddyBlockMixins() {

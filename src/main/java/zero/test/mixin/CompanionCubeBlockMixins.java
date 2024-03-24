@@ -14,7 +14,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.gen.Invoker;
 import zero.test.IWorldMixins;
 import java.util.Random;
-// Block piston reactions
 @Mixin(CompanionCubeBlock.class)
 public abstract class CompanionCubeBlockMixins {
     // Another case of overriding

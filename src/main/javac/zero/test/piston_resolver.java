@@ -14,7 +14,7 @@ import zero.test.mixin.IPistonBaseAccessMixins;
 import zero.test.IWorldMixins;
 import zero.test.IBlockEntityPistonMixins;
 import zero.test.ZeroUtil;
-import zero.test.ZeroMetaUtil;
+import zero.test.ZeroCompatUtil;
 
 #include "func_aliases.h"
 #include "feature_flags.h"
@@ -47,9 +47,9 @@ import zero.test.ZeroMetaUtil;
 #define PISTON_BLOCK_STATE_UNPACK(...) BLOCK_STATE_UNPACK_LONG(__VA_ARGS__)
 #define PISTON_BLOCK_STATE_EXTRACT_ID(...) BLOCK_STATE_LONG_EXTRACT_ID(__VA_ARGS__)
 #define PISTON_BLOCK_STATE_EXTRACT_META(...) BLOCK_STATE_LONG_EXTRACT_META(__VA_ARGS__)
-#define PISTON_SET_BLOCK(world, x, y, z, blockId, meta, extMeta, flags) ZeroMetaUtil.setBlockWithExtra(world, x, y, z, blockId, meta, extMeta, flags)
-#define PISTON_GET_TILE_ENTITY(blockId, meta, extMeta, direction, isExtending, isBase) ZeroMetaUtil.getPistonTileEntity(blockId, meta, extMeta, direction, isExtending, isBase)
-#define PISTON_GET_SHOVEL_TILE_ENTITY(blockId, meta, extMeta, direction) ZeroMetaUtil.getShoveledTileEntity(blockId, meta, extMeta, direction)
+#define PISTON_SET_BLOCK(world, x, y, z, blockId, meta, extMeta, flags) ZeroCompatUtil.setBlockWithExtra(world, x, y, z, blockId, meta, extMeta, flags)
+#define PISTON_GET_TILE_ENTITY(blockId, meta, extMeta, direction, isExtending, isBase) ZeroCompatUtil.getPistonTileEntity(blockId, meta, extMeta, direction, isExtending, isBase)
+#define PISTON_GET_SHOVEL_TILE_ENTITY(blockId, meta, extMeta, direction) ZeroCompatUtil.getShoveledTileEntity(blockId, meta, extMeta, direction)
 #else
 #define blockstate_t int
 #define PISTON_BLOCK_STATE_PACK(...) BLOCK_STATE_PACK(__VA_ARGS__)
@@ -314,7 +314,7 @@ public class PistonResolver {
             data_list[pushIndex] = PISTON_BLOCK_STATE_PACK(
                 nextBlockId,
                 world.getBlockMetadata(nextX, nextY, nextZ),
-                ZeroMetaUtil.getBlockExtMetadata(world, nextX, nextY, nextZ)
+                ZeroCompatUtil.getBlockExtMetadata(world, nextX, nextY, nextZ)
             );
             pushed_blocks[pushIndex++] = nextPackedPos;
             nextX += Facing.offsetsXForSide[direction];
@@ -430,7 +430,7 @@ public class PistonResolver {
             
             int nextBlockMeta = world.getBlockMetadata(nextX, nextY, nextZ);
 #if ENABLE_METADATA_EXTENSION_COMPAT
-            int nextBlockExtMeta = ZeroMetaUtil.getBlockExtMetadata(world, nextX, nextY, nextZ);
+            int nextBlockExtMeta = ZeroCompatUtil.getBlockExtMetadata(world, nextX, nextY, nextZ);
 #endif
             if (nextBlock.getMobilityFlag() == PISTON_CAN_BREAK) {
                 data_list[destroy_index_global] = PISTON_BLOCK_STATE_PACK(nextBlockId, nextBlockMeta, nextBlockExtMeta);
@@ -522,7 +522,7 @@ public class PistonResolver {
                 data_list[destroy_index_global] = PISTON_BLOCK_STATE_PACK(
                     blockId,
                     world.getBlockMetadata(x, y, z),
-                    ZeroMetaUtil.getBlockExtMetadata(world, x, y, z)
+                    ZeroCompatUtil.getBlockExtMetadata(world, x, y, z)
                 );
                 pushed_blocks[destroy_index_global++] = packedPos;
                 return true;

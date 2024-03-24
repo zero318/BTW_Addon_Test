@@ -1,5 +1,4 @@
 package zero.test.block;
-// Block piston reactions
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
